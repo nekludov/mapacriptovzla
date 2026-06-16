@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MapaCripto Venezuela – Negocios que aceptan criptomonedas</title>
+  <meta name="description" content="Descubre negocios y emprendedores en Venezuela que aceptan Bitcoin, USDT, ETH y otras criptomonedas.">
+  <meta property="og:title" content="MapaCripto Venezuela">
+  <meta property="og:description" content="Mapa interactivo de negocios venezolanos que aceptan criptomonedas.">
+  <meta name="theme-color" content="#0F1117">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Google Analytics 4 – reemplaza G-XXXXXXXXXX con tu Measurement ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+
+  <style>
+    /* ── Reset & base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #CF142B;
+      --primary-h: #a50e22;
+      --accent:    #F7931A;
+      --blue:      #003893;
+      --bg:        #0F1117;
+      --surface:   #1C1F26;
+      --surface2:  #252930;
+      --border:    #2E3340;
+      --text:      #E8EAED;
+      --muted:     #9AA0AC;
+      --success:   #22C55E;
+      --error:     #EF4444;
+      --header-h:  56px;
+      --filter-h:  52px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    header {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 17px;
+      white-space: nowrap;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .logo-flag {
+      display: flex;
+      flex-direction: column;
+      width: 22px;
+      height: 14px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .logo-flag span { flex: 1; }
+    .logo-flag span:nth-child(1) { background: #CF142B; }
+    .logo-flag span:nth-child(2) { background: #003893; }
+    .logo-flag span:nth-child(3) { background: #CF9B00; }
+
+    .header-count {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    header .spacer { flex: 1; }
+
+    .btn-registro {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0 16px;
+      height: 36px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-registro:hover { background: var(--primary-h); }
+
+    /* ── Filter bar ───────────────────────────────────────── */
+    .filter-bar {
+      height: var(--filter-h);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+
+    .filter-bar select,
+    .filter-bar input[type=text] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0 12px;
+      height: 34px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+    .filter-bar input[type=text] { min-width: 130px; cursor: text; }
+    .filter-bar select:focus,
+    .filter-bar input:focus { border-color: var(--primary); }
+
+    .btn-filter {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0 14px;
+      height: 34px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .btn-filter:hover { background: var(--border); }
+    .btn-clear {
+      color: var(--muted);
+      background: none;
+      border: none;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+    .btn-clear:hover { color: var(--text); }
+
+    /* ── Map ──────────────────────────────────────────────── */
+    #map {
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── Markers ──────────────────────────────────────────── */
+    .map-marker {
+      width: 38px;
+      height: 38px;
+      border-radius: 50% 50% 50% 4px;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2.5px solid rgba(255,255,255,0.85);
+      box-shadow: 0 3px 10px rgba(0,0,0,.4);
+      font-size: 17px;
+    }
+    .map-marker span { transform: rotate(45deg); line-height: 1; }
+
+    /* ── Popup ────────────────────────────────────────────── */
+    .leaflet-popup-content-wrapper {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.5);
+      padding: 0;
+      overflow: hidden;
+    }
+    .leaflet-popup-tip-container { display: none; }
+    .leaflet-popup-content { margin: 0; width: 240px !important; }
+    .leaflet-popup-close-button {
+      color: var(--muted) !important;
+      font-size: 20px !important;
+      top: 8px !important;
+      right: 10px !important;
+    }
+    .leaflet-popup-close-button:hover { color: var(--text) !important; }
+
+    .popup-logo {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+    }
+    .popup-body { padding: 14px; }
+    .popup-body h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      padding-right: 20px;
+      line-height: 1.3;
+    }
+    .badge-tipo {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--surface2);
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .popup-criptos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .cripto-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      letter-spacing: .2px;
+    }
+    .cripto-tag.BTC  { background: #f7931a22; color: #F7931A; border: 1px solid #F7931A55; }
+    .cripto-tag.ETH  { background: #627eea22; color: #627EEA; border: 1px solid #627EEA55; }
+    .cripto-tag.USDT { background: #26a17b22; color: #26A17B; border: 1px solid #26A17B55; }
+    .cripto-tag.USDC { background: #2775ca22; color: #2775CA; border: 1px solid #2775CA55; }
+    .cripto-tag.DASH { background: #008ce722; color: #008CE7; border: 1px solid #008CE755; }
+    .cripto-tag.LTC  { background: #bfbbbb22; color: #BFBBBB; border: 1px solid #BFBBBB55; }
+    .cripto-tag.otro { background: #9aa0ac22; color: #9AA0AC; border: 1px solid #9AA0AC55; }
+
+    .popup-desc {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .popup-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+    .popup-share {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-wa, .btn-x {
+      flex: 1;
+      text-align: center;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 0;
+      border-radius: 8px;
+      transition: opacity .15s;
+    }
+    .btn-wa:hover, .btn-x:hover { opacity: .8; }
+    .btn-wa { background: #25D366; color: #fff; }
+    .btn-x  { background: #000;    color: #fff; }
+
+    /* ── Modals ───────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90dvh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .modal-box::-webkit-scrollbar { width: 4px; }
+    .modal-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 0;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 { font-size: 17px; font-weight: 700; }
+    .btn-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 4px;
+    }
+    .btn-close:hover { color: var(--text); }
+
+    .modal-body { padding: 20px 24px 24px; }
+
+    /* ── Form ─────────────────────────────────────────────── */
+    .form-row { margin-bottom: 16px; }
+    .form-row label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .form-row label .req { color: var(--primary); }
+    .form-control {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .form-control:focus { border-color: var(--primary); }
+    textarea.form-control { resize: vertical; min-height: 70px; }
+
+    /* Checkboxes de criptos */
+    .cripto-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .cripto-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+    }
+    .cripto-check input { display: none; }
+    .cripto-check.selected {
+      border-color: var(--accent);
+      background: #f7931a15;
+    }
+    .cripto-check .cc-icon { font-size: 18px; }
+    .cripto-check .cc-name { font-size: 12px; font-weight: 700; }
+
+    /* Logo upload */
+    .logo-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .logo-upload-area:hover { border-color: var(--primary); }
+    .logo-upload-area.has-image { padding: 0; border-style: solid; overflow: hidden; }
+    .logo-upload-area img { width: 100%; max-height: 140px; object-fit: cover; display: block; }
+    .logo-upload-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* Mini-map */
+    #mini-map {
+      height: 180px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .map-coords {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-family: monospace;
+    }
+    .map-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-gps {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background .15s;
+    }
+    .btn-gps:hover { background: var(--border); }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background .15s;
+    }
+    .btn-submit:hover  { background: var(--primary-h); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    .form-msg {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      display: none;
+    }
+    .form-msg.success { background: #22c55e18; color: var(--success); border: 1px solid #22c55e44; display: block; }
+    .form-msg.error   { background: #ef444418; color: var(--error);   border: 1px solid #ef444444; display: block; }
+
+    /* ── Admin panel ──────────────────────────────────────── */
+    .admin-pw-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .admin-pw-row input { flex: 1; }
+    .btn-admin-load {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      padding: 0 16px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .admin-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .admin-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .admin-card .ac-meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; line-height: 1.7; }
+    .admin-card-actions { display: flex; gap: 8px; }
+    .btn-aprobar, .btn-rechazar {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-aprobar  { background: var(--success); color: #fff; }
+    .btn-rechazar { background: var(--error);   color: #fff; }
+    .btn-aprobar:hover, .btn-rechazar:hover { opacity: .85; }
+
+    .admin-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 32px 0;
+      font-size: 14px;
+    }
+
+    /* ── Loading overlay ──────────────────────────────────── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      transition: opacity .4s;
+    }
+    #loading.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--muted); }
+
+    /* ── Toast ────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 5000;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      transition: transform .3s;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Mobile ───────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .header-count { display: none; }
+      .btn-registro span.long { display: none; }
+      .cripto-grid { grid-template-columns: repeat(2, 1fr); }
+      .modal-box { max-height: 95dvh; border-radius: 16px 16px 0 0; }
+      .modal-overlay { align-items: flex-end; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Loading ─────────────────────────────────────────────── -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p class="loading-text">Cargando mapa…</p>
+</div>
+
+<!-- ── Toast ───────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── Header ──────────────────────────────────────────────── -->
+<header>
+  <a class="logo" href="#">
+    <div class="logo-flag">
+      <span></span><span></span><span></span>
+    </div>
+    MapaCripto
+  </a>
+  <span class="header-count" id="header-count">cargando…</span>
+  <div class="spacer"></div>
+  <button class="btn-registro" onclick="openModal('registro')">
+    <span>+</span>
+    <span class="long">Registrar negocio</span>
+    <span class="short" style="display:none">Registrar</span>
+  </button>
+</header>
+
+<!-- ── Filter bar ──────────────────────────────────────────── -->
+<div class="filter-bar">
+  <input type="text" id="f-ciudad" placeholder="🏙 Ciudad…" list="ciudades-list" oninput="applyFilters()">
+  <datalist id="ciudades-list">
+    <option>Caracas</option><option>Maracaibo</option><option>Valencia</option>
+    <option>Barquisimeto</option><option>Maturín</option><option>Barcelona</option>
+    <option>Maracay</option><option>Ciudad Guayana</option><option>Mérida</option>
+    <option>Punto Fijo</option><option>Cumaná</option><option>Coro</option>
+    <option>San Cristóbal</option><option>Porlamar</option><option>Los Teques</option>
+  </datalist>
+
+  <select id="f-tipo" onchange="applyFilters()">
+    <option value="">Todos los tipos</option>
+    <option value="restaurante">🍽 Restaurante</option>
+    <option value="farmacia">💊 Farmacia</option>
+    <option value="ferreteria">🔧 Ferretería</option>
+    <option value="tecnologia">💻 Tecnología</option>
+    <option value="servicio">🛠 Servicio</option>
+    <option value="tienda">🏪 Tienda</option>
+    <option value="hotel">🏨 Hotel</option>
+    <option value="transporte">🚗 Transporte</option>
+    <option value="emprendedor">💡 Emprendedor</option>
+    <option value="otro">📍 Otro</option>
+  </select>
+
+  <select id="f-cripto" onchange="applyFilters()">
+    <option value="">Todas las criptos</option>
+    <option value="BTC">₿ Bitcoin</option>
+    <option value="USDT">💵 USDT</option>
+    <option value="USDC">💵 USDC</option>
+    <option value="ETH">Ξ Ethereum</option>
+    <option value="DASH">⚡ Dash</option>
+    <option value="LTC">Ł Litecoin</option>
+  </select>
+
+  <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
+</div>
+
+<!-- ── Map ─────────────────────────────────────────────────── -->
+<div id="map"></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Modal: Registro de negocio                                 -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-registro">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Registrar negocio</h2>
+      <button class="btn-close" onclick="closeModal('registro')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-row">
+        <label>Nombre del negocio <span class="req">*</span></label>
+        <input id="r-nombre" class="form-control" type="text" placeholder="Ej. Arepera La Criolla">
+      </div>
+
+      <div class="form-row">
+        <label>Tipo de negocio <span class="req">*</span></label>
+        <select id="r-tipo" class="form-control">
+          <option value="">Seleccionar…</option>
+          <option value="restaurante">🍽 Restaurante / Comida</option>
+          <option value="farmacia">💊 Farmacia / Salud</option>
+          <option value="ferreteria">🔧 Ferretería / Construcción</option>
+          <option value="tecnologia">💻 Tecnología / Electrónica</option>
+          <option value="servicio">🛠 Servicio profesional</option>
+          <option value="tienda">🏪 Tienda / Comercio</option>
+          <option value="hotel">🏨 Hotel / Alojamiento</option>
+          <option value="transporte">🚗 Transporte</option>
+          <option value="emprendedor">💡 Emprendedor / Freelance</option>
+          <option value="otro">📍 Otro</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Ciudad</label>
+        <input id="r-ciudad" class="form-control" type="text" list="ciudades-list" placeholder="Ej. Caracas">
+      </div>
+
+      <div class="form-row">
+        <label>Criptomonedas que acepta <span class="req">*</span></label>
+        <div class="cripto-grid" id="cripto-grid">
+          <!-- generado por JS -->
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Descripción / Dirección</label>
+        <textarea id="r-desc" class="form-control" placeholder="Breve descripción, dirección o referencia del local…"></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>Contacto (teléfono, Instagram, etc.)</label>
+        <input id="r-contacto" class="form-control" type="text" placeholder="@miempresa o +58 412 …">
+      </div>
+
+      <div class="form-row">
+        <label>Logo o foto del local</label>
+        <div class="logo-upload-area" id="logo-area" onclick="document.getElementById('logo-input').click()">
+          <div id="logo-placeholder">
+            <div style="font-size:28px;margin-bottom:6px">📷</div>
+            <div style="font-size:13px;color:var(--muted)">Clic para subir imagen</div>
+            <div class="logo-upload-hint">JPG/PNG · se reduce a 1200px automáticamente</div>
+          </div>
+          <img id="logo-preview" style="display:none">
+        </div>
+        <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)">
+      </div>
+
+      <div class="form-row">
+        <label>Ubicación en el mapa <span class="req">*</span> — clic en el mapa o GPS</label>
+        <div id="mini-map"></div>
+        <div class="map-actions">
+          <button class="btn-gps" onclick="useGPS()">📍 Usar mi ubicación</button>
+          <button class="btn-gps" onclick="resetLocation()" id="btn-reset-loc" style="display:none">✕ Quitar punto</button>
+        </div>
+        <div class="map-coords" id="map-coords">Sin ubicación seleccionada</div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit" onclick="submitRegistro()">
+        Enviar negocio
+      </button>
+      <div class="form-msg" id="form-msg"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Modal: Panel de administración                             -->
+<!-- Acceso: añadir #admin a la URL y recargar                 -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-admin">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>🔐 Admin – Negocios pendientes</h2>
+      <button class="btn-close" onclick="closeModal('admin')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="admin-pw-row">
+        <input id="admin-pw" class="form-control" type="password" placeholder="Contraseña admin" onkeydown="if(e.key==='Enter')loadPendientes()">
+        <button class="btn-admin-load" onclick="loadPendientes()">Cargar</button>
+      </div>
+      <div id="admin-list"><p class="admin-empty">Ingresa la contraseña para ver los pendientes.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ──────────────────────────────────────────────── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CONFIG – cambiar antes de deploy
+// ════════════════════════════════════════════════════════════
+const API_URL = 'https://backend-eight-beta-43.vercel.app';
+
+// ════════════════════════════════════════════════════════════
+// Constantes de dominio
+// ════════════════════════════════════════════════════════════
+const TIPOS = {
+  restaurante: { emoji: '🍽', color: '#FF6B35' },
+  farmacia:    { emoji: '💊', color: '#4CAF50' },
+  ferreteria:  { emoji: '🔧', color: '#9C27B0' },
+  tecnologia:  { emoji: '💻', color: '#2196F3' },
+  servicio:    { emoji: '🛠', color: '#FF9800' },
+  tienda:      { emoji: '🏪', color: '#E91E63' },
+  hotel:       { emoji: '🏨', color: '#00BCD4' },
+  transporte:  { emoji: '🚗', color: '#795548' },
+  emprendedor: { emoji: '💡', color: '#FFC107' },
+  otro:        { emoji: '📍', color: '#607D8B' },
+};
+
+const CRIPTOS = [
+  { id: 'BTC',  label: 'Bitcoin', icon: '₿'  },
+  { id: 'USDT', label: 'USDT',    icon: '💵' },
+  { id: 'USDC', label: 'USDC',    icon: '💵' },
+  { id: 'ETH',  label: 'Ethereum',icon: 'Ξ'  },
+  { id: 'DASH', label: 'Dash',    icon: '⚡' },
+  { id: 'LTC',  label: 'Litecoin',icon: 'Ł'  },
+];
+
+// ════════════════════════════════════════════════════════════
+// Estado global
+// ════════════════════════════════════════════════════════════
+let map, clusterGroup;
+let miniMap = null, miniMarker = null;
+let pickedLat = null, pickedLng = null;
+let logoBase64 = null;
+let allNegocios = [];
+
+// ════════════════════════════════════════════════════════════
+// Init
+// ════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  buildCriptoGrid();
+  loadNegocios();
+  if (location.hash === '#admin') openModal('admin');
+});
+
+function initMap() {
+  map = L.map('map', {
+    center: [8.0, -66.0],
+    zoom: 6,
+    zoomControl: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  clusterGroup = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    maxClusterRadius: 50,
+    iconCreateFunction: (cluster) => {
+      const n = cluster.getChildCount();
+      return L.divIcon({
+        html: `<div style="background:var(--primary);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)">${n}</div>`,
+        className: '',
+        iconSize: [36, 36],
+      });
+    },
+  });
+  map.addLayer(clusterGroup);
+}
+
+// ════════════════════════════════════════════════════════════
+// API – cargar negocios
+// ════════════════════════════════════════════════════════════
+async function loadNegocios() {
+  try {
+    const res = await fetch(`${API_URL}/api/negocios`);
+    if (!res.ok) throw new Error('Error al cargar');
+    allNegocios = await res.json();
+    renderMarkers(allNegocios);
+    updateCount(allNegocios.length);
+  } catch (e) {
+    showToast('No se pudo conectar al servidor.');
+  } finally {
+    hideLoading();
+  }
+}
+
+function hideLoading() {
+  const el = document.getElementById('loading');
+  el.classList.add('hidden');
+  setTimeout(() => el.remove(), 500);
+}
+
+// ════════════════════════════════════════════════════════════
+// Markers & popup
+// ════════════════════════════════════════════════════════════
+function renderMarkers(negocios) {
+  clusterGroup.clearLayers();
+
+  negocios.forEach(n => {
+    const tipo = TIPOS[n.tipo] || TIPOS.otro;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="map-marker" style="background:${tipo.color}"><span>${tipo.emoji}</span></div>`,
+      iconSize: [38, 38],
+      iconAnchor: [19, 38],
+      popupAnchor: [0, -40],
+    });
+
+    const marker = L.marker([n.lat, n.lng], { icon });
+    marker.bindPopup(buildPopup(n), { maxWidth: 260, minWidth: 240 });
+    clusterGroup.addLayer(marker);
+  });
+}
+
+function buildPopup(n) {
+  const tipo = TIPOS[n.tipo] || TIPOS.otro;
+
+  const criptos = (n.criptos || []).map(c =>
+    `<span class="cripto-tag ${c}">${c}</span>`
+  ).join('');
+
+  const shareText = encodeURIComponent(
+    `🗺️ ${n.nombre} acepta criptomonedas en Venezuela!\n` +
+    (n.descripcion ? n.descripcion + '\n' : '') +
+    (n.ciudad ? `📍 ${n.ciudad}\n` : '') +
+    `\nEncuéntralos en MapaCripto.ve`
+  );
+
+  return `
+    <div>
+      ${n.logo_url ? `<img class="popup-logo" src="${n.logo_url}" alt="${escHtml(n.nombre)}">` : ''}
+      <div class="popup-body">
+        <h3>${escHtml(n.nombre)}</h3>
+        <span class="badge-tipo">${tipo.emoji} ${escHtml(n.tipo)}</span>
+        <div class="popup-criptos">${criptos}</div>
+        ${n.descripcion ? `<p class="popup-desc">${escHtml(n.descripcion)}</p>` : ''}
+        ${n.ciudad    ? `<p class="popup-meta">🏙 ${escHtml(n.ciudad)}</p>` : ''}
+        ${n.contacto  ? `<p class="popup-meta">📞 ${escHtml(n.contacto)}</p>` : ''}
+        <div class="popup-share">
+          <a class="btn-wa" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">
+            WhatsApp
+          </a>
+          <a class="btn-x" href="https://twitter.com/intent/tweet?text=${shareText}" target="_blank" rel="noopener">
+            𝕏 Twitter
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateCount(n) {
+  document.getElementById('header-count').textContent = `${n} negocio${n !== 1 ? 's' : ''} activo${n !== 1 ? 's' : ''}`;
+}
+
+// ════════════════════════════════════════════════════════════
+// Filtros
+// ════════════════════════════════════════════════════════════
+function applyFilters() {
+  const ciudad = document.getElementById('f-ciudad').value.trim().toLowerCase();
+  const tipo   = document.getElementById('f-tipo').value;
+  const cripto = document.getElementById('f-cripto').value;
+
+  const filtered = allNegocios.filter(n => {
+    if (ciudad && !n.ciudad?.toLowerCase().includes(ciudad)) return false;
+    if (tipo   && n.tipo !== tipo) return false;
+    if (cripto && !n.criptos?.includes(cripto)) return false;
+    return true;
+  });
+
+  renderMarkers(filtered);
+  updateCount(filtered.length);
+}
+
+function clearFilters() {
+  document.getElementById('f-ciudad').value = '';
+  document.getElementById('f-tipo').value   = '';
+  document.getElementById('f-cripto').value = '';
+  renderMarkers(allNegocios);
+  updateCount(allNegocios.length);
+}
+
+// ════════════════════════════════════════════════════════════
+// Modal management
+// ════════════════════════════════════════════════════════════
+function openModal(name) {
+  document.getElementById(`modal-${name}`).classList.add('open');
+  if (name === 'registro') initMiniMap();
+}
+
+function closeModal(name) {
+  document.getElementById(`modal-${name}`).classList.remove('open');
+}
+
+// Cerrar al clic fuera del box
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ════════════════════════════════════════════════════════════
+// Mini-map (picker)
+// ════════════════════════════════════════════════════════════
+function initMiniMap() {
+  setTimeout(() => {
+    if (!miniMap) {
+      miniMap = L.map('mini-map', { zoomControl: true, attributionControl: false })
+        .setView([8.0, -66.0], 5);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd', maxZoom: 19
+      }).addTo(miniMap);
+
+      miniMap.on('click', e => setPickedLocation(e.latlng.lat, e.latlng.lng));
+    } else {
+      miniMap.invalidateSize();
+    }
+  }, 120);
+}
+
+function setPickedLocation(lat, lng) {
+  pickedLat = lat;
+  pickedLng = lng;
+
+  if (miniMarker) miniMarker.remove();
+  miniMarker = L.circleMarker([lat, lng], {
+    radius: 8, fillColor: '#CF142B', fillOpacity: 1,
+    color: '#fff', weight: 2
+  }).addTo(miniMap);
+
+  document.getElementById('map-coords').textContent =
+    `Lat: ${lat.toFixed(6)}  Lng: ${lng.toFixed(6)}`;
+  document.getElementById('btn-reset-loc').style.display = '';
+}
+
+function useGPS() {
+  if (!navigator.geolocation) return showToast('GPS no disponible en este dispositivo.');
+  showToast('Obteniendo ubicación…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      miniMap.setView([lat, lng], 15);
+      setPickedLocation(lat, lng);
+    },
+    () => showToast('No se pudo obtener la ubicación. Haz clic en el mapa.')
+  );
+}
+
+function resetLocation() {
+  pickedLat = pickedLng = null;
+  if (miniMarker) { miniMarker.remove(); miniMarker = null; }
+  document.getElementById('map-coords').textContent = 'Sin ubicación seleccionada';
+  document.getElementById('btn-reset-loc').style.display = 'none';
+}
+
+// ════════════════════════════════════════════════════════════
+// Criptos checkbox grid
+// ════════════════════════════════════════════════════════════
+function buildCriptoGrid() {
+  const grid = document.getElementById('cripto-grid');
+  grid.innerHTML = CRIPTOS.map(c => `
+    <label class="cripto-check" data-id="${c.id}" onclick="toggleCripto(this)">
+      <input type="checkbox" value="${c.id}">
+      <span class="cc-icon">${c.icon}</span>
+      <span class="cc-name">${c.label}</span>
+    </label>
+  `).join('');
+}
+
+function toggleCripto(el) {
+  el.classList.toggle('selected');
+  el.querySelector('input').checked = el.classList.contains('selected');
+}
+
+function getSelectedCriptos() {
+  return [...document.querySelectorAll('#cripto-grid .cripto-check.selected')]
+    .map(el => el.dataset.id);
+}
+
+// ════════════════════════════════════════════════════════════
+// Logo upload + canvas resize
+// ════════════════════════════════════════════════════════════
+function handleLogo(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  resizeImage(file, 1200, 0.82).then(b64 => {
+    logoBase64 = b64;
+    const area = document.getElementById('logo-area');
+    area.classList.add('has-image');
+    document.getElementById('logo-placeholder').style.display = 'none';
+    const img = document.getElementById('logo-preview');
+    img.src = b64;
+    img.style.display = 'block';
+  });
+}
+
+function resizeImage(file, maxPx, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.onload = () => {
+        let { width: w, height: h } = img;
+        if (w > maxPx || h > maxPx) {
+          if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else       { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// Submit registro
+// ════════════════════════════════════════════════════════════
+async function submitRegistro() {
+  const nombre  = document.getElementById('r-nombre').value.trim();
+  const tipo    = document.getElementById('r-tipo').value;
+  const ciudad  = document.getElementById('r-ciudad').value.trim();
+  const desc    = document.getElementById('r-desc').value.trim();
+  const contacto= document.getElementById('r-contacto').value.trim();
+  const criptos = getSelectedCriptos();
+
+  const msg = document.getElementById('form-msg');
+  msg.className = 'form-msg';
+  msg.textContent = '';
+
+  // Validación
+  if (!nombre) return showFormMsg('El nombre del negocio es requerido.', 'error');
+  if (!tipo)   return showFormMsg('Selecciona el tipo de negocio.', 'error');
+  if (!criptos.length) return showFormMsg('Selecciona al menos una criptomoneda.', 'error');
+  if (!pickedLat || !pickedLng) return showFormMsg('Selecciona la ubicación en el mapa.', 'error');
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+
+  try {
+    const res = await fetch(`${API_URL}/api/negocios`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre, tipo, ciudad, descripcion: desc,
+        contacto, criptos, lat: pickedLat, lng: pickedLng,
+        logo_base64: logoBase64,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error desconocido.');
+
+    if (data.estado === 'activo') {
+      showFormMsg('✅ ¡Negocio registrado y publicado! Ya aparece en el mapa.', 'success');
+      await loadNegocios(); // refrescar mapa
+    } else {
+      showFormMsg('✅ ¡Registro enviado! Está en revisión y se publicará pronto.', 'success');
+    }
+
+    // Reset form
+    setTimeout(() => {
+      closeModal('registro');
+      resetRegistroForm();
+    }, 3000);
+
+  } catch (e) {
+    showFormMsg(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enviar negocio';
+  }
+}
+
+function showFormMsg(text, type) {
+  const msg = document.getElementById('form-msg');
+  msg.textContent = text;
+  msg.className = `form-msg ${type}`;
+}
+
+function resetRegistroForm() {
+  document.getElementById('r-nombre').value   = '';
+  document.getElementById('r-tipo').value     = '';
+  document.getElementById('r-ciudad').value   = '';
+  document.getElementById('r-desc').value     = '';
+  document.getElementById('r-contacto').value = '';
+  document.querySelectorAll('.cripto-check.selected').forEach(el => {
+    el.classList.remove('selected');
+    el.querySelector('input').checked = false;
+  });
+  logoBase64 = null;
+  document.getElementById('logo-area').classList.remove('has-image');
+  document.getElementById('logo-placeholder').style.display = '';
+  document.getElementById('logo-preview').style.display = 'none';
+  document.getElementById('logo-preview').src = '';
+  document.getElementById('logo-input').value = '';
+  document.getElementById('form-msg').className = 'form-msg';
+  resetLocation();
+}
+
+// ════════════════════════════════════════════════════════════
+// Admin panel
+// ════════════════════════════════════════════════════════════
+async function loadPendientes() {
+  const pw   = document.getElementById('admin-pw').value;
+  const list = document.getElementById('admin-list');
+  list.innerHTML = '<p class="admin-empty">Cargando…</p>';
+
+  try {
+    const res  = await fetch(`${API_URL}/api/admin/pendientes?password=${encodeURIComponent(pw)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    if (!data.length) {
+      list.innerHTML = '<p class="admin-empty">🎉 No hay negocios pendientes.</p>';
+      return;
+    }
+
+    list.innerHTML = data.map(n => `
+      <div class="admin-card" id="ac-${n.id}">
+        <h4>${escHtml(n.nombre)}</h4>
+        <div class="ac-meta">
+          <b>Tipo:</b> ${escHtml(n.tipo)} &nbsp;|&nbsp; <b>Ciudad:</b> ${escHtml(n.ciudad || '?')}<br>
+          <b>Criptos:</b> ${(n.criptos || []).join(', ')}<br>
+          <b>Desc:</b> ${escHtml(n.descripcion || '—')}<br>
+          <b>Contacto:</b> ${escHtml(n.contacto || '—')}
+          ${n.logo_url ? `<br><a href="${n.logo_url}" target="_blank" style="color:var(--accent)">Ver foto</a>` : ''}
+        </div>
+        <div class="admin-card-actions">
+          <button class="btn-aprobar"  onclick="moderarNegocio('${n.id}','activo')">✅ Aprobar</button>
+          <button class="btn-rechazar" onclick="moderarNegocio('${n.id}','rechazado')">❌ Rechazar</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = `<p class="admin-empty" style="color:var(--error)">${escHtml(e.message)}</p>`;
+  }
+}
+
+async function moderarNegocio(id, estado) {
+  const pw = document.getElementById('admin-pw').value;
+  try {
+    const res = await fetch(`${API_URL}/api/negocios/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, estado }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    const card = document.getElementById(`ac-${id}`);
+    card.style.opacity = '.4';
+    card.style.pointerEvents = 'none';
+    card.innerHTML += `<p style="margin-top:8px;font-size:12px;color:var(--muted)">${estado === 'activo' ? '✅ Aprobado' : '❌ Rechazado'}</p>`;
+
+    if (estado === 'activo') await loadNegocios();
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// Toast
+// ════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "mapacripto-api",
+  "version": "1.0.0",
+  "description": "API para MapaCripto Venezuela – negocios que aceptan cripto",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.3",
+    "@supabase/supabase-js": "^2.47.10",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
