@@ -2,6 +2,7 @@ const express = require('express');
 const cors    = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
+const { TwitterApi } = require('twitter-api-v2');
 
 const app = express();
 
@@ -21,6 +22,31 @@ const BUCKET = 'logos';
 // Venezuela bounding box (lat: 0.6–12.2, lng: -73.4–-59.8)
 const inVenezuela = (lat, lng) =>
   lat >= 0.6 && lat <= 12.2 && lng >= -73.4 && lng <= -59.8;
+
+// ── Auto-tweet cuando se aprueba un negocio ──────────────────────────────────
+async function postTweet(negocio) {
+  if (!process.env.X_API_KEY) return;
+  try {
+    const client = new TwitterApi({
+      appKey:       process.env.X_API_KEY,
+      appSecret:    process.env.X_API_SECRET,
+      accessToken:  process.env.X_ACCESS_TOKEN,
+      accessSecret: process.env.X_ACCESS_SECRET,
+    });
+
+    const criptos = (negocio.criptos || []).join(', ');
+    let text = `🆕 Nuevo negocio en el mapa!\n\n🏪 ${negocio.nombre}`;
+    if (negocio.ciudad)      text += `\n📍 ${negocio.ciudad}`;
+    if (criptos)             text += `\n💰 Acepta: ${criptos}`;
+    if (negocio.descripcion) text += `\n\n${negocio.descripcion.slice(0, 80)}${negocio.descripcion.length > 80 ? '…' : ''}`;
+    text += `\n\n🗺️ criptomapavenezuela.com\n#CriptoVenezuela #Bitcoin #Venezuela`;
+
+    await client.v2.tweet(text);
+    console.log('Tweet publicado:', negocio.nombre);
+  } catch (e) {
+    console.error('Tweet error:', e.message);
+  }
+}
 
 // ── GET /api/negocios ────────────────────────────────────────────────────────
 app.get('/api/negocios', async (req, res) => {
@@ -117,6 +143,7 @@ Descripción: ${descripcion || '(ninguna)'}
     }]).select().single();
 
     if (error) throw error;
+    if (data.estado === 'activo') postTweet(data);
     res.json({ ok: true, estado: data.estado, id: data.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -148,6 +175,7 @@ app.patch('/api/negocios/:id', async (req, res) => {
     .from('negocios').update({ estado })
     .eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
+  if (estado === 'activo') postTweet(data);
   res.json({ ok: true, data });
 });
 
