@@ -1,15 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Dark background -->
+  <!-- Dark rounded background -->
   <rect width="32" height="32" rx="6" fill="#0F1117"/>
 
   <!-- Venezuelan flag stripes -->
-  <rect x="4" y="8"  width="24" height="5.33" rx="1" fill="#CF9B00"/>
-  <rect x="4" y="13.33" width="24" height="5.33" fill="#003893"/>
-  <rect x="4" y="18.67" width="24" height="5.33" rx="1" fill="#CF142B"/>
+  <rect x="2" y="7"  width="28" height="6"   rx="1" fill="#CF9B00"/>
+  <rect x="2" y="13" width="28" height="6"          fill="#003893"/>
+  <rect x="2" y="19" width="28" height="5.5" rx="1" fill="#CF142B"/>
 
-  <!-- Map pin overlay -->
-  <circle cx="23" cy="22" r="7" fill="#0F1117"/>
-  <circle cx="23" cy="20" r="4.5" fill="#F7931A"/>
-  <circle cx="23" cy="20" r="1.8" fill="#0F1117"/>
-  <path d="M23 24.5 Q19.5 28 23 31 Q26.5 28 23 24.5Z" fill="#F7931A"/>
+  <!-- 8 stars in arc on blue band -->
+  <circle cx="3.7"  cy="16.4" r="0.55" fill="white"/>
+  <circle cx="7.3"  cy="15.7" r="0.55" fill="white"/>
+  <circle cx="10.8" cy="15.3" r="0.55" fill="white"/>
+  <circle cx="14.4" cy="15.0" r="0.55" fill="white"/>
+  <circle cx="18.0" cy="15.0" r="0.55" fill="white"/>
+  <circle cx="21.6" cy="15.3" r="0.55" fill="white"/>
+  <circle cx="25.1" cy="15.7" r="0.55" fill="white"/>
+  <circle cx="28.7" cy="16.4" r="0.55" fill="white"/>
+
+  <!-- Dark cutout behind pin -->
+  <circle cx="24" cy="22" r="8.5" fill="#0F1117"/>
+
+  <!-- Map pin: teardrop shape -->
+  <circle cx="24" cy="19" r="5.5" fill="#F7931A"/>
+  <polygon points="19.5,22.5 28.5,22.5 24,30.5" fill="#F7931A"/>
+  <!-- Pin hole -->
+  <circle cx="24" cy="19" r="2.2" fill="#0F1117"/>
 </svg>
