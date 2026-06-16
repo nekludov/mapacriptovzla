@@ -554,6 +554,39 @@
       font-size: 14px;
     }
 
+    /* ── Stats card (topright) ────────────────────────────── */
+    .map-stats-card {
+      margin: 10px;
+    }
+    .map-stats-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+      min-width: 140px;
+    }
+    .map-stats-number {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .map-stats-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .map-stats-sub {
+      font-size: 13px;
+      color: var(--text);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
     /* ── Locate button ────────────────────────────────────── */
     .map-locate-btn {
       width: 40px;
@@ -954,6 +987,21 @@ function initMap() {
   });
   map.addLayer(clusterGroup);
 
+  // ── Contador de negocios (topright) ──────────────────────
+  const statsControl = L.control({ position: 'topright' });
+  statsControl.onAdd = () => {
+    const div = L.DomUtil.create('div', 'map-stats-card');
+    div.innerHTML = `
+      <div class="map-stats-inner">
+        <div class="map-stats-number" id="map-stats-count">—</div>
+        <div class="map-stats-label">negocios activos</div>
+        <div class="map-stats-sub">🇻🇪 Venezuela</div>
+      </div>`;
+    L.DomEvent.disableClickPropagation(div);
+    return div;
+  };
+  statsControl.addTo(map);
+
   // Botón "Mi ubicación" flotante en el mapa
   const locateBtn = L.control({ position: 'bottomright' });
   locateBtn.onAdd = () => {
@@ -1059,6 +1107,8 @@ function escHtml(str) {
 
 function updateCount(n) {
   document.getElementById('header-count').textContent = `${n} negocio${n !== 1 ? 's' : ''} activo${n !== 1 ? 's' : ''}`;
+  const el = document.getElementById('map-stats-count');
+  if (el) el.textContent = n;
 }
 
 // ════════════════════════════════════════════════════════════
