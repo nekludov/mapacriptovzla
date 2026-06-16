@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidad – CriptoMapa Venezuela</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0F1117; --surface: #1C1F26; --border: #2E3340;
+      --text: #E8EAED; --muted: #9AA0AC; --accent: #F7931A;
+      --primary: #CF142B;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(to right, #CF9B00 33%, #003893 33% 66%, #CF142B 66%);
+    }
+    .logo { font-weight: 700; font-size: 17px; text-decoration: none; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .logo-flag { display: flex; flex-direction: column; width: 22px; height: 14px; border-radius: 2px; overflow: hidden; }
+    .logo-flag span { flex: 1; }
+    .logo-flag span:nth-child(1) { background: #CF9B00; }
+    .logo-flag span:nth-child(2) { background: #003893; }
+    .logo-flag span:nth-child(3) { background: #CF142B; }
+    header nav a { color: var(--muted); text-decoration: none; font-size: 13px; }
+    header nav a:hover { color: var(--text); }
+
+    main { max-width: 760px; margin: 48px auto; padding: 0 24px 80px; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+    h2 { font-size: 17px; font-weight: 700; margin: 32px 0 12px; color: var(--accent); }
+    p { color: #C8CDD6; margin-bottom: 12px; font-size: 15px; }
+    ul { color: #C8CDD6; padding-left: 20px; margin-bottom: 12px; font-size: 15px; }
+    ul li { margin-bottom: 6px; }
+    a { color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 14px; }
+    th { text-align: left; padding: 10px 12px; background: var(--surface); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: #C8CDD6; }
+
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      font-size: 13px;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <div class="logo-flag"><span></span><span></span><span></span></div>
+    CriptoMapa Venezuela
+  </a>
+  <nav><a href="/">← Volver al mapa</a></nav>
+</header>
+
+<main>
+  <h1>Política de Privacidad</h1>
+  <p class="subtitle">Última actualización: junio 2026</p>
+
+  <h2>1. Responsable del tratamiento</h2>
+  <p>CriptoMapa Venezuela opera el sitio web <a href="https://criptomapavenezuela.com">criptomapavenezuela.com</a>. Para cualquier consulta sobre privacidad, contáctanos en <a href="mailto:criptomapavenezuela@proton.me">criptomapavenezuela@proton.me</a>.</p>
+
+  <h2>2. Datos que recopilamos</h2>
+  <p><strong>Datos enviados voluntariamente (registro de negocios):</strong></p>
+  <ul>
+    <li>Nombre del negocio</li>
+    <li>Tipo de negocio y criptomonedas aceptadas</li>
+    <li>Ciudad y coordenadas geográficas</li>
+    <li>Información de contacto (opcional): teléfono, redes sociales</li>
+    <li>Foto o logo del local (opcional)</li>
+    <li>Descripción o dirección</li>
+  </ul>
+  <p><strong>Datos recopilados automáticamente:</strong></p>
+  <ul>
+    <li>Datos de uso anónimos mediante Google Analytics 4 (páginas visitadas, tiempo en sitio, dispositivo)</li>
+    <li>Coordenadas GPS si el usuario activa la geolocalización voluntariamente (no se almacenan en servidor)</li>
+  </ul>
+
+  <h2>3. Finalidad del tratamiento</h2>
+  <table>
+    <tr><th>Dato</th><th>Para qué se usa</th></tr>
+    <tr><td>Datos del negocio</td><td>Mostrarlos en el mapa público para conectar negocios con usuarios</td></tr>
+    <tr><td>Foto / logo</td><td>Mostrarlo en el popup del mapa</td></tr>
+    <tr><td>Datos de analítica</td><td>Entender el uso del sitio y mejorar la plataforma</td></tr>
+    <tr><td>GPS (si se activa)</td><td>Centrar el mapa en tu ubicación actual — no se envía al servidor</td></tr>
+  </table>
+
+  <h2>4. Compartición de datos</h2>
+  <p>Los datos del negocio registrado son <strong>públicos por naturaleza</strong> — aparecen en el mapa y pueden ser compartidos por usuarios vía WhatsApp o X (Twitter). Al registrar tu negocio, aceptas esta visibilidad pública.</p>
+  <p>No vendemos ni cedemos datos personales a terceros. Usamos los siguientes servicios de terceros:</p>
+  <ul>
+    <li><strong>Supabase</strong> — base de datos y almacenamiento de imágenes</li>
+    <li><strong>Vercel</strong> — infraestructura del servidor</li>
+    <li><strong>Google Analytics 4</strong> — analítica de uso anónima</li>
+    <li><strong>X / Twitter API</strong> — publicación automática de nuevos negocios aprobados</li>
+    <li><strong>Anthropic (Claude)</strong> — moderación automática del contenido</li>
+  </ul>
+
+  <h2>5. Conservación de datos</h2>
+  <p>Los datos de negocios registrados se conservan mientras el negocio esté activo en la plataforma. Puedes solicitar la eliminación de tu listado en cualquier momento escribiéndonos.</p>
+
+  <h2>6. Tus derechos</h2>
+  <p>Tienes derecho a acceder, rectificar o eliminar los datos de tu negocio. Escríbenos a <a href="mailto:criptomapavenezuela@proton.me">criptomapavenezuela@proton.me</a> con el nombre del negocio y te atenderemos en un plazo de 7 días hábiles.</p>
+
+  <h2>7. Cookies</h2>
+  <p>Google Analytics 4 utiliza cookies para el análisis de uso. Puedes desactivarlas en la configuración de tu navegador o usando extensiones como uBlock Origin.</p>
+
+  <h2>8. Cambios en esta política</h2>
+  <p>Podemos actualizar esta política ocasionalmente. Te notificaremos de cambios significativos publicando la nueva versión en esta página con la fecha actualizada.</p>
+
+  <h2>9. Contacto</h2>
+  <p>Para cualquier consulta sobre privacidad: <a href="mailto:criptomapavenezuela@proton.me">criptomapavenezuela@proton.me</a> o a través de <a href="https://x.com/criptomapavzla">@criptomapavzla</a> en X.</p>
+</main>
+
+<footer>
+  <a href="/">Mapa</a>
+  <span style="color:var(--border)">|</span>
+  <a href="/terms.html">Términos</a>
+  <span style="color:var(--border)">|</span>
+  <a href="/privacy.html">Privacidad</a>
+  <span style="color:var(--border)">|</span>
+  <a href="mailto:criptomapavenezuela@proton.me">criptomapavenezuela@proton.me</a>
+</footer>
+
+</body>
+</html>
