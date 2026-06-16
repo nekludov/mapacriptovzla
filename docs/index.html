@@ -1059,6 +1059,7 @@ async function loadNegocios() {
 
 function hideLoading() {
   const el = document.getElementById('loading');
+  if (!el) return;
   el.classList.add('hidden');
   setTimeout(() => el.remove(), 500);
 }
