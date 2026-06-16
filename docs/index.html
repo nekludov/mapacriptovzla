@@ -529,6 +529,24 @@
       font-size: 14px;
     }
 
+    /* ── Locate button ────────────────────────────────────── */
+    .map-locate-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      transition: background .15s;
+      margin-bottom: 8px;
+    }
+    .map-locate-btn:hover { background: var(--surface2); }
+
     /* ── Loading overlay ──────────────────────────────────── */
     #loading {
       position: fixed;
@@ -812,6 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
   buildCriptoGrid();
   loadNegocios();
   if (location.hash === '#admin') openModal('admin');
+  tryAutoLocate();
 });
 
 function initMap() {
@@ -840,6 +859,18 @@ function initMap() {
     },
   });
   map.addLayer(clusterGroup);
+
+  // Botón "Mi ubicación" flotante en el mapa
+  const locateBtn = L.control({ position: 'bottomright' });
+  locateBtn.onAdd = () => {
+    const btn = L.DomUtil.create('button', 'map-locate-btn');
+    btn.title = 'Mi ubicación';
+    btn.innerHTML = '📍';
+    L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation)
+               .on(btn, 'click', locateUser);
+    return btn;
+  };
+  locateBtn.addTo(map);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1242,6 +1273,39 @@ async function moderarNegocio(id, estado) {
   } catch (e) {
     showToast(`Error: ${e.message}`);
   }
+}
+
+// ════════════════════════════════════════════════════════════
+// Geolocalización
+// ════════════════════════════════════════════════════════════
+let userMarker = null;
+
+function locateUser() {
+  if (!navigator.geolocation) return showToast('GPS no disponible en este dispositivo.');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      map.flyTo([lat, lng], 13, { duration: 1.2 });
+      if (userMarker) userMarker.remove();
+      userMarker = L.circleMarker([lat, lng], {
+        radius: 10,
+        fillColor: '#003893',
+        fillOpacity: 0.9,
+        color: '#fff',
+        weight: 3,
+        pane: 'markerPane',
+      }).addTo(map).bindPopup('📍 Estás aquí').openPopup();
+    },
+    () => showToast('No se pudo obtener tu ubicación.')
+  );
+}
+
+function tryAutoLocate() {
+  // Intento silencioso — si ya tiene permiso concedido, centra el mapa
+  if (!navigator.geolocation) return;
+  navigator.permissions?.query({ name: 'geolocation' }).then(result => {
+    if (result.state === 'granted') locateUser();
+  });
 }
 
 // ════════════════════════════════════════════════════════════
