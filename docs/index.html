@@ -554,6 +554,23 @@
       font-size: 14px;
     }
 
+    /* ── Online toggle ────────────────────────────────────── */
+    .online-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .online-label input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+    .online-label:has(input:checked) { border-color: #0891B2; background: rgba(8,145,178,.1); }
+
     /* ── Stats card (topright) ────────────────────────────── */
     .map-stats-card {
       margin: 10px;
@@ -848,6 +865,13 @@
       </div>
 
       <div class="form-row">
+        <label class="online-label">
+          <input type="checkbox" id="r-online" onchange="toggleOnlineMode(this.checked)">
+          🌐 Solo online — sin local físico
+        </label>
+      </div>
+
+      <div class="form-row" id="location-section">
         <label>Ubicación en el mapa <span class="req">*</span> — clic en el mapa o GPS</label>
         <div id="mini-map"></div>
         <div class="map-actions">
@@ -1045,7 +1069,7 @@ function renderMarkers(negocios) {
   clusterGroup.clearLayers();
 
   negocios.forEach(n => {
-    const tipo = TIPOS[n.tipo] || TIPOS.otro;
+    const tipo = n.online ? { emoji: '🌐', color: '#0891B2' } : (TIPOS[n.tipo] || TIPOS.otro);
     const icon = L.divIcon({
       className: '',
       html: `<div class="map-marker" style="background:${tipo.color}"><span>${tipo.emoji}</span></div>`,
@@ -1085,7 +1109,7 @@ function buildPopup(n) {
         <span class="badge-tipo">${tipo.emoji} ${escHtml(n.tipo)}</span>
         <div class="popup-criptos">${criptos}</div>
         ${n.descripcion ? `<p class="popup-desc">${escHtml(n.descripcion)}</p>` : ''}
-        ${n.ciudad    ? `<p class="popup-meta">🏙 ${escHtml(n.ciudad)}</p>` : ''}
+        ${n.online ? `<p class="popup-meta">🌐 Tienda online</p>` : (n.ciudad ? `<p class="popup-meta">🏙 ${escHtml(n.ciudad)}</p>` : '')}
         ${n.contacto  ? `<p class="popup-meta">📞 ${escHtml(n.contacto)}</p>` : ''}
         <div class="popup-share">
           <a class="btn-wa" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">
@@ -1295,7 +1319,8 @@ async function submitRegistro() {
   if (!nombre) return showFormMsg('El nombre del negocio es requerido.', 'error');
   if (!tipo)   return showFormMsg('Selecciona el tipo de negocio.', 'error');
   if (!criptos.length) return showFormMsg('Selecciona al menos una criptomoneda.', 'error');
-  if (!pickedLat || !pickedLng) return showFormMsg('Selecciona la ubicación en el mapa.', 'error');
+  const isOnline = document.getElementById('r-online').checked;
+  if (!isOnline && (!pickedLat || !pickedLng)) return showFormMsg('Selecciona la ubicación en el mapa.', 'error');
 
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
@@ -1308,7 +1333,7 @@ async function submitRegistro() {
       body: JSON.stringify({
         nombre, tipo, ciudad, descripcion: desc,
         contacto, criptos, lat: pickedLat, lng: pickedLng,
-        logo_base64: logoBase64,
+        online: isOnline, logo_base64: logoBase64,
       }),
     });
 
@@ -1336,6 +1361,20 @@ async function submitRegistro() {
   }
 }
 
+function toggleOnlineMode(isOnline) {
+  const section = document.getElementById('location-section');
+  section.style.display = isOnline ? 'none' : '';
+  if (isOnline) {
+    pickedLat = 8.0;
+    pickedLng = -66.0;
+  } else {
+    pickedLat = null;
+    pickedLng = null;
+    document.getElementById('map-coords').textContent = 'Sin ubicación seleccionada';
+    document.getElementById('btn-reset-loc').style.display = 'none';
+  }
+}
+
 function showFormMsg(text, type) {
   const msg = document.getElementById('form-msg');
   msg.textContent = text;
@@ -1359,6 +1398,8 @@ function resetRegistroForm() {
   document.getElementById('logo-preview').src = '';
   document.getElementById('logo-input').value = '';
   document.getElementById('form-msg').className = 'form-msg';
+  document.getElementById('r-online').checked = false;
+  document.getElementById('location-section').style.display = '';
   resetLocation();
 }
 

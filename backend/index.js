@@ -70,7 +70,7 @@ app.get('/api/negocios', async (req, res) => {
 app.post('/api/negocios', async (req, res) => {
   try {
     const { nombre, tipo, criptos, descripcion, lat, lng,
-            contacto, ciudad, logo_base64 } = req.body;
+            contacto, ciudad, online, logo_base64 } = req.body;
 
     // Validación básica
     if (!nombre?.trim() || !tipo || !criptos?.length || lat == null || lng == null) {
@@ -138,6 +138,7 @@ Descripción: ${descripcion || '(ninguna)'}
       lng:         lngN,
       contacto:    contacto?.trim() || null,
       ciudad:      ciudad?.trim() || null,
+      online:      online === true || online === 'true',
       logo_url,
       estado,
     }]).select().single();
