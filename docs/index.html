@@ -601,6 +601,30 @@
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
 
+    /* ── Footer ───────────────────────────────────────────── */
+    footer {
+      height: 34px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color .15s;
+    }
+    footer a:hover { color: var(--text); }
+    footer .footer-x:hover   { color: #fff; }
+    footer .footer-mail:hover { color: var(--accent); }
+
     /* ── Mobile ───────────────────────────────────────────── */
     @media (max-width: 600px) {
       .header-count { display: none; }
@@ -678,6 +702,19 @@
 
 <!-- ── Map ─────────────────────────────────────────────────── -->
 <div id="map"></div>
+
+<!-- ── Footer ──────────────────────────────────────────────── -->
+<footer>
+  <a class="footer-x" href="https://x.com/criptomapavzla" target="_blank" rel="noopener">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    @criptomapavzla
+  </a>
+  <span style="color:var(--border)">|</span>
+  <a class="footer-mail" href="mailto:criptomapavenezuela@proton.me">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+    criptomapavenezuela@proton.me
+  </a>
+</footer>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- Modal: Registro de negocio                                 -->
@@ -959,7 +996,7 @@ function buildPopup(n) {
     `🗺️ ${n.nombre} acepta criptomonedas en Venezuela!\n` +
     (n.descripcion ? n.descripcion + '\n' : '') +
     (n.ciudad ? `📍 ${n.ciudad}\n` : '') +
-    `\nEncuéntralos en MapaCripto.ve`
+    `\nEncuéntralos en criptomapavenezuela.com\n@criptomapavzla`
   );
 
   return `
