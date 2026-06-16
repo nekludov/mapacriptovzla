@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark background -->
+  <rect width="32" height="32" rx="6" fill="#0F1117"/>
+
+  <!-- Venezuelan flag stripes -->
+  <rect x="4" y="8"  width="24" height="5.33" rx="1" fill="#CF9B00"/>
+  <rect x="4" y="13.33" width="24" height="5.33" fill="#003893"/>
+  <rect x="4" y="18.67" width="24" height="5.33" rx="1" fill="#CF142B"/>
+
+  <!-- Map pin overlay -->
+  <circle cx="23" cy="22" r="7" fill="#0F1117"/>
+  <circle cx="23" cy="20" r="4.5" fill="#F7931A"/>
+  <circle cx="23" cy="20" r="1.8" fill="#0F1117"/>
+  <path d="M23 24.5 Q19.5 28 23 31 Q26.5 28 23 24.5Z" fill="#F7931A"/>
+</svg>
