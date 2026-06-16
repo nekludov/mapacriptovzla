@@ -830,6 +830,13 @@
       </div>
 
       <div class="form-row">
+        <label class="online-label">
+          <input type="checkbox" id="r-online" onchange="toggleOnlineMode(this.checked)">
+          🌐 Solo online — sin local físico
+        </label>
+      </div>
+
+      <div class="form-row">
         <label>Ciudad</label>
         <input id="r-ciudad" class="form-control" type="text" list="ciudades-list" placeholder="Ej. Caracas">
       </div>
@@ -862,13 +869,6 @@
           <img id="logo-preview" style="display:none">
         </div>
         <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)">
-      </div>
-
-      <div class="form-row">
-        <label class="online-label">
-          <input type="checkbox" id="r-online" onchange="toggleOnlineMode(this.checked)">
-          🌐 Solo online — sin local físico
-        </label>
       </div>
 
       <div class="form-row" id="location-section">
