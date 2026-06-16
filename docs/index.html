@@ -289,6 +289,9 @@
     .cripto-tag.BinancePay { background: #f3ba2f22; color: #F3BA2F; border: 1px solid #F3BA2F55; }
     .cripto-tag.Otros      { background: #9aa0ac22; color: #9AA0AC; border: 1px solid #9AA0AC55; }
 
+    .contact-link { color: var(--accent); text-decoration: none; word-break: break-all; }
+    .contact-link:hover { text-decoration: underline; }
+
     .popup-desc {
       font-size: 12.5px;
       color: var(--muted);
@@ -1086,6 +1089,24 @@ function renderMarkers(negocios) {
   });
 }
 
+function formatContacto(c) {
+  if (!c) return '';
+  const esc = escHtml(c);
+  if (/^https?:\/\//i.test(c)) {
+    const icon = /instagram/i.test(c) ? '📸' : /twitter\.com|x\.com/i.test(c) ? '𝕏' : /wa\.me|whatsapp/i.test(c) ? '💬' : /t\.me|telegram/i.test(c) ? '✈️' : '🔗';
+    const label = c.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
+    const short = label.length > 32 ? label.slice(0, 32) + '…' : label;
+    return `<p class="popup-meta"><a href="${esc}" target="_blank" rel="noopener" class="contact-link">${icon} ${short}</a></p>`;
+  }
+  if (/^@\w/.test(c)) {
+    return `<p class="popup-meta"><a href="https://instagram.com/${c.slice(1)}" target="_blank" rel="noopener" class="contact-link">📸 ${esc}</a></p>`;
+  }
+  if (/^\+?[\d\s\-()+]{6,}$/.test(c)) {
+    return `<p class="popup-meta"><a href="tel:${c.replace(/\s/g, '')}" class="contact-link">📞 ${esc}</a></p>`;
+  }
+  return `<p class="popup-meta">📞 ${esc}</p>`;
+}
+
 function buildPopup(n) {
   const tipo = TIPOS[n.tipo] || TIPOS.otro;
 
@@ -1112,7 +1133,7 @@ function buildPopup(n) {
         <div class="popup-criptos">${criptos}</div>
         ${n.descripcion ? `<p class="popup-desc">${escHtml(n.descripcion)}</p>` : ''}
         ${n.online ? `<p class="popup-meta">🌐 Tienda online</p>` : (n.ciudad ? `<p class="popup-meta">🏙 ${escHtml(n.ciudad)}</p>` : '')}
-        ${n.contacto  ? `<p class="popup-meta">📞 ${escHtml(n.contacto)}</p>` : ''}
+        ${formatContacto(n.contacto)}
         <div class="popup-share">
           <a class="btn-wa" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">
             WhatsApp
