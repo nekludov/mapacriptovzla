@@ -950,6 +950,20 @@
       </button>
       <div class="form-msg" id="form-msg"></div>
 
+      <!-- Aparece tras registro exitoso con el link de edición -->
+      <div id="edit-link-box" style="display:none;margin-top:12px;padding:14px;background:var(--surface2);border:1px solid var(--accent);border-radius:10px;">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px">🔑 Guarda este enlace para editar tu negocio</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Con este link podrás actualizar tus datos en cualquier momento, sin contraseña. Guárdalo en un lugar seguro.</div>
+        <div style="display:flex;gap:8px">
+          <input id="edit-link-input" class="form-control" type="text" readonly
+                 style="font-size:11px;font-family:monospace;flex:1;min-width:0;cursor:text">
+          <button onclick="copyEditLink()"
+                  style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">
+            Copiar
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1053,6 +1067,13 @@ let miniMap = null, miniMarker = null;
 let pickedLat = null, pickedLng = null;
 let logoBase64 = null;
 let allNegocios = [];
+let currentEditToken = null;
+
+const PRO_TIPOS = new Set([
+  'docente','plomero','electricista','ac_tecnico','mecanico','programador',
+  'disenador','fotografo','estetica','entrenador','medico','abogado',
+  'servicios_hogar','marketing','otro_prof',
+]);
 
 // ════════════════════════════════════════════════════════════
 // Init
@@ -1063,6 +1084,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadNegocios();
   if (location.hash === '#admin') openModal('admin');
   tryAutoLocate();
+  const et = new URLSearchParams(location.search).get('edit');
+  if (et) loadEditMode(et);
 });
 
 function initMap() {
@@ -1324,6 +1347,7 @@ function openModal(name, mode = 'negocio') {
 
 function closeModal(name) {
   document.getElementById(`modal-${name}`).classList.remove('open');
+  if (name === 'registro' && currentEditToken) resetRegistroForm();
 }
 
 // Cerrar al clic fuera del box
@@ -1479,40 +1503,63 @@ async function submitRegistro() {
 
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
-  btn.textContent = 'Enviando…';
+  btn.textContent = currentEditToken ? 'Guardando…' : 'Enviando…';
 
   try {
-    const res = await fetch(`${API_URL}/api/negocios`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nombre, tipo, ciudad, descripcion: desc,
-        contacto, criptos, lat: pickedLat, lng: pickedLng,
-        online: isOnline, logo_base64: logoBase64,
-      }),
-    });
+    const payload = {
+      nombre, tipo, ciudad, descripcion: desc,
+      contacto, criptos, lat: pickedLat, lng: pickedLng,
+      online: isOnline, logo_base64: logoBase64,
+    };
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error desconocido.');
+    if (currentEditToken) {
+      // ── Modo edición ──────────────────────────────────────
+      const res  = await fetch(`${API_URL}/api/negocios/edit/${encodeURIComponent(currentEditToken)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error desconocido.');
 
-    if (data.estado === 'activo') {
-      showFormMsg('✅ ¡Negocio registrado y publicado! Ya aparece en el mapa.', 'success');
-      await loadNegocios(); // refrescar mapa
+      showFormMsg(
+        data.estado === 'activo'
+          ? '✅ ¡Cambios publicados! Ya se ven en el mapa.'
+          : '✅ Cambios guardados. Quedan en revisión y se publicarán pronto.',
+        'success'
+      );
+      if (data.estado === 'activo') await loadNegocios();
+
     } else {
-      showFormMsg('✅ ¡Registro enviado! Está en revisión y se publicará pronto.', 'success');
-    }
+      // ── Registro nuevo ────────────────────────────────────
+      const res  = await fetch(`${API_URL}/api/negocios`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error desconocido.');
 
-    // Reset form
-    setTimeout(() => {
-      closeModal('registro');
-      resetRegistroForm();
-    }, 3000);
+      if (data.estado === 'activo') {
+        showFormMsg('✅ ¡Negocio registrado y publicado! Ya aparece en el mapa.', 'success');
+        await loadNegocios();
+      } else {
+        showFormMsg('✅ ¡Registro enviado! Está en revisión y se publicará pronto.', 'success');
+      }
+
+      // Mostrar enlace de edición — el usuario debe guardarlo antes de cerrar
+      if (data.edit_token) {
+        const editLink = `${location.origin}/?edit=${data.edit_token}`;
+        document.getElementById('edit-link-input').value = editLink;
+        document.getElementById('edit-link-box').style.display = '';
+      }
+    }
 
   } catch (e) {
     showFormMsg(e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Enviar negocio';
+    btn.textContent = currentEditToken ? 'Guardar cambios' : 'Enviar negocio';
   }
 }
 
@@ -1562,15 +1609,19 @@ function resetRegistroForm() {
   document.getElementById('logo-preview').src = '';
   document.getElementById('logo-input').value = '';
   document.getElementById('form-msg').className = 'form-msg';
+  document.getElementById('edit-link-box').style.display = 'none';
+  document.getElementById('edit-link-input').value = '';
   document.getElementById('r-online').checked = false;
-  document.getElementById('location-section').style.display = '';
   // Restore negocio mode defaults
+  currentEditToken = null;
   registroMode = 'negocio';
   document.querySelector('#modal-registro .modal-header h2').textContent = 'Registrar negocio';
   document.getElementById('r-nombre-label').innerHTML = 'Nombre del negocio <span class="req">*</span>';
   document.getElementById('r-nombre').placeholder = 'Ej. Arepera La Criolla';
   document.getElementById('r-tipo-label').innerHTML = 'Tipo de negocio <span class="req">*</span>';
   document.getElementById('r-tipo').innerHTML = OPTS_NEGOCIO;
+  document.getElementById('btn-submit').textContent = 'Enviar negocio';
+  toggleOnlineMode(false);
   resetLocation();
 }
 
@@ -1678,6 +1729,76 @@ function showToast(text) {
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ════════════════════════════════════════════════════════════
+// Edición por token
+// ════════════════════════════════════════════════════════════
+async function loadEditMode(token) {
+  try {
+    const res = await fetch(`${API_URL}/api/negocios/edit/${encodeURIComponent(token)}`);
+    if (!res.ok) { showToast('Enlace de edición inválido o expirado.'); return; }
+    const n = await res.json();
+    currentEditToken = token;
+    // Limpiar token de la URL para que no se comparta accidentalmente
+    history.replaceState({}, '', '/');
+    const mode = PRO_TIPOS.has(n.tipo) ? 'profesional' : 'negocio';
+    openModal('registro', mode);
+    // Esperar a que el mini-mapa se inicialice (initMiniMap usa 120 ms)
+    setTimeout(() => prefillEditForm(n), 300);
+  } catch (e) {
+    showToast('Error al cargar los datos de edición.');
+  }
+}
+
+function prefillEditForm(n) {
+  document.getElementById('r-nombre').value   = n.nombre      || '';
+  document.getElementById('r-ciudad').value   = n.ciudad      || '';
+  document.getElementById('r-desc').value     = n.descripcion || '';
+  document.getElementById('r-contacto').value = n.contacto    || '';
+  document.getElementById('r-tipo').value     = n.tipo        || '';
+
+  // Criptos
+  document.querySelectorAll('.cripto-check').forEach(el => {
+    const sel = (n.criptos || []).includes(el.dataset.id);
+    el.classList.toggle('selected', sel);
+    el.querySelector('input').checked = sel;
+  });
+
+  // Online toggle (llama a toggleOnlineMode que limpia coords)
+  const onlineBox = document.getElementById('r-online');
+  onlineBox.checked = !!n.online;
+  toggleOnlineMode(!!n.online);
+
+  // Ubicación — poner después de toggleOnlineMode para que no se limpie
+  if (n.lat && n.lng) {
+    if (miniMap) miniMap.setView([n.lat, n.lng], 12);
+    setPickedLocation(n.lat, n.lng);
+  }
+
+  // Logo existente como vista previa
+  if (n.logo_url) {
+    document.getElementById('logo-area').classList.add('has-image');
+    document.getElementById('logo-placeholder').style.display = 'none';
+    const img = document.getElementById('logo-preview');
+    img.src = n.logo_url;
+    img.style.display = 'block';
+  }
+
+  // Adaptar cabecera y botón al modo edición
+  document.querySelector('#modal-registro .modal-header h2').textContent =
+    PRO_TIPOS.has(n.tipo) ? 'Editar profesional' : 'Editar negocio';
+  document.getElementById('btn-submit').textContent = 'Guardar cambios';
+}
+
+function copyEditLink() {
+  const val = document.getElementById('edit-link-input').value;
+  navigator.clipboard?.writeText(val).then(() => showToast('¡Enlace copiado!'))
+    .catch(() => {
+      const inp = document.getElementById('edit-link-input');
+      inp.select(); document.execCommand('copy');
+      showToast('¡Enlace copiado!');
+    });
 }
 </script>
 </body>
