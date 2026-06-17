@@ -1363,8 +1363,12 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 function initMiniMap() {
   setTimeout(() => {
     if (!miniMap) {
-      miniMap = L.map('mini-map', { zoomControl: true, attributionControl: false })
-        .setView([8.0, -66.0], 5);
+      const vzBounds = L.latLngBounds([[0.6, -73.4], [12.2, -59.8]]);
+      miniMap = L.map('mini-map', {
+        zoomControl: true, attributionControl: false,
+        maxBounds: vzBounds, maxBoundsViscosity: 1.0,
+        minZoom: 5,
+      }).setView([8.0, -66.0], 5);
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         subdomains: 'abcd', maxZoom: 19
@@ -1377,7 +1381,15 @@ function initMiniMap() {
   }, 120);
 }
 
+function inVenezuela(lat, lng) {
+  return lat >= 0.6 && lat <= 12.2 && lng >= -73.4 && lng <= -59.8;
+}
+
 function setPickedLocation(lat, lng) {
+  if (!inVenezuela(lat, lng)) {
+    showToast('Selecciona un punto dentro de Venezuela 🇻🇪');
+    return;
+  }
   pickedLat = lat;
   pickedLng = lng;
 
@@ -1398,6 +1410,10 @@ function useGPS() {
   navigator.geolocation.getCurrentPosition(
     pos => {
       const { latitude: lat, longitude: lng } = pos.coords;
+      if (!inVenezuela(lat, lng)) {
+        showToast('Tu ubicación GPS está fuera de Venezuela 🇻🇪');
+        return;
+      }
       miniMap.setView([lat, lng], 15);
       setPickedLocation(lat, lng);
     },
