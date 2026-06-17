@@ -975,15 +975,24 @@
 <div class="modal-overlay" id="modal-admin">
   <div class="modal-box">
     <div class="modal-header">
-      <h2>🔐 Admin – Negocios pendientes</h2>
+      <h2>🔐 Admin</h2>
       <button class="btn-close" onclick="closeModal('admin')">×</button>
     </div>
     <div class="modal-body">
       <div class="admin-pw-row">
-        <input id="admin-pw" class="form-control" type="password" placeholder="Contraseña admin" onkeydown="if(event.key==='Enter')loadPendientes()">
-        <button class="btn-admin-load" onclick="loadPendientes()">Cargar</button>
+        <input id="admin-pw" class="form-control" type="password" placeholder="Contraseña admin" onkeydown="if(event.key==='Enter')loadAdmin()">
+        <button class="btn-admin-load" onclick="loadAdmin()">Cargar</button>
       </div>
-      <div id="admin-list"><p class="admin-empty">Ingresa la contraseña para ver los pendientes.</p></div>
+      <!-- Pendientes -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
+        Pendientes de revisión
+      </div>
+      <div id="admin-list"><p class="admin-empty">Ingresa la contraseña para continuar.</p></div>
+      <!-- Activos -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px" id="admin-activos-label" style="display:none">
+        Negocios activos
+      </div>
+      <div id="admin-activos-list"></div>
     </div>
   </div>
 </div>
@@ -1644,39 +1653,55 @@ function resetRegistroForm() {
 // ════════════════════════════════════════════════════════════
 // Admin panel
 // ════════════════════════════════════════════════════════════
-async function loadPendientes() {
-  const pw   = document.getElementById('admin-pw').value;
-  const list = document.getElementById('admin-list');
-  list.innerHTML = '<p class="admin-empty">Cargando…</p>';
-
-  try {
-    const res  = await fetch(`${API_URL}/api/admin/pendientes?password=${encodeURIComponent(pw)}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-
-    if (!data.length) {
-      list.innerHTML = '<p class="admin-empty">🎉 No hay negocios pendientes.</p>';
-      return;
-    }
-
-    list.innerHTML = data.map(n => `
-      <div class="admin-card" id="ac-${n.id}">
-        <h4>${escHtml(n.nombre)}</h4>
-        <div class="ac-meta">
-          <b>Tipo:</b> ${escHtml(n.tipo)} &nbsp;|&nbsp; <b>Ciudad:</b> ${escHtml(n.ciudad || '?')}<br>
-          <b>Criptos:</b> ${(n.criptos || []).join(', ')}<br>
-          <b>Desc:</b> ${escHtml(n.descripcion || '—')}<br>
-          <b>Contacto:</b> ${escHtml(n.contacto || '—')}
-          ${n.logo_url ? `<br><a href="${n.logo_url}" target="_blank" style="color:var(--accent)">Ver foto</a>` : ''}
-        </div>
-        <div class="admin-card-actions">
+function adminCardHtml(n, showModerar = true) {
+  const criptos = (n.criptos || []).map(escHtml).join(', ');
+  return `
+    <div class="admin-card" id="ac-${n.id}">
+      <h4>${escHtml(n.nombre)}</h4>
+      <div class="ac-meta">
+        <b>Tipo:</b> ${escHtml(n.tipo)} &nbsp;|&nbsp; <b>Ciudad:</b> ${escHtml(n.ciudad || '?')}<br>
+        <b>Criptos:</b> ${criptos}<br>
+        <b>Desc:</b> ${escHtml(n.descripcion || '—')}<br>
+        <b>Contacto:</b> ${escHtml(n.contacto || '—')}
+        ${n.logo_url ? `<br><a href="${escHtml(n.logo_url)}" target="_blank" style="color:var(--accent)">Ver foto</a>` : ''}
+      </div>
+      <div class="admin-card-actions">
+        ${showModerar ? `
           <button class="btn-aprobar"  onclick="moderarNegocio('${n.id}','activo')">✅ Aprobar</button>
           <button class="btn-rechazar" onclick="moderarNegocio('${n.id}','rechazado')">❌ Rechazar</button>
-        </div>
+        ` : ''}
+        <button class="btn-rechazar" style="flex:0;padding:8px 12px"
+                onclick="eliminarNegocio('${n.id}')">🗑</button>
       </div>
-    `).join('');
+    </div>`;
+}
+
+async function loadAdmin() {
+  const pw = document.getElementById('admin-pw').value;
+  document.getElementById('admin-list').innerHTML = '<p class="admin-empty">Cargando…</p>';
+  document.getElementById('admin-activos-list').innerHTML = '';
+
+  try {
+    // Cargar pendientes
+    const resPend = await fetch(`${API_URL}/api/admin/pendientes?password=${encodeURIComponent(pw)}`);
+    const pendData = await resPend.json();
+    if (!resPend.ok) throw new Error(pendData.error);
+
+    document.getElementById('admin-list').innerHTML = pendData.length
+      ? pendData.map(n => adminCardHtml(n, true)).join('')
+      : '<p class="admin-empty">🎉 No hay negocios pendientes.</p>';
+
+    // Cargar activos
+    const resAct = await fetch(`${API_URL}/api/admin/activos?password=${encodeURIComponent(pw)}`);
+    const actData = await resAct.json();
+    if (resAct.ok && actData.length) {
+      document.getElementById('admin-activos-label').style.display = '';
+      document.getElementById('admin-activos-list').innerHTML =
+        actData.map(n => adminCardHtml(n, false)).join('');
+    }
   } catch (e) {
-    list.innerHTML = `<p class="admin-empty" style="color:var(--error)">${escHtml(e.message)}</p>`;
+    document.getElementById('admin-list').innerHTML =
+      `<p class="admin-empty" style="color:var(--error)">${escHtml(e.message)}</p>`;
   }
 }
 
@@ -1697,6 +1722,26 @@ async function moderarNegocio(id, estado) {
     card.innerHTML += `<p style="margin-top:8px;font-size:12px;color:var(--muted)">${estado === 'activo' ? '✅ Aprobado' : '❌ Rechazado'}</p>`;
 
     if (estado === 'activo') await loadNegocios();
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+  }
+}
+
+async function eliminarNegocio(id) {
+  if (!confirm('¿Eliminar este negocio definitivamente?')) return;
+  const pw = document.getElementById('admin-pw').value;
+  try {
+    const res = await fetch(`${API_URL}/api/negocios/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    document.getElementById(`ac-${id}`)?.remove();
+    await loadNegocios();
+    showToast('Negocio eliminado.');
   } catch (e) {
     showToast(`Error: ${e.message}`);
   }

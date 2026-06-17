@@ -7,7 +7,7 @@ const { TwitterApi } = require('twitter-api-v2');
 
 const app = express();
 
-app.use(cors({ origin: '*', methods: ['GET','POST','PATCH','OPTIONS'] }));
+app.use(cors({ origin: '*', methods: ['GET','POST','PATCH','DELETE','OPTIONS'] }));
 app.use(express.json({ limit: '5mb' }));
 
 const supabase  = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -230,6 +230,18 @@ app.get('/api/admin/pendientes', async (req, res) => {
   res.json(data);
 });
 
+// ── GET /api/admin/activos ────────────────────────────────────────────────────
+app.get('/api/admin/activos', async (req, res) => {
+  if (!ADMIN_PASSWORD || req.query.password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'No autorizado.' });
+  }
+  const { data, error } = await supabase
+    .from('negocios').select(PUBLIC_COLS).eq('estado', 'activo')
+    .order('created_at', { ascending: false });
+  if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
+  res.json(data);
+});
+
 // ── PATCH /api/negocios/:id — acción admin ────────────────────────────────────
 app.patch('/api/negocios/:id', async (req, res) => {
   const { password, estado } = req.body;
@@ -245,6 +257,17 @@ app.patch('/api/negocios/:id', async (req, res) => {
   if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
   if (estado === 'activo') await postTweet(data);
   res.json({ ok: true, data });
+});
+
+// ── DELETE /api/negocios/:id — eliminar negocio (admin) ──────────────────────
+app.delete('/api/negocios/:id', async (req, res) => {
+  const { password } = req.body;
+  if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'No autorizado.' });
+  }
+  const { error } = await supabase.from('negocios').delete().eq('id', req.params.id);
+  if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
+  res.json({ ok: true });
 });
 
 // ── Health check ──────────────────────────────────────────────────────────────
