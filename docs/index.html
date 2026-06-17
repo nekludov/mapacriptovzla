@@ -936,7 +936,7 @@
       </div>
 
       <div class="form-row" id="location-section">
-        <label>Ubicación en el mapa <span class="req">*</span> — clic en el mapa o GPS</label>
+        <label id="location-label">Ubicación en el mapa <span class="req">*</span> — clic en el mapa o GPS</label>
         <div id="mini-map"></div>
         <div class="map-actions">
           <button class="btn-gps" onclick="useGPS()">📍 Usar mi ubicación</button>
@@ -1475,7 +1475,7 @@ async function submitRegistro() {
   if (!tipo)   return showFormMsg('Selecciona el tipo de negocio.', 'error');
   if (!criptos.length) return showFormMsg('Selecciona al menos una criptomoneda.', 'error');
   const isOnline = document.getElementById('r-online').checked;
-  if (!isOnline && (!pickedLat || !pickedLng)) return showFormMsg('Selecciona la ubicación en el mapa.', 'error');
+  if (!pickedLat || !pickedLng) return showFormMsg(isOnline ? 'Marca tu ciudad o zona en el mapa.' : 'Selecciona la ubicación en el mapa.', 'error');
 
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
@@ -1526,17 +1526,17 @@ function closeRegMenu() {
 document.addEventListener('click', closeRegMenu);
 
 function toggleOnlineMode(isOnline) {
-  const section = document.getElementById('location-section');
-  section.style.display = isOnline ? 'none' : '';
+  const label = document.getElementById('location-label');
   if (isOnline) {
-    pickedLat = 8.0;
-    pickedLng = -66.0;
+    label.innerHTML = 'Ciudad / zona de operación <span class="req">*</span> — marca tu ciudad en el mapa';
   } else {
-    pickedLat = null;
-    pickedLng = null;
-    document.getElementById('map-coords').textContent = 'Sin ubicación seleccionada';
-    document.getElementById('btn-reset-loc').style.display = 'none';
+    label.innerHTML = 'Ubicación en el mapa <span class="req">*</span> — clic en el mapa o GPS';
   }
+  pickedLat = null;
+  pickedLng = null;
+  document.getElementById('map-coords').textContent = 'Sin ubicación seleccionada';
+  document.getElementById('btn-reset-loc').style.display = 'none';
+  if (miniMarker) { miniMarker.remove(); miniMarker = null; }
 }
 
 function showFormMsg(text, type) {
