@@ -782,9 +782,9 @@
         position: relative;
       }
       .mbn-fab {
-        width: 58px;
-        height: 58px;
-        border-radius: 18px;
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
         background: var(--accent);
         border: none;
         color: #fff;
@@ -792,12 +792,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 18px rgba(247,147,26,.45);
-        margin-top: -22px;
-        transition: transform .15s, box-shadow .15s;
+        box-shadow: 0 2px 14px rgba(247,147,26,.45);
+        transition: transform .15s;
         flex-shrink: 0;
       }
-      .mbn-fab:active { transform: scale(.95); }
+      .mbn-fab:active { transform: scale(.93); }
       .mbn-fab-label {
         font-size: 10px;
         font-weight: 600;
@@ -849,6 +848,101 @@
 
       /* Filter button active state */
       .mbn-item.filter-active { color: var(--accent); }
+
+      /* Hamburger button in header */
+      .btn-hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--text);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 8px;
+        transition: background .15s;
+      }
+      .btn-hamburger:active { background: var(--surface2); }
+
+      /* Side drawer */
+      .drawer-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.55);
+        z-index: 1500;
+        backdrop-filter: blur(2px);
+      }
+      .drawer-overlay.open { display: block; }
+
+      .side-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 78vw;
+        max-width: 300px;
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        z-index: 1600;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform .25s cubic-bezier(.4,0,.2,1);
+        box-shadow: -8px 0 32px rgba(0,0,0,.5);
+      }
+      .side-drawer.open { transform: translateX(0); }
+
+      .drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .drawer-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .btn-drawer-close {
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 24px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 2px 4px;
+      }
+      .drawer-nav {
+        flex: 1;
+        padding: 8px 0;
+        overflow-y: auto;
+      }
+      .drawer-nav a {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 15px 20px;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+        border-bottom: 1px solid var(--border);
+        transition: background .12s;
+      }
+      .drawer-nav a:last-child { border-bottom: none; }
+      .drawer-nav a:active { background: var(--surface2); }
+      .drawer-nav .nav-icon { font-size: 20px; width: 28px; text-align: center; }
+      .drawer-footer {
+        padding: 16px 20px;
+        border-top: 1px solid var(--border);
+        font-size: 11px;
+        color: var(--muted);
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -902,6 +996,12 @@
       </div>
     </div>
   </div>
+  <!-- Mobile: hamburger -->
+  <button class="btn-hamburger btn-mobile" onclick="openDrawer()" aria-label="Menú">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
 </header>
 
 <!-- ── Filter bar ──────────────────────────────────────────── -->
@@ -1116,6 +1216,42 @@
   </div>
 </div>
 
+<!-- ── Side drawer (mobile) ─────────────────────────────────── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="side-drawer" id="side-drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">
+      <svg width="20" height="13" viewBox="0 0 26 17" xmlns="http://www.w3.org/2000/svg" style="border-radius:2px">
+        <rect width="26" height="5.67" fill="#CF9B00"/>
+        <rect y="5.67" width="26" height="5.67" fill="#003893"/>
+        <rect y="11.33" width="26" height="5.67" fill="#CF142B"/>
+      </svg>
+      MapaCripto
+    </div>
+    <button class="btn-drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <nav class="drawer-nav">
+    <a href="/quienes-somos.html">
+      <span class="nav-icon">👥</span> Quiénes somos
+    </a>
+    <a href="https://x.com/criptomapavzla" target="_blank" rel="noopener">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </span> @criptomapavzla
+    </a>
+    <a href="mailto:criptomapavenezuela@proton.me">
+      <span class="nav-icon">✉️</span> Contacto
+    </a>
+    <a href="/terms.html">
+      <span class="nav-icon">📄</span> Términos y condiciones
+    </a>
+    <a href="/privacy.html">
+      <span class="nav-icon">🔒</span> Privacidad
+    </a>
+  </nav>
+  <div class="drawer-footer">© 2025 CriptoMapa Venezuela</div>
+</div>
+
 <!-- ── Mobile bottom navigation ────────────────────────────── -->
 <nav class="mobile-nav" id="mobile-nav">
 
@@ -1141,13 +1277,15 @@
     <span class="mbn-fab-label">Registrar</span>
   </div>
 
-  <!-- Redes -->
-  <a class="mbn-item" href="https://x.com/criptomapavzla" target="_blank" rel="noopener" aria-label="X / Twitter">
+  <!-- Menú -->
+  <button class="mbn-item" onclick="openDrawer()" aria-label="Menú">
     <span class="mbn-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
     </span>
-    <span class="mbn-label">@criptomapa</span>
-  </a>
+    <span class="mbn-label">Menú</span>
+  </button>
 
 </nav>
 
@@ -1751,6 +1889,18 @@ function toggleRegMenu(e) {
 }
 function closeRegMenu() {
   document.getElementById('reg-menu').classList.remove('open');
+}
+
+// ── Side drawer ───────────────────────────────────────────────
+function openDrawer() {
+  document.getElementById('side-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  document.getElementById('side-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 // ── Mobile bottom nav ─────────────────────────────────────────

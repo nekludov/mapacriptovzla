@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiénes somos – MapaCripto Venezuela</title>
+  <meta name="description" content="Conoce el proyecto detrás de CriptoMapa Venezuela, el directorio de negocios venezolanos que aceptan criptomonedas.">
+  <meta name="theme-color" content="#0F1117">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:  #CF142B;
+      --accent:   #F7931A;
+      --blue:     #003893;
+      --bg:       #0F1117;
+      --surface:  #1C1F26;
+      --surface2: #252930;
+      --border:   #2E3340;
+      --text:     #E8EAED;
+      --muted:    #9AA0AC;
+      --success:  #22C55E;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      position: relative;
+      flex-shrink: 0;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(to right, #CF9B00 33%, #003893 33% 66%, #CF142B 66%);
+    }
+    .header-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 17px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .back-btn {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .15s;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .hero-flag {
+      display: inline-flex;
+      flex-direction: column;
+      width: 56px;
+      height: 36px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    }
+    .hero-flag span { flex: 1; }
+    .hero-flag span:nth-child(1) { background: #CF9B00; }
+    .hero-flag span:nth-child(2) { background: #003893; }
+    .hero-flag span:nth-child(3) { background: #CF142B; }
+    .hero h1 {
+      font-size: clamp(28px, 6vw, 40px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ── Section ── */
+    .section { margin-bottom: 48px; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 12px;
+    }
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .section p, .section li {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+    .section ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .section li::before {
+      content: '✓';
+      color: var(--success);
+      font-weight: 700;
+      margin-right: 10px;
+    }
+
+    /* ── Cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 4px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 20px;
+    }
+    .card-icon { font-size: 28px; margin-bottom: 12px; }
+    .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── CTA ── */
+    .cta-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      text-align: center;
+    }
+    .cta-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .cta-box p { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 12px 28px;
+      border-radius: 10px;
+      transition: opacity .15s;
+    }
+    .cta-btn:hover { opacity: .88; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      main { padding: 32px 16px 48px; }
+      .cta-box { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="/">
+      <svg width="26" height="17" viewBox="0 0 26 17" xmlns="http://www.w3.org/2000/svg" style="border-radius:2px;flex-shrink:0">
+        <rect width="26" height="5.67" fill="#CF9B00"/>
+        <rect y="5.67" width="26" height="5.67" fill="#003893"/>
+        <rect y="11.33" width="26" height="5.67" fill="#CF142B"/>
+        <circle cx="2.8"  cy="8.8"  r="0.72" fill="white"/>
+        <circle cx="5.7"  cy="7.9"  r="0.72" fill="white"/>
+        <circle cx="8.6"  cy="7.3"  r="0.72" fill="white"/>
+        <circle cx="11.5" cy="7.0"  r="0.72" fill="white"/>
+        <circle cx="14.5" cy="7.0"  r="0.72" fill="white"/>
+        <circle cx="17.4" cy="7.3"  r="0.72" fill="white"/>
+        <circle cx="20.3" cy="7.9"  r="0.72" fill="white"/>
+        <circle cx="23.2" cy="8.8"  r="0.72" fill="white"/>
+      </svg>
+      MapaCripto
+    </a>
+    <a class="back-btn" href="/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+      Volver al mapa
+    </a>
+  </div>
+</header>
+
+<main>
+
+  <div class="hero">
+    <div class="hero-flag"><span></span><span></span><span></span></div>
+    <h1>El mapa cripto de <span>Venezuela</span></h1>
+    <p>Somos un proyecto independiente que conecta a los venezolanos con los negocios y profesionales que aceptan criptomonedas como forma de pago.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Nuestra misión</div>
+    <h2>¿Por qué existe MapaCripto?</h2>
+    <p>Venezuela tiene una de las tasas de adopción de criptomonedas más altas del mundo. Sin embargo, encontrar dónde gastarlas sigue siendo un desafío. MapaCripto nació para resolver eso: un directorio visual, libre y gratuito donde cualquier negocio puede registrarse y cualquier persona puede descubrir dónde pagar con cripto.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Lo que ofrecemos</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🗺️</div>
+        <h3>Mapa interactivo</h3>
+        <p>Visualiza todos los negocios activos en un mapa de Venezuela en tiempo real.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🆓</div>
+        <h3>Completamente gratis</h3>
+        <p>Registrar tu negocio o profesión no tiene ningún costo. Siempre.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <h3>Sin contraseñas</h3>
+        <p>Cada negocio recibe un enlace único para editar su perfil cuando quiera.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <h3>Moderación IA</h3>
+        <p>Cada registro es revisado automáticamente para mantener la calidad del directorio.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <div class="section-label">Criptomonedas</div>
+    <h2>¿Qué criptos aceptamos?</h2>
+    <ul>
+      <li>Bitcoin (BTC)</li>
+      <li>Tether (USDT)</li>
+      <li>USD Coin (USDC)</li>
+      <li>Binance Pay</li>
+      <li>Otras criptomonedas</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Contacto</div>
+    <h2>¿Tienes alguna pregunta?</h2>
+    <p>Puedes contactarnos por correo o seguirnos en X para las últimas novedades del proyecto.</p>
+    <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap">
+      <a href="mailto:criptomapavenezuela@proton.me" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;color:var(--text);text-decoration:none;font-size:14px;font-weight:500">
+        ✉️ criptomapavenezuela@proton.me
+      </a>
+      <a href="https://x.com/criptomapavzla" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;color:var(--text);text-decoration:none;font-size:14px;font-weight:500">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        @criptomapavzla
+      </a>
+    </div>
+  </div>
+
+  <div class="cta-box">
+    <h2>¿Tu negocio acepta cripto?</h2>
+    <p>Regístralo gratis en el mapa y llega a más clientes en toda Venezuela.</p>
+    <a class="cta-btn" href="/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Registrar mi negocio
+    </a>
+  </div>
+
+</main>
+
+<footer>
+  <p>© 2025 CriptoMapa Venezuela · <a href="/terms.html">Términos</a> · <a href="/privacy.html">Privacidad</a></p>
+</footer>
+
+</body>
+</html>
