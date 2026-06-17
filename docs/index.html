@@ -596,38 +596,31 @@
     .online-label input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
     .online-label:has(input:checked) { border-color: #0891B2; background: rgba(8,145,178,.1); }
 
-    /* ── Stats card (topright) ────────────────────────────── */
-    .map-stats-card {
-      margin: 10px;
-    }
+    /* ── Stats pill (topright) ───────────────────────────── */
+    .map-stats-card { margin: 10px; }
     .map-stats-inner {
-      background: var(--surface);
+      background: rgba(28,31,38,.88);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 20px;
-      text-align: center;
-      box-shadow: 0 4px 16px rgba(0,0,0,.4);
-      min-width: 140px;
+      border-radius: 20px;
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
+      white-space: nowrap;
     }
     .map-stats-number {
-      font-size: 36px;
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 700;
       color: var(--accent);
       line-height: 1;
     }
     .map-stats-label {
       font-size: 12px;
       color: var(--muted);
-      margin-top: 4px;
-      text-transform: uppercase;
-      letter-spacing: .05em;
     }
-    .map-stats-sub {
-      font-size: 13px;
-      color: var(--text);
-      margin-top: 6px;
-      font-weight: 500;
-    }
+    .map-stats-sub { font-size: 13px; line-height: 1; }
 
     /* ── Locate button ────────────────────────────────────── */
     .map-locate-btn {
@@ -1294,9 +1287,9 @@ function initMap() {
     const div = L.DomUtil.create('div', 'map-stats-card');
     div.innerHTML = `
       <div class="map-stats-inner">
-        <div class="map-stats-number" id="map-stats-count">—</div>
-        <div class="map-stats-label">negocios activos</div>
-        <div class="map-stats-sub">🇻🇪 Venezuela</div>
+        <span class="map-stats-sub">🇻🇪</span>
+        <span class="map-stats-number" id="map-stats-count">—</span>
+        <span class="map-stats-label">activos</span>
       </div>`;
     L.DomEvent.disableClickPropagation(div);
     return div;
