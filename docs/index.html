@@ -928,7 +928,7 @@
           <div id="logo-placeholder">
             <div style="font-size:28px;margin-bottom:6px">📷</div>
             <div style="font-size:13px;color:var(--muted)">Clic para subir imagen</div>
-            <div class="logo-upload-hint">JPG/PNG · se reduce a 1200px automáticamente</div>
+            <div class="logo-upload-hint">JPG/PNG/WebP · se comprime automáticamente</div>
           </div>
           <img id="logo-preview" style="display:none">
         </div>
@@ -1420,7 +1420,7 @@ function getSelectedCriptos() {
 function handleLogo(event) {
   const file = event.target.files[0];
   if (!file) return;
-  resizeImage(file, 1200, 0.82).then(b64 => {
+  resizeImage(file, 800, 0.80).then(b64 => {
     logoBase64 = b64;
     const area = document.getElementById('logo-area');
     area.classList.add('has-image');
@@ -1445,7 +1445,9 @@ function resizeImage(file, maxPx, quality) {
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        // WebP es 25-35% más pequeño que JPEG; fallback a JPEG si no está soportado
+        const webp = canvas.toDataURL('image/webp', quality);
+        resolve(webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/jpeg', quality));
       };
       img.src = e.target.result;
     };
