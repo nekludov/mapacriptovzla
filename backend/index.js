@@ -158,7 +158,7 @@ app.post('/api/negocios', async (req, res) => {
     }]).select().single();
 
     if (error) throw error;
-    if (data.estado === 'activo') postTweet(data);
+    if (data.estado === 'activo') await postTweet(data);
     res.json({ ok: true, estado: data.estado, id: data.id, edit_token: data.edit_token });
   } catch (err) {
     console.error('POST /api/negocios:', err.message);
@@ -243,7 +243,7 @@ app.patch('/api/negocios/:id', async (req, res) => {
     .from('negocios').update({ estado })
     .eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
-  if (estado === 'activo') postTweet(data);
+  if (estado === 'activo') await postTweet(data);
   res.json({ ok: true, data });
 });
 
