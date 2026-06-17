@@ -140,6 +140,14 @@
       gap: 6px;
     }
     .btn-registro:hover { background: #e8840f; }
+    .header-btns { display: flex; gap: 8px; align-items: center; }
+    .btn-profesional {
+      height: 36px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;
+      background: transparent; border: 1.5px solid var(--accent); color: var(--accent);
+      transition: background .15s;
+    }
+    .btn-profesional:hover { background: rgba(247,147,26,.12); }
 
     /* ── Filter bar ───────────────────────────────────────── */
     .filter-bar {
@@ -698,7 +706,7 @@
     /* ── Mobile ───────────────────────────────────────────── */
     @media (max-width: 600px) {
       .header-count { display: none; }
-      .btn-registro span.long { display: none; }
+      .btn-registro span.long, .btn-profesional span.long { display: none; }
       .cripto-grid { grid-template-columns: repeat(2, 1fr); }
       .modal-box { max-height: 95dvh; border-radius: 16px 16px 0 0; }
       .modal-overlay { align-items: flex-end; padding: 0; }
@@ -736,11 +744,16 @@
   </a>
   <span class="header-count" id="header-count">cargando…</span>
   <div class="spacer"></div>
-  <button class="btn-registro" onclick="openModal('registro')">
-    <span>+</span>
-    <span class="long">Registrar negocio</span>
-    <span class="short" style="display:none">Registrar</span>
-  </button>
+  <div class="header-btns">
+    <button class="btn-profesional" onclick="openModal('registro', 'profesional')">
+      <span>+</span>
+      <span class="long">Soy profesional</span>
+    </button>
+    <button class="btn-registro" onclick="openModal('registro', 'negocio')">
+      <span>+</span>
+      <span class="long">Registrar negocio</span>
+    </button>
+  </div>
 </header>
 
 <!-- ── Filter bar ──────────────────────────────────────────── -->
@@ -766,6 +779,22 @@
     <option value="transporte">🚗 Transporte</option>
     <option value="emprendedor">💡 Emprendedor</option>
     <option value="otro">📍 Otro</option>
+    <optgroup label="── Profesionales ──">
+    <option value="docente">👨‍🏫 Docente</option>
+    <option value="plomero">🪠 Plomero</option>
+    <option value="electricista">⚡ Electricista</option>
+    <option value="ac_tecnico">❄️ Técnico A/C</option>
+    <option value="mecanico">🔩 Mecánico</option>
+    <option value="programador">👨‍💻 Programador</option>
+    <option value="disenador">🎨 Diseñador</option>
+    <option value="fotografo">📸 Fotógrafo</option>
+    <option value="estetica">💇 Estética</option>
+    <option value="entrenador">🏋️ Entrenador</option>
+    <option value="medico">🩺 Médico</option>
+    <option value="abogado">⚖️ Abogado</option>
+    <option value="servicios_hogar">🧹 Servicios hogar</option>
+    <option value="otro_prof">👤 Otro profesional</option>
+    </optgroup>
   </select>
 
   <select id="f-cripto" onchange="applyFilters()">
@@ -812,12 +841,12 @@
     <div class="modal-body">
 
       <div class="form-row">
-        <label>Nombre del negocio <span class="req">*</span></label>
+        <label id="r-nombre-label">Nombre del negocio <span class="req">*</span></label>
         <input id="r-nombre" class="form-control" type="text" placeholder="Ej. Arepera La Criolla">
       </div>
 
       <div class="form-row">
-        <label>Tipo de negocio <span class="req">*</span></label>
+        <label id="r-tipo-label">Tipo de negocio <span class="req">*</span></label>
         <select id="r-tipo" class="form-control">
           <option value="">Seleccionar…</option>
           <option value="restaurante">🍽 Restaurante / Comida</option>
@@ -928,16 +957,32 @@ const API_URL = 'https://api.criptomapavenezuela.com';
 // Constantes de dominio
 // ════════════════════════════════════════════════════════════
 const TIPOS = {
-  restaurante: { emoji: '🍽', color: '#FF6B35' },
-  farmacia:    { emoji: '💊', color: '#4CAF50' },
-  ferreteria:  { emoji: '🔧', color: '#9C27B0' },
-  tecnologia:  { emoji: '💻', color: '#2196F3' },
-  servicio:    { emoji: '🛠', color: '#FF9800' },
-  tienda:      { emoji: '🏪', color: '#E91E63' },
-  hotel:       { emoji: '🏨', color: '#00BCD4' },
-  transporte:  { emoji: '🚗', color: '#795548' },
-  emprendedor: { emoji: '💡', color: '#FFC107' },
-  otro:        { emoji: '📍', color: '#607D8B' },
+  // Negocios
+  restaurante:      { emoji: '🍽', color: '#FF6B35' },
+  farmacia:         { emoji: '💊', color: '#4CAF50' },
+  ferreteria:       { emoji: '🔧', color: '#9C27B0' },
+  tecnologia:       { emoji: '💻', color: '#2196F3' },
+  servicio:         { emoji: '🛠', color: '#FF9800' },
+  tienda:           { emoji: '🏪', color: '#E91E63' },
+  hotel:            { emoji: '🏨', color: '#00BCD4' },
+  transporte:       { emoji: '🚗', color: '#795548' },
+  emprendedor:      { emoji: '💡', color: '#FFC107' },
+  otro:             { emoji: '📍', color: '#607D8B' },
+  // Profesionales
+  docente:          { emoji: '👨‍🏫', color: '#8B5CF6' },
+  plomero:          { emoji: '🪠', color: '#6B7280' },
+  electricista:     { emoji: '⚡', color: '#EAB308' },
+  ac_tecnico:       { emoji: '❄️', color: '#06B6D4' },
+  mecanico:         { emoji: '🔩', color: '#78716C' },
+  programador:      { emoji: '👨‍💻', color: '#3B82F6' },
+  disenador:        { emoji: '🎨', color: '#EC4899' },
+  fotografo:        { emoji: '📸', color: '#F59E0B' },
+  estetica:         { emoji: '💇', color: '#F472B6' },
+  entrenador:       { emoji: '🏋️', color: '#10B981' },
+  medico:           { emoji: '🩺', color: '#06B6D4' },
+  abogado:          { emoji: '⚖️', color: '#8B5CF6' },
+  servicios_hogar:  { emoji: '🧹', color: '#9CA3AF' },
+  otro_prof:        { emoji: '👤', color: '#607D8B' },
 };
 
 const CRIPTOS = [
@@ -1188,9 +1233,57 @@ function clearFilters() {
 // ════════════════════════════════════════════════════════════
 // Modal management
 // ════════════════════════════════════════════════════════════
-function openModal(name) {
+const OPTS_NEGOCIO = `
+  <option value="">Seleccionar…</option>
+  <option value="restaurante">🍽 Restaurante / Comida</option>
+  <option value="farmacia">💊 Farmacia / Salud</option>
+  <option value="ferreteria">🔧 Ferretería / Construcción</option>
+  <option value="tecnologia">💻 Tecnología / Electrónica</option>
+  <option value="servicio">🛠 Servicio profesional</option>
+  <option value="tienda">🏪 Tienda / Comercio</option>
+  <option value="hotel">🏨 Hotel / Alojamiento</option>
+  <option value="transporte">🚗 Transporte</option>
+  <option value="emprendedor">💡 Emprendedor / Freelance</option>
+  <option value="otro">📍 Otro</option>`;
+
+const OPTS_PROFESIONAL = `
+  <option value="">Seleccionar especialidad…</option>
+  <option value="docente">👨‍🏫 Docente / Clases particulares</option>
+  <option value="plomero">🪠 Plomero / Gasfitero</option>
+  <option value="electricista">⚡ Electricista</option>
+  <option value="ac_tecnico">❄️ Técnico A/C / Refrigeración</option>
+  <option value="mecanico">🔩 Mecánico</option>
+  <option value="programador">👨‍💻 Programador / IT</option>
+  <option value="disenador">🎨 Diseñador / Ilustrador</option>
+  <option value="fotografo">📸 Fotógrafo / Videógrafo</option>
+  <option value="estetica">💇 Estética / Belleza</option>
+  <option value="entrenador">🏋️ Entrenador / Fitness</option>
+  <option value="medico">🩺 Médico / Salud</option>
+  <option value="abogado">⚖️ Abogado / Contador</option>
+  <option value="servicios_hogar">🧹 Servicios del hogar</option>
+  <option value="otro_prof">👤 Otro profesional</option>`;
+
+let registroMode = 'negocio';
+
+function openModal(name, mode = 'negocio') {
   document.getElementById(`modal-${name}`).classList.add('open');
-  if (name === 'registro') initMiniMap();
+  if (name === 'registro') {
+    registroMode = mode;
+    const isPro = mode === 'profesional';
+    document.querySelector('#modal-registro .modal-header h2').textContent =
+      isPro ? 'Registrar profesional' : 'Registrar negocio';
+    document.getElementById('r-nombre-label').innerHTML =
+      (isPro ? 'Tu nombre / nombre comercial' : 'Nombre del negocio') + ' <span class="req">*</span>';
+    document.getElementById('r-nombre').placeholder =
+      isPro ? 'Ej. Juan Pérez — Técnico A/C' : 'Ej. Arepera La Criolla';
+    document.getElementById('r-tipo-label').innerHTML =
+      (isPro ? 'Especialidad / Profesión' : 'Tipo de negocio') + ' <span class="req">*</span>';
+    document.getElementById('r-tipo').innerHTML = isPro ? OPTS_PROFESIONAL : OPTS_NEGOCIO;
+    const onlineBox = document.getElementById('r-online');
+    onlineBox.checked = isPro;
+    toggleOnlineMode(isPro);
+    initMiniMap();
+  }
 }
 
 function closeModal(name) {
@@ -1424,6 +1517,13 @@ function resetRegistroForm() {
   document.getElementById('form-msg').className = 'form-msg';
   document.getElementById('r-online').checked = false;
   document.getElementById('location-section').style.display = '';
+  // Restore negocio mode defaults
+  registroMode = 'negocio';
+  document.querySelector('#modal-registro .modal-header h2').textContent = 'Registrar negocio';
+  document.getElementById('r-nombre-label').innerHTML = 'Nombre del negocio <span class="req">*</span>';
+  document.getElementById('r-nombre').placeholder = 'Ej. Arepera La Criolla';
+  document.getElementById('r-tipo-label').innerHTML = 'Tipo de negocio <span class="req">*</span>';
+  document.getElementById('r-tipo').innerHTML = OPTS_NEGOCIO;
   resetLocation();
 }
 
