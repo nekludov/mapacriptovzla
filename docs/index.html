@@ -702,6 +702,8 @@
     footer a:hover { color: var(--text); }
     footer .footer-x:hover   { color: #fff; }
     footer .footer-mail:hover { color: var(--accent); }
+    footer .sep { color: var(--border); }
+    .mail-short { display: none; }
 
     /* ── Mobile ───────────────────────────────────────────── */
     @media (max-width: 600px) {
@@ -710,6 +712,10 @@
       .cripto-grid { grid-template-columns: repeat(2, 1fr); }
       .modal-box { max-height: 95dvh; border-radius: 16px 16px 0 0; }
       .modal-overlay { align-items: flex-end; padding: 0; }
+      footer { height: auto; padding: 8px 16px; gap: 12px; flex-wrap: wrap; justify-content: center; }
+      footer .sep { display: none; }
+      .mail-full { display: none; }
+      .mail-short { display: inline; }
     }
   </style>
 </head>
@@ -819,14 +825,15 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     @criptomapavzla
   </a>
-  <span style="color:var(--border)">|</span>
+  <span class="sep">|</span>
   <a class="footer-mail" href="mailto:criptomapavenezuela@proton.me">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-    criptomapavenezuela@proton.me
+    <span class="mail-full">criptomapavenezuela@proton.me</span>
+    <span class="mail-short">Contacto</span>
   </a>
-  <span style="color:var(--border)">|</span>
+  <span class="sep">|</span>
   <a href="/terms.html" style="color:var(--muted);text-decoration:none;font-size:12px;">Términos</a>
-  <span style="color:var(--border)">|</span>
+  <span class="sep">|</span>
   <a href="/privacy.html" style="color:var(--muted);text-decoration:none;font-size:12px;">Privacidad</a>
 </footer>
 
