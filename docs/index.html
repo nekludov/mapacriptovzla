@@ -718,18 +718,144 @@
     footer .sep { color: var(--border); }
     .mail-short { display: none; }
 
+    /* ── Mobile bottom nav ───────────────────────────────── */
+    .mobile-nav { display: none; }
+
     /* ── Mobile ───────────────────────────────────────────── */
     @media (max-width: 600px) {
+      /* Header: only logo */
       .header-count { display: none; }
-      .btn-desktop { display: none; }
-      .btn-mobile { display: block; }
+      .header-btns  { display: none; }
+
+      /* Filter bar: smaller gap, collapses via JS */
+      .filter-bar { height: 46px; padding: 0 10px; gap: 8px; }
+      .filter-bar select,
+      .filter-bar input[type=text] { height: 38px; font-size: 14px; }
+      .filter-bar.mbn-hidden { display: none; }
+
+      /* Forms */
       .cripto-grid { grid-template-columns: repeat(2, 1fr); }
-      .modal-box { max-height: 95dvh; border-radius: 16px 16px 0 0; }
+
+      /* Modal: bottom sheet */
+      .modal-box { max-height: 95dvh; border-radius: 20px 20px 0 0; }
       .modal-overlay { align-items: flex-end; padding: 0; }
-      footer { height: auto; padding: 8px 16px; gap: 12px; flex-wrap: wrap; justify-content: center; }
-      footer .sep { display: none; }
-      .mail-full { display: none; }
-      .mail-short { display: inline; }
+
+      /* Popup wider on mobile */
+      .leaflet-popup-content { width: 290px !important; }
+
+      /* Footer: hidden – replaced by bottom nav */
+      footer { display: none; }
+
+      /* ── Bottom navigation bar ────────────────────────────── */
+      .mobile-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        height: 64px;
+        padding-bottom: env(safe-area-inset-bottom, 0);
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+        position: relative;
+        z-index: 500;
+        box-shadow: 0 -4px 20px rgba(0,0,0,.35);
+      }
+
+      .mbn-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        background: none;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        padding: 6px 16px;
+        border-radius: 10px;
+        font-family: inherit;
+        text-decoration: none;
+        transition: color .15s;
+        min-width: 64px;
+      }
+      .mbn-item:hover, .mbn-item.active { color: var(--text); }
+      .mbn-icon { font-size: 21px; line-height: 1; display: flex; align-items: center; }
+      .mbn-label { font-size: 10px; font-weight: 600; letter-spacing: .2px; }
+
+      /* FAB center */
+      .mbn-fab-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+      }
+      .mbn-fab {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        background: var(--accent);
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 18px rgba(247,147,26,.45);
+        margin-top: -22px;
+        transition: transform .15s, box-shadow .15s;
+        flex-shrink: 0;
+      }
+      .mbn-fab:active { transform: scale(.95); }
+      .mbn-fab-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-top: 3px;
+        letter-spacing: .2px;
+      }
+
+      /* Reg dropdown above FAB */
+      .mobile-reg-menu {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 -4px 24px rgba(0,0,0,.55);
+        min-width: 210px;
+        z-index: 600;
+        animation: slideUpMenu .18s ease;
+      }
+      @keyframes slideUpMenu {
+        from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+      .mobile-reg-menu.open { display: block; }
+      .mobile-reg-menu button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 15px 18px;
+        background: none;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background .12s;
+      }
+      .mobile-reg-menu button:last-child { border-bottom: none; }
+      .mobile-reg-menu button:active { background: var(--surface2); }
+
+      /* Filter button active state */
+      .mbn-item.filter-active { color: var(--accent); }
     }
   </style>
 </head>
@@ -997,6 +1123,41 @@
   </div>
 </div>
 
+<!-- ── Mobile bottom navigation ────────────────────────────── -->
+<nav class="mobile-nav" id="mobile-nav">
+
+  <!-- Filtros -->
+  <button class="mbn-item" id="mbn-filter-btn" onclick="toggleMobileFilter()">
+    <span class="mbn-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+      </svg>
+    </span>
+    <span class="mbn-label">Filtros</span>
+  </button>
+
+  <!-- FAB Registrar -->
+  <div class="mbn-fab-wrap">
+    <div class="mobile-reg-menu" id="mobile-reg-menu">
+      <button onclick="openModal('registro','negocio');closeMobileRegMenu()">🏪 Registrar negocio</button>
+      <button onclick="openModal('registro','profesional');closeMobileRegMenu()">👤 Soy profesional</button>
+    </div>
+    <button class="mbn-fab" onclick="toggleMobileRegMenu(event)" aria-label="Registrar negocio">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <span class="mbn-fab-label">Registrar</span>
+  </div>
+
+  <!-- Redes -->
+  <a class="mbn-item" href="https://x.com/criptomapavzla" target="_blank" rel="noopener" aria-label="X / Twitter">
+    <span class="mbn-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </span>
+    <span class="mbn-label">@criptomapa</span>
+  </a>
+
+</nav>
+
 <!-- ── Scripts ──────────────────────────────────────────────── -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
@@ -1095,6 +1256,9 @@ document.addEventListener('DOMContentLoaded', () => {
   tryAutoLocate();
   const et = new URLSearchParams(location.search).get('edit');
   if (et) loadEditMode(et);
+  // Init mobile filter button state (visible by default)
+  const mbnFilterBtn = document.getElementById('mbn-filter-btn');
+  if (mbnFilterBtn) mbnFilterBtn.classList.add('filter-active');
 });
 
 function initMap() {
@@ -1595,7 +1759,29 @@ function toggleRegMenu(e) {
 function closeRegMenu() {
   document.getElementById('reg-menu').classList.remove('open');
 }
-document.addEventListener('click', closeRegMenu);
+
+// ── Mobile bottom nav ─────────────────────────────────────────
+function toggleMobileRegMenu(e) {
+  e.stopPropagation();
+  document.getElementById('mobile-reg-menu').classList.toggle('open');
+}
+function closeMobileRegMenu() {
+  document.getElementById('mobile-reg-menu').classList.remove('open');
+}
+
+let mobileFilterVisible = true;
+function toggleMobileFilter() {
+  const fb = document.querySelector('.filter-bar');
+  const btn = document.getElementById('mbn-filter-btn');
+  mobileFilterVisible = !mobileFilterVisible;
+  fb.classList.toggle('mbn-hidden', !mobileFilterVisible);
+  btn.classList.toggle('filter-active', mobileFilterVisible);
+}
+
+document.addEventListener('click', () => {
+  closeRegMenu();
+  closeMobileRegMenu();
+});
 
 function toggleOnlineMode(isOnline) {
   const label = document.getElementById('location-label');
