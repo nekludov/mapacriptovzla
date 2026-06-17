@@ -148,6 +148,19 @@
       transition: background .15s;
     }
     .btn-profesional:hover { background: rgba(247,147,26,.12); }
+    .btn-mobile { display: none; }
+    .reg-dropdown { position: relative; }
+    .reg-menu {
+      display: none; position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.5); min-width: 190px; z-index: 999;
+    }
+    .reg-menu.open { display: block; }
+    .reg-menu button {
+      display: block; width: 100%; padding: 13px 16px; background: none; border: none;
+      color: var(--text); font-size: 14px; font-weight: 500; text-align: left; cursor: pointer;
+    }
+    .reg-menu button:hover { background: var(--surface2); }
 
     /* ── Filter bar ───────────────────────────────────────── */
     .filter-bar {
@@ -708,7 +721,8 @@
     /* ── Mobile ───────────────────────────────────────────── */
     @media (max-width: 600px) {
       .header-count { display: none; }
-      .btn-registro span.long, .btn-profesional span.long { display: none; }
+      .btn-desktop { display: none; }
+      .btn-mobile { display: block; }
       .cripto-grid { grid-template-columns: repeat(2, 1fr); }
       .modal-box { max-height: 95dvh; border-radius: 16px 16px 0 0; }
       .modal-overlay { align-items: flex-end; padding: 0; }
@@ -751,14 +765,23 @@
   <span class="header-count" id="header-count">cargando…</span>
   <div class="spacer"></div>
   <div class="header-btns">
-    <button class="btn-profesional" onclick="openModal('registro', 'profesional')">
-      <span>+</span>
-      <span class="long">Soy profesional</span>
+    <!-- Desktop: dos botones -->
+    <button class="btn-profesional btn-desktop" onclick="openModal('registro', 'profesional')">
+      <span>+</span> Soy profesional
     </button>
-    <button class="btn-registro" onclick="openModal('registro', 'negocio')">
-      <span>+</span>
-      <span class="long">Registrar negocio</span>
+    <button class="btn-registro btn-desktop" onclick="openModal('registro', 'negocio')">
+      <span>+</span> Registrar negocio
     </button>
+    <!-- Mobile: dropdown -->
+    <div class="reg-dropdown btn-mobile">
+      <button class="btn-registro" onclick="toggleRegMenu(event)">
+        + Registrar <span style="font-size:10px;opacity:.8">▾</span>
+      </button>
+      <div class="reg-menu" id="reg-menu">
+        <button onclick="openModal('registro','negocio');closeRegMenu()">🏪 Registrar negocio</button>
+        <button onclick="openModal('registro','profesional');closeRegMenu()">👤 Soy profesional</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -1487,6 +1510,15 @@ async function submitRegistro() {
     btn.textContent = 'Enviar negocio';
   }
 }
+
+function toggleRegMenu(e) {
+  e.stopPropagation();
+  document.getElementById('reg-menu').classList.toggle('open');
+}
+function closeRegMenu() {
+  document.getElementById('reg-menu').classList.remove('open');
+}
+document.addEventListener('click', closeRegMenu);
 
 function toggleOnlineMode(isOnline) {
   const section = document.getElementById('location-section');
