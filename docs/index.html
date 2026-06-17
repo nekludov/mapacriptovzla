@@ -966,7 +966,7 @@
     </div>
     <div class="modal-body">
       <div class="admin-pw-row">
-        <input id="admin-pw" class="form-control" type="password" placeholder="Contraseña admin" onkeydown="if(e.key==='Enter')loadPendientes()">
+        <input id="admin-pw" class="form-control" type="password" placeholder="Contraseña admin" onkeydown="if(event.key==='Enter')loadPendientes()">
         <button class="btn-admin-load" onclick="loadPendientes()">Cargar</button>
       </div>
       <div id="admin-list"><p class="admin-empty">Ingresa la contraseña para ver los pendientes.</p></div>
@@ -1176,10 +1176,12 @@ function formatContacto(c) {
     return `<p class="popup-meta"><a href="${esc}" target="_blank" rel="noopener" class="contact-link">${icon} ${short}</a></p>`;
   }
   if (/^@\w/.test(c)) {
-    return `<p class="popup-meta"><a href="https://instagram.com/${c.slice(1)}" target="_blank" rel="noopener" class="contact-link">📸 ${esc}</a></p>`;
+    const handle = encodeURIComponent(c.slice(1));
+    return `<p class="popup-meta"><a href="https://instagram.com/${handle}" target="_blank" rel="noopener" class="contact-link">📸 ${esc}</a></p>`;
   }
   if (/^\+?[\d\s\-()+]{6,}$/.test(c)) {
-    return `<p class="popup-meta"><a href="tel:${c.replace(/\s/g, '')}" class="contact-link">📞 ${esc}</a></p>`;
+    const tel = c.replace(/[^\d+]/g, '');
+    return `<p class="popup-meta"><a href="tel:${tel}" class="contact-link">📞 ${esc}</a></p>`;
   }
   return `<p class="popup-meta">📞 ${esc}</p>`;
 }
@@ -1188,10 +1190,11 @@ function buildPopup(n) {
   const tipo = TIPOS[n.tipo] || TIPOS.otro;
 
   const criptoMap = Object.fromEntries(CRIPTOS.map(c => [c.id, c]));
-  const criptos = (n.criptos || []).map(c => {
+  const VALID_CRIPTO_IDS = new Set(CRIPTOS.map(c => c.id));
+  const criptos = (n.criptos || []).filter(c => VALID_CRIPTO_IDS.has(c)).map(c => {
     const meta = criptoMap[c];
-    const img  = meta ? `<img src="${meta.logo}" alt="${c}" width="14" height="14" style="border-radius:50%">` : '';
-    return `<span class="cripto-tag ${c}">${img}${c}</span>`;
+    const img  = meta ? `<img src="${meta.logo}" alt="${escHtml(c)}" width="14" height="14" style="border-radius:50%">` : '';
+    return `<span class="cripto-tag ${escHtml(c)}">${img}${escHtml(c)}</span>`;
   }).join('');
 
   const shareText = encodeURIComponent(

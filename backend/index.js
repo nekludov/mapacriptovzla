@@ -19,6 +19,16 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const BUCKET = 'logos';
 
+const ALLOWED_TIPOS = new Set([
+  'restaurante','farmacia','ferreteria','tecnologia','servicio','tienda',
+  'hotel','transporte','emprendedor','otro',
+  'docente','plomero','electricista','ac_tecnico','mecanico','programador',
+  'disenador','fotografo','estetica','entrenador','medico','abogado',
+  'servicios_hogar','marketing','otro_prof',
+]);
+const ALLOWED_CRIPTOS = new Set(['BTC','USDT','USDC','BinancePay','Otros']);
+const ALLOWED_MIMES   = new Set(['image/jpeg','image/png','image/webp','image/gif']);
+
 // Venezuela bounding box (lat: 0.6–12.2, lng: -73.4–-59.8)
 const inVenezuela = (lat, lng) =>
   lat >= 0.6 && lat <= 12.2 && lng >= -73.4 && lng <= -59.8;
@@ -55,14 +65,15 @@ app.get('/api/negocios', async (req, res) => {
 
     let q = supabase.from('negocios').select('*').eq('estado', 'activo');
     if (ciudad) q = q.ilike('ciudad', `%${ciudad}%`);
-    if (tipo)   q = q.eq('tipo', tipo);
-    if (cripto) q = q.contains('criptos', [cripto]);
+    if (tipo && ALLOWED_TIPOS.has(tipo))   q = q.eq('tipo', tipo);
+    if (cripto && ALLOWED_CRIPTOS.has(cripto)) q = q.contains('criptos', [cripto]);
 
     const { data, error } = await q.order('created_at', { ascending: false });
     if (error) throw error;
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('GET /api/negocios:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });
 
@@ -76,6 +87,18 @@ app.post('/api/negocios', async (req, res) => {
     if (!nombre?.trim() || !tipo || !criptos?.length || lat == null || lng == null) {
       return res.status(400).json({ error: 'Faltan campos requeridos.' });
     }
+    if (!ALLOWED_TIPOS.has(tipo)) {
+      return res.status(400).json({ error: 'Tipo de negocio inválido.' });
+    }
+    if (!Array.isArray(criptos) || !criptos.every(c => ALLOWED_CRIPTOS.has(c))) {
+      return res.status(400).json({ error: 'Criptomonedas inválidas.' });
+    }
+    // Length limits
+    if (nombre.trim().length > 120) return res.status(400).json({ error: 'Nombre demasiado largo.' });
+    if (descripcion && descripcion.length > 500) return res.status(400).json({ error: 'Descripción demasiado larga.' });
+    if (ciudad && ciudad.length > 80) return res.status(400).json({ error: 'Ciudad demasiado larga.' });
+    if (contacto && contacto.length > 200) return res.status(400).json({ error: 'Contacto demasiado largo.' });
+
     const latN = parseFloat(lat);
     const lngN = parseFloat(lng);
     if (!inVenezuela(latN, lngN)) {
@@ -108,21 +131,28 @@ Descripción: ${descripcion || '(ninguna)'}
     let logo_url = null;
     if (logo_base64) {
       try {
-        const comma   = logo_base64.indexOf(',');
-        const meta    = logo_base64.slice(0, comma);
-        const b64data = logo_base64.slice(comma + 1);
-        const ext     = meta.includes('png') ? 'png' : 'jpg';
-        const mime    = meta.includes('png') ? 'image/png' : 'image/jpeg';
-        const buf     = Buffer.from(b64data, 'base64');
-        const path    = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-        const { error: upErr } = await supabase.storage
-          .from(BUCKET).upload(path, buf, { contentType: mime, upsert: false });
-
-        if (!upErr) {
-          logo_url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+        const comma     = logo_base64.indexOf(',');
+        const meta      = logo_base64.slice(0, comma);
+        const mimeMatch = meta.match(/^data:([^;]+);base64$/);
+        const mime      = mimeMatch ? mimeMatch[1].toLowerCase() : '';
+        if (ALLOWED_MIMES.has(mime)) {
+          const b64data = logo_base64.slice(comma + 1);
+          const buf     = Buffer.from(b64data, 'base64');
+          if (buf.length <= 4 * 1024 * 1024) {
+            const ext  = mime === 'image/png' ? 'png' : mime === 'image/gif' ? 'gif' : mime === 'image/webp' ? 'webp' : 'jpg';
+            const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+            const { error: upErr } = await supabase.storage
+              .from(BUCKET).upload(path, buf, { contentType: mime, upsert: false });
+            if (!upErr) {
+              logo_url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+            } else {
+              console.error('Storage upload error:', upErr.message);
+            }
+          } else {
+            console.warn('Logo demasiado grande, ignorado:', buf.length);
+          }
         } else {
-          console.error('Storage upload error:', upErr.message);
+          console.warn('Logo MIME rechazado:', mime);
         }
       } catch (e) {
         console.error('Storage error:', e.message);
@@ -147,7 +177,8 @@ Descripción: ${descripcion || '(ninguna)'}
     if (data.estado === 'activo') postTweet(data);
     res.json({ ok: true, estado: data.estado, id: data.id });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('POST /api/negocios:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });
 
@@ -159,7 +190,7 @@ app.get('/api/admin/pendientes', async (req, res) => {
   const { data, error } = await supabase
     .from('negocios').select('*').eq('estado', 'pendiente')
     .order('created_at', { ascending: true });
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
   res.json(data);
 });
 
@@ -175,7 +206,7 @@ app.patch('/api/negocios/:id', async (req, res) => {
   const { data, error } = await supabase
     .from('negocios').update({ estado })
     .eq('id', req.params.id).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
   if (estado === 'activo') postTweet(data);
   res.json({ ok: true, data });
 });
