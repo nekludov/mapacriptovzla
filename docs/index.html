@@ -2041,7 +2041,10 @@ function closeModal(name) {
 // Cerrar al clic fuera del box
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('open');
+    if (e.target === overlay) {
+      const name = overlay.id.replace('modal-', '');
+      closeModal(name);
+    }
   });
 });
 
@@ -2371,6 +2374,7 @@ function resetRegistroFormFields() {
 function resetRegistroForm() {
   currentEditToken = null;
   registroMode = 'negocio';
+  if (miniMap) { miniMap.remove(); miniMap = null; miniMarker = null; }
   resetRegistroFormFields();
   showPickerStep();
 }
@@ -2403,12 +2407,16 @@ function adminCardHtml(n, showModerar = true) {
 
 async function loadAdmin() {
   const pw = document.getElementById('admin-pw').value;
+  const authHeader = { 'Authorization': `Bearer ${pw}` };
   document.getElementById('admin-list').innerHTML = '<p class="admin-empty">Cargando…</p>';
   document.getElementById('admin-activos-list').innerHTML = '';
 
   try {
-    // Cargar pendientes
-    const resPend = await fetch(`${API_URL}/api/admin/pendientes?password=${encodeURIComponent(pw)}`);
+    const [resPend, resAct] = await Promise.all([
+      fetch(`${API_URL}/api/admin/pendientes`, { headers: authHeader }),
+      fetch(`${API_URL}/api/admin/activos`,    { headers: authHeader }),
+    ]);
+
     const pendData = await resPend.json();
     if (!resPend.ok) throw new Error(pendData.error);
 
@@ -2416,8 +2424,6 @@ async function loadAdmin() {
       ? pendData.map(n => adminCardHtml(n, true)).join('')
       : '<p class="admin-empty">🎉 No hay negocios pendientes.</p>';
 
-    // Cargar activos
-    const resAct = await fetch(`${API_URL}/api/admin/activos?password=${encodeURIComponent(pw)}`);
     const actData = await resAct.json();
     if (resAct.ok && actData.length) {
       document.getElementById('admin-activos-label').style.display = '';
@@ -2435,8 +2441,8 @@ async function moderarNegocio(id, estado) {
   try {
     const res = await fetch(`${API_URL}/api/negocios/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw, estado }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${pw}` },
+      body: JSON.stringify({ estado }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
@@ -2458,8 +2464,7 @@ async function eliminarNegocio(id) {
   try {
     const res = await fetch(`${API_URL}/api/negocios/${id}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${pw}` },
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);

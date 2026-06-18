@@ -8,7 +8,11 @@ const { Resend } = require('resend');
 
 const app = express();
 
-app.use(cors({ origin: '*', methods: ['GET','POST','PATCH','DELETE','OPTIONS'] }));
+const ALLOWED_ORIGINS = ['https://criptomapavenezuela.com', 'http://localhost:5500', 'http://127.0.0.1:5500'];
+app.use(cors({
+  origin: (origin, cb) => (!origin || ALLOWED_ORIGINS.includes(origin)) ? cb(null, true) : cb(new Error('CORS')),
+  methods: ['GET','POST','PATCH','DELETE','OPTIONS'],
+}));
 app.use(express.json({ limit: '5mb' }));
 
 const supabase  = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -55,22 +59,34 @@ function validateBody({ nombre, tipo, criptos, descripcion, lat, lng, ciudad, co
   return null;
 }
 
+function requireAdmin(req, res, next) {
+  const token = (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
+  if (!ADMIN_PASSWORD || token.length !== ADMIN_PASSWORD.length ||
+      !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(ADMIN_PASSWORD))) {
+    return res.status(401).json({ error: 'No autorizado.' });
+  }
+  next();
+}
+
 async function moderate(nombre, tipo, ciudad, descripcion) {
   try {
     const msg = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 50,
+      system: 'Eres un moderador de contenido. Analiza los datos del negocio que recibirás y responde ÚNICAMENTE con la palabra APROBAR o RECHAZAR. No agregues ningún otro texto.',
       messages: [{
         role: 'user',
-        content: `Modera este negocio venezolano para un mapa de criptomonedas. Responde SOLO con "APROBAR" o "RECHAZAR".
-Nombre: ${nombre}
+        content: `Negocio venezolano para mapa de criptomonedas:
+\`\`\`
+Nombre: ${nombre.slice(0, 120)}
 Tipo: ${tipo}
-Ciudad: ${ciudad || '(no indicada)'}
-Descripción: ${descripcion || '(ninguna)'}
+Ciudad: ${(ciudad || '(no indicada)').slice(0, 80)}
+Descripción: ${(descripcion || '(ninguna)').slice(0, 500)}
+\`\`\`
 ¿Es un negocio legítimo con contenido apropiado?`,
       }],
     });
-    return msg.content[0].text.trim().includes('APROBAR') ? 'activo' : 'pendiente';
+    return msg.content[0].text.trim().toUpperCase().startsWith('APROBAR') ? 'activo' : 'pendiente';
   } catch (e) {
     console.error('Moderation error:', e.message);
     return 'pendiente';
@@ -400,10 +416,7 @@ app.get('/api/negocios/edit/:token/stats', async (req, res) => {
 });
 
 // ── GET /api/admin/pendientes ─────────────────────────────────────────────────
-app.get('/api/admin/pendientes', async (req, res) => {
-  if (!ADMIN_PASSWORD || req.query.password !== ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'No autorizado.' });
-  }
+app.get('/api/admin/pendientes', requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from('negocios').select(PUBLIC_COLS).eq('estado', 'pendiente')
     .order('created_at', { ascending: true });
@@ -412,10 +425,7 @@ app.get('/api/admin/pendientes', async (req, res) => {
 });
 
 // ── GET /api/admin/activos ────────────────────────────────────────────────────
-app.get('/api/admin/activos', async (req, res) => {
-  if (!ADMIN_PASSWORD || req.query.password !== ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'No autorizado.' });
-  }
+app.get('/api/admin/activos', requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from('negocios').select(PUBLIC_COLS).eq('estado', 'activo')
     .order('created_at', { ascending: false });
@@ -424,11 +434,8 @@ app.get('/api/admin/activos', async (req, res) => {
 });
 
 // ── PATCH /api/negocios/:id — acción admin ────────────────────────────────────
-app.patch('/api/negocios/:id', async (req, res) => {
-  const { password, estado, contacto, nombre, descripcion, ciudad } = req.body;
-  if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'No autorizado.' });
-  }
+app.patch('/api/negocios/:id', requireAdmin, async (req, res) => {
+  const { estado, contacto, nombre, descripcion, ciudad } = req.body;
   const updates = {};
   if (estado !== undefined) {
     if (!['activo', 'rechazado'].includes(estado))
@@ -450,11 +457,7 @@ app.patch('/api/negocios/:id', async (req, res) => {
 });
 
 // ── DELETE /api/negocios/:id — eliminar negocio (admin) ──────────────────────
-app.delete('/api/negocios/:id', async (req, res) => {
-  const { password } = req.body;
-  if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'No autorizado.' });
-  }
+app.delete('/api/negocios/:id', requireAdmin, async (req, res) => {
   const { error } = await supabase.from('negocios').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
   res.json({ ok: true });
