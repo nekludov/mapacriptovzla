@@ -345,8 +345,9 @@
       transition: opacity .15s;
     }
     .btn-wa:hover, .btn-x:hover { opacity: .8; }
-    .btn-wa { background: #25D366; color: #fff !important; }
-    .btn-x  { background: #000;    color: #fff !important; }
+    .btn-wa     { background: #25D366; color: #fff !important; }
+    .btn-x      { background: #000;    color: #fff !important; }
+    .btn-perfil { background: var(--surface2); color: var(--text) !important; border: 1px solid var(--border); }
 
     /* ── Modals ───────────────────────────────────────────── */
     .modal-overlay {
@@ -1007,6 +1008,7 @@
 
 <!-- ── Filter bar ──────────────────────────────────────────── -->
 <div class="filter-bar">
+  <input type="text" id="f-nombre" placeholder="🔍 Buscar negocio…" oninput="applyFilters()" autocomplete="off">
   <input type="text" id="f-ciudad" placeholder="🏙 Ciudad…" list="ciudades-list" oninput="applyFilters()">
   <datalist id="ciudades-list">
     <option>Caracas</option><option>Maracaibo</option><option>Valencia</option>
@@ -1514,6 +1516,18 @@ function formatContacto(c) {
   return `<p class="popup-meta">📞 ${esc}</p>`;
 }
 
+function getWaContactLink(c) {
+  if (!c) return null;
+  if (/wa\.me/i.test(c)) return c.startsWith('http') ? c : 'https://' + c;
+  if (/whatsapp/i.test(c)) return c.startsWith('http') ? c : null;
+  if (/^\+?[\d\s\-()+]{7,}$/.test(c)) {
+    const digits = c.replace(/\D/g, '');
+    const intl = digits.startsWith('58') ? digits : '58' + digits.replace(/^0/, '');
+    return `https://wa.me/${intl}`;
+  }
+  return null;
+}
+
 function buildPopup(n) {
   const tipo = TIPOS[n.tipo] || TIPOS.otro;
 
@@ -1525,6 +1539,7 @@ function buildPopup(n) {
     return `<span class="cripto-tag ${escHtml(c)}">${img}${escHtml(c)}</span>`;
   }).join('');
 
+  const waContact = getWaContactLink(n.contacto);
   const shareText = encodeURIComponent(
     `🗺️ ${n.nombre} acepta criptomonedas en Venezuela!\n` +
     (n.descripcion ? n.descripcion + '\n' : '') +
@@ -1543,12 +1558,11 @@ function buildPopup(n) {
         ${n.online ? `<p class="popup-meta">🌐 Tienda online</p>` : (n.ciudad ? `<p class="popup-meta">🏙 ${escHtml(n.ciudad)}</p>` : '')}
         ${formatContacto(n.contacto)}
         <div class="popup-share">
-          <a class="btn-wa" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">
-            WhatsApp
-          </a>
-          <a class="btn-x" href="https://twitter.com/intent/tweet?text=${shareText}" target="_blank" rel="noopener">
-            𝕏 Twitter
-          </a>
+          ${waContact
+            ? `<a class="btn-wa" href="${waContact}" target="_blank" rel="noopener">💬 WhatsApp</a>`
+            : `<a class="btn-wa" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">Compartir</a>`
+          }
+          <a class="btn-perfil" href="/negocio.html?id=${escHtml(n.id)}" target="_blank">Ver perfil</a>
         </div>
       </div>
     </div>
@@ -1570,11 +1584,13 @@ function updateCount(n) {
 // Filtros
 // ════════════════════════════════════════════════════════════
 function applyFilters() {
+  const nombre = document.getElementById('f-nombre').value.trim().toLowerCase();
   const ciudad = document.getElementById('f-ciudad').value.trim().toLowerCase();
   const tipo   = document.getElementById('f-tipo').value;
   const cripto = document.getElementById('f-cripto').value;
 
   const filtered = allNegocios.filter(n => {
+    if (nombre && !n.nombre?.toLowerCase().includes(nombre)) return false;
     if (ciudad && !n.ciudad?.toLowerCase().includes(ciudad)) return false;
     if (tipo   && n.tipo !== tipo) return false;
     if (cripto && !n.criptos?.includes(cripto)) return false;
@@ -1586,6 +1602,7 @@ function applyFilters() {
 }
 
 function clearFilters() {
+  document.getElementById('f-nombre').value = '';
   document.getElementById('f-ciudad').value = '';
   document.getElementById('f-tipo').value   = '';
   document.getElementById('f-cripto').value = '';

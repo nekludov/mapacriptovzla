@@ -218,6 +218,18 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
   }
 });
 
+// ── GET /api/negocios/:id — perfil público ────────────────────
+app.get('/api/negocios/:id', async (req, res) => {
+  const { data, error } = await supabase
+    .from('negocios')
+    .select(PUBLIC_COLS)
+    .eq('id', req.params.id)
+    .eq('estado', 'activo')
+    .single();
+  if (error || !data) return res.status(404).json({ error: 'Negocio no encontrado.' });
+  res.json(data);
+});
+
 // ── GET /api/admin/pendientes ─────────────────────────────────────────────────
 app.get('/api/admin/pendientes', async (req, res) => {
   if (!ADMIN_PASSWORD || req.query.password !== ADMIN_PASSWORD) {

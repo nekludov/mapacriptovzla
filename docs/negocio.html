@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cargando… – MapaCripto Venezuela</title>
+  <meta name="theme-color" content="#0F1117">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:  #CF142B;
+      --accent:   #F7931A;
+      --bg:       #0F1117;
+      --surface:  #1C1F26;
+      --surface2: #252930;
+      --border:   #2E3340;
+      --text:     #E8EAED;
+      --muted:    #9AA0AC;
+      --success:  #22C55E;
+      --error:    #EF4444;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background: var(--surface);
+      position: relative;
+      flex-shrink: 0;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(to right, #CF9B00 33%, #003893 33% 66%, #CF142B 66%);
+    }
+    .header-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; text-decoration: none; color: var(--text); }
+    .back-btn {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 6px;
+      color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color .15s;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    /* Main */
+    main { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 32px 20px 64px; }
+
+    /* State: loading / error */
+    #state-loading, #state-error {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    #state-loading { color: var(--muted); }
+    #state-error { color: var(--error); }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin .7s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Profile card */
+    #profile { display: none; }
+
+    .profile-hero {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+    .profile-logo {
+      width: 96px; height: 96px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface2);
+    }
+    .profile-logo-placeholder {
+      width: 96px; height: 96px;
+      border-radius: 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+    }
+    .profile-info { flex: 1; min-width: 0; }
+    .profile-info h1 {
+      font-size: clamp(20px, 5vw, 28px);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .badge-tipo {
+      display: inline-block;
+      font-size: 12px; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      background: var(--surface2); color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+    .profile-meta {
+      font-size: 13px; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 4px;
+    }
+
+    /* Sections */
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: 10px;
+    }
+
+    /* Criptos */
+    .cripto-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cripto-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .cripto-chip img { width: 18px; height: 18px; border-radius: 50%; }
+    .cripto-chip.BTC        { background: #f7931a18; color: #F7931A; border-color: #F7931A44; }
+    .cripto-chip.USDT       { background: #26a17b18; color: #26A17B; border-color: #26A17B44; }
+    .cripto-chip.USDC       { background: #2775ca18; color: #2775CA; border-color: #2775CA44; }
+    .cripto-chip.BinancePay { background: #f3ba2f18; color: #F3BA2F; border-color: #F3BA2F44; }
+    .cripto-chip.Otros      { background: #9aa0ac18; color: #9AA0AC; border-color: #9AA0AC44; }
+
+    /* Description */
+    .desc-text { font-size: 15px; color: var(--muted); line-height: 1.75; }
+
+    /* Contact */
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .contact-info { font-size: 15px; font-weight: 500; word-break: break-all; }
+    .contact-info a { color: var(--accent); text-decoration: none; }
+    .contact-info a:hover { text-decoration: underline; }
+    .btn-wa-contact {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #25D366; color: #fff;
+      text-decoration: none; font-weight: 700; font-size: 14px;
+      padding: 10px 20px; border-radius: 10px;
+      white-space: nowrap; transition: opacity .15s; flex-shrink: 0;
+    }
+    .btn-wa-contact:hover { opacity: .85; }
+
+    /* Map */
+    #profile-map {
+      height: 220px; border-radius: 14px;
+      overflow: hidden; border: 1px solid var(--border);
+    }
+
+    /* Share */
+    .share-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-share {
+      flex: 1; min-width: 120px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 16px; border-radius: 10px;
+      font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
+      border: none; font-family: inherit; transition: opacity .15s;
+    }
+    .btn-share:hover { opacity: .85; }
+    .btn-share-copy  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-share-wa    { background: #25D366; color: #fff; }
+    .btn-share-x     { background: #000; color: #fff; }
+
+    /* Owner box */
+    .owner-box {
+      margin-top: 40px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .owner-box p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .owner-box a { color: var(--accent); }
+
+    /* Divider */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    /* Footer */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 500px) {
+      .profile-hero { flex-direction: column; }
+      .profile-logo, .profile-logo-placeholder { width: 72px; height: 72px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="/">
+      <svg width="26" height="17" viewBox="0 0 26 17" xmlns="http://www.w3.org/2000/svg" style="border-radius:2px;flex-shrink:0">
+        <rect width="26" height="5.67" fill="#CF9B00"/>
+        <rect y="5.67" width="26" height="5.67" fill="#003893"/>
+        <rect y="11.33" width="26" height="5.67" fill="#CF142B"/>
+        <circle cx="2.8" cy="8.8" r="0.72" fill="white"/>
+        <circle cx="5.7" cy="7.9" r="0.72" fill="white"/>
+        <circle cx="8.6" cy="7.3" r="0.72" fill="white"/>
+        <circle cx="11.5" cy="7.0" r="0.72" fill="white"/>
+        <circle cx="14.5" cy="7.0" r="0.72" fill="white"/>
+        <circle cx="17.4" cy="7.3" r="0.72" fill="white"/>
+        <circle cx="20.3" cy="7.9" r="0.72" fill="white"/>
+        <circle cx="23.2" cy="8.8" r="0.72" fill="white"/>
+      </svg>
+      MapaCripto
+    </a>
+    <a class="back-btn" href="/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+      Volver al mapa
+    </a>
+  </div>
+</header>
+
+<main>
+  <div id="state-loading">
+    <div class="spinner"></div>
+    <p>Cargando perfil…</p>
+  </div>
+  <div id="state-error" style="display:none">
+    <p style="font-size:32px;margin-bottom:12px">😕</p>
+    <p>Negocio no encontrado o no está activo.</p>
+    <a href="/" style="color:var(--accent);display:inline-block;margin-top:16px">← Volver al mapa</a>
+  </div>
+  <div id="profile"></div>
+</main>
+
+<footer>
+  <p>© 2025 CriptoMapa Venezuela · <a href="/terms.html">Términos</a> · <a href="/privacy.html">Privacidad</a></p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const API_URL = 'https://api.criptomapavenezuela.com';
+
+const TIPOS = {
+  restaurante:'🍽', farmacia:'💊', ferreteria:'🔧', tecnologia:'💻',
+  servicio:'🛠', tienda:'🏪', hotel:'🏨', transporte:'🚗',
+  emprendedor:'💡', otro:'📍', docente:'👨‍🏫', plomero:'🪠',
+  electricista:'⚡', ac_tecnico:'❄️', mecanico:'🔩', programador:'👨‍💻',
+  disenador:'🎨', fotografo:'📸', estetica:'💇', entrenador:'🏋️',
+  medico:'🩺', abogado:'⚖️', servicios_hogar:'🧹', marketing:'📱', otro_prof:'👤',
+};
+
+const CRIPTOS_META = {
+  BTC:        { label:'Bitcoin',     logo:'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/btc.png' },
+  USDT:       { label:'USDT',        logo:'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/usdt.png' },
+  USDC:       { label:'USDC',        logo:'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/usdc.png' },
+  BinancePay: { label:'Binance Pay', logo:'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/32/color/bnb.png' },
+  Otros:      { label:'Otros',       logo:'' },
+};
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getWaLink(c) {
+  if (!c) return null;
+  if (/wa\.me/i.test(c)) return c.startsWith('http') ? c : 'https://' + c;
+  if (/^\+?[\d\s\-()+]{7,}$/.test(c)) {
+    const d = c.replace(/\D/g, '');
+    const intl = d.startsWith('58') ? d : '58' + d.replace(/^0/, '');
+    return `https://wa.me/${intl}`;
+  }
+  return null;
+}
+
+function renderContact(c) {
+  if (!c) return '';
+  const e = esc(c);
+  if (/^https?:\/\//i.test(c)) {
+    const icon = /instagram/i.test(c) ? '📸' : /wa\.me|whatsapp/i.test(c) ? '💬' : /t\.me|telegram/i.test(c) ? '✈️' : '🔗';
+    return `<a href="${e}" target="_blank" rel="noopener">${icon} ${e}</a>`;
+  }
+  if (/^@\w/.test(c)) return `<a href="https://instagram.com/${esc(c.slice(1))}" target="_blank" rel="noopener">📸 ${e}</a>`;
+  if (/^\+?[\d\s\-()+]{6,}$/.test(c)) return `<a href="tel:${c.replace(/[^\d+]/g,'')}"}>📞 ${e}</a>`;
+  return `📞 ${e}`;
+}
+
+async function loadProfile() {
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) return showError();
+
+  try {
+    const res = await fetch(`${API_URL}/api/negocios/${encodeURIComponent(id)}`);
+    if (!res.ok) return showError();
+    const n = await res.json();
+    render(n);
+  } catch {
+    showError();
+  }
+}
+
+function showError() {
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('state-error').style.display = 'block';
+}
+
+function render(n) {
+  document.title = `${n.nombre} – MapaCripto Venezuela`;
+
+  // Open Graph dynamic (best effort for sharing)
+  document.querySelector('meta[name="description"]')?.setAttribute('content',
+    `${n.nombre} acepta criptomonedas en Venezuela. ${n.descripcion || ''}`);
+
+  const emoji = TIPOS[n.tipo] || '📍';
+  const wa    = getWaLink(n.contacto);
+
+  const criptosHtml = (n.criptos || []).map(id => {
+    const m = CRIPTOS_META[id] || { label: id, logo: '' };
+    const img = m.logo ? `<img src="${m.logo}" width="18" height="18" alt="${esc(id)}">` : '';
+    return `<span class="cripto-chip ${esc(id)}">${img}${esc(m.label)}</span>`;
+  }).join('');
+
+  const shareUrl  = location.href;
+  const shareText = encodeURIComponent(
+    `🗺️ ${n.nombre} acepta criptomonedas en Venezuela!\n` +
+    (n.ciudad ? `📍 ${n.ciudad}\n` : '') +
+    `\n${shareUrl}\n@criptomapavzla`
+  );
+
+  document.getElementById('profile').innerHTML = `
+    <div class="profile-hero">
+      ${n.logo_url
+        ? `<img class="profile-logo" src="${esc(n.logo_url)}" alt="${esc(n.nombre)}">`
+        : `<div class="profile-logo-placeholder">${emoji}</div>`}
+      <div class="profile-info">
+        <h1>${esc(n.nombre)}</h1>
+        <span class="badge-tipo">${emoji} ${esc(n.tipo)}</span>
+        ${n.online
+          ? `<p class="profile-meta">🌐 Tienda online</p>`
+          : n.ciudad ? `<p class="profile-meta">🏙️ ${esc(n.ciudad)}</p>` : ''}
+      </div>
+    </div>
+
+    ${criptosHtml ? `
+    <div class="section">
+      <div class="section-title">Acepta</div>
+      <div class="cripto-grid">${criptosHtml}</div>
+    </div>` : ''}
+
+    ${n.descripcion ? `
+    <div class="section">
+      <div class="section-title">Descripción</div>
+      <p class="desc-text">${esc(n.descripcion)}</p>
+    </div>` : ''}
+
+    ${n.contacto ? `
+    <div class="section">
+      <div class="section-title">Contacto</div>
+      <div class="contact-card">
+        <div class="contact-info">${renderContact(n.contacto)}</div>
+        ${wa ? `<a class="btn-wa-contact" href="${esc(wa)}" target="_blank" rel="noopener">
+          💬 WhatsApp
+        </a>` : ''}
+      </div>
+    </div>` : ''}
+
+    ${!n.online && n.lat && n.lng ? `
+    <div class="section">
+      <div class="section-title">Ubicación</div>
+      <div id="profile-map"></div>
+    </div>` : ''}
+
+    <hr class="divider">
+
+    <div class="section">
+      <div class="section-title">Compartir</div>
+      <div class="share-row">
+        <button class="btn-share btn-share-copy" onclick="copyLink()">
+          🔗 Copiar enlace
+        </button>
+        ${wa ? `<a class="btn-share btn-share-wa" href="${esc(wa)}" target="_blank" rel="noopener">
+          💬 WhatsApp
+        </a>` : `<a class="btn-share btn-share-wa"
+          href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener">
+          Compartir por WhatsApp
+        </a>`}
+        <a class="btn-share btn-share-x"
+          href="https://twitter.com/intent/tweet?text=${shareText}" target="_blank" rel="noopener">
+          𝕏 Twitter
+        </a>
+      </div>
+    </div>
+
+    <div class="owner-box">
+      <p>¿Eres el dueño de este negocio?<br>
+        Usa el <a href="#">enlace de edición</a> que recibiste al registrarte para actualizar tus datos.
+        Si lo perdiste, contáctanos en <a href="mailto:criptomapavenezuela@proton.me">criptomapavenezuela@proton.me</a>.
+      </p>
+    </div>
+  `;
+
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('profile').style.display = 'block';
+
+  // Render map if not online and has coordinates
+  if (!n.online && n.lat && n.lng) {
+    const profileMap = L.map('profile-map', {
+      center: [n.lat, n.lng],
+      zoom: 15,
+      zoomControl: true,
+      scrollWheelZoom: false,
+      dragging: false,
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO',
+      subdomains: 'abcd',
+    }).addTo(profileMap);
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        width:38px;height:38px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);
+        display:flex;align-items:center;justify-content:center;
+        background:${encodeURIComponent('#F7931A')};border:2.5px solid rgba(255,255,255,.85);
+        box-shadow:0 3px 10px rgba(0,0,0,.4);font-size:17px">
+        <span style="transform:rotate(45deg)">${emoji}</span>
+      </div>`,
+      iconSize: [38, 38],
+      iconAnchor: [19, 38],
+    });
+    L.marker([n.lat, n.lng], { icon }).addTo(profileMap);
+  }
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(location.href).then(() => {
+    const btn = document.querySelector('.btn-share-copy');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+loadProfile();
+</script>
+</body>
+</html>
