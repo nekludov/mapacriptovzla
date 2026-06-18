@@ -44,6 +44,9 @@ const PUBLIC_COLS = 'id,nombre,tipo,criptos,descripcion,lat,lng,contacto,ciudad,
 const inVenezuela = (lat, lng) =>
   lat >= 0.6 && lat <= 12.2 && lng >= -73.4 && lng <= -59.8;
 
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
+const escEmail = s => s?.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ?? '';
+
 function validateBody({ nombre, tipo, criptos, descripcion, lat, lng, ciudad, contacto }) {
   if (!nombre?.trim() || !tipo || !criptos?.length || lat == null || lng == null)
     return 'Faltan campos requeridos.';
@@ -56,6 +59,12 @@ function validateBody({ nombre, tipo, criptos, descripcion, lat, lng, ciudad, co
   if (contacto?.length > 200)        return 'Contacto demasiado largo.';
   if (!inVenezuela(parseFloat(lat), parseFloat(lng)))
     return 'Las coordenadas deben estar dentro de Venezuela.';
+  return null;
+}
+
+function validateEmail(email) {
+  if (!email) return 'El correo electrónico es requerido.';
+  if (!EMAIL_RE.test(email.trim())) return 'Correo electrónico inválido.';
   return null;
 }
 
@@ -114,10 +123,12 @@ async function uploadLogo(logo_base64) {
 }
 
 async function sendPingEmail({ email, nombre, edit_token, id }) {
-  if (!resend) { console.warn('Resend not configured — skipping email'); return; }
+  if (!resend) { console.warn('Resend not configured — skipping email'); return false; }
+  if (!EMAIL_RE.test(email)) { console.warn('sendPingEmail: email inválido:', email); return false; }
   const confirmUrl = `${API_URL}/api/confirm/${encodeURIComponent(edit_token)}`;
   const editUrl    = `${FRONTEND_URL}/?edit=${encodeURIComponent(edit_token)}`;
   const profileUrl = `${FRONTEND_URL}/negocio.html?id=${id}`;
+  const nombreSafe = escEmail(nombre);
   try {
     await resend.emails.send({
       from: 'MapaCripto <noreply@criptomapavenezuela.com>',
@@ -129,7 +140,7 @@ async function sendPingEmail({ email, nombre, edit_token, id }) {
             <span style="color:#fff;font-weight:700;font-size:18px">🗺️ MapaCripto Venezuela</span>
           </div>
           <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
-            <p style="margin:0 0 16px">Hola, hace 6 meses registraste <strong>${nombre}</strong> en el mapa de negocios cripto de Venezuela.</p>
+            <p style="margin:0 0 16px">Hola, hace 6 meses registraste <strong>${nombreSafe}</strong> en el mapa de negocios cripto de Venezuela.</p>
             <p style="margin:0 0 24px;color:#555">Para mantener el directorio actualizado necesitamos saber si el negocio sigue activo. Si no recibimos respuesta en <strong>30 días</strong>, lo marcaremos como inactivo y dejará de aparecer en el mapa.</p>
             <a href="${confirmUrl}" style="display:inline-block;background:#F7931A;color:#fff;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:8px;font-size:15px">
               ✅ Sí, seguimos activos
@@ -145,8 +156,41 @@ async function sendPingEmail({ email, nombre, edit_token, id }) {
         </div>
       `,
     });
+    return true;
   } catch (e) {
     console.error('Ping email error:', e.message);
+    return false;
+  }
+}
+
+async function sendRejectionEmail({ email, nombre, id }) {
+  if (!resend || !email || !EMAIL_RE.test(email)) return;
+  const nombreSafe = escEmail(nombre);
+  const profileUrl = `${FRONTEND_URL}/negocio.html?id=${id}`;
+  try {
+    await resend.emails.send({
+      from: 'MapaCripto <noreply@criptomapavenezuela.com>',
+      to:   email,
+      subject: `Tu registro en MapaCripto no fue aprobado`,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
+          <div style="background:#0A0C10;padding:20px 24px;border-radius:10px 10px 0 0">
+            <span style="color:#F7931A;font-weight:700;font-size:18px">MapaCripto Venezuela</span>
+          </div>
+          <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
+            <p style="margin:0 0 16px">Hola, tu registro <strong>${nombreSafe}</strong> fue revisado por nuestro equipo y no pudo ser aprobado en este momento.</p>
+            <p style="margin:0 0 24px;color:#555">Esto puede deberse a información incompleta, contenido no relacionado con el mapa, o una ubicación fuera de Venezuela. Si crees que es un error, puedes volver a registrarte con información más detallada.</p>
+            <a href="${FRONTEND_URL}" style="display:inline-block;background:#F7931A;color:#fff;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:8px;font-size:14px">
+              Volver al mapa
+            </a>
+            <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0">
+            <p style="font-size:12px;color:#999;margin:0">Si tienes dudas, responde a este correo.</p>
+          </div>
+        </div>
+      `,
+    });
+  } catch (e) {
+    console.error('Rejection email error:', e.message);
   }
 }
 
@@ -167,6 +211,9 @@ async function sendAdminNotification({ nombre, tipo, ciudad, estado, id }) {
   const estadoLabel = estado === 'activo' ? 'Activo (aprobado por IA)' : 'Pendiente de revisión';
   const profileUrl  = `${FRONTEND_URL}/negocio.html?id=${id}`;
   const adminUrl    = `${FRONTEND_URL}/?admin=1`;
+  const nombreSafe  = escEmail(nombre);
+  const ciudadSafe  = escEmail(ciudad || '—');
+  const tipoSafe    = escEmail(tipoLabel);
   try {
     await resend.emails.send({
       from: 'MapaCripto <noreply@criptomapavenezuela.com>',
@@ -179,15 +226,15 @@ async function sendAdminNotification({ nombre, tipo, ciudad, estado, id }) {
           </div>
           <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
             <p style="margin:0 0 4px;font-size:13px;color:#888">Nuevo registro en el mapa</p>
-            <h2 style="margin:0 0 20px;font-size:22px;color:#111">${nombre}</h2>
+            <h2 style="margin:0 0 20px;font-size:22px;color:#111">${nombreSafe}</h2>
             <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
               <tr>
                 <td style="padding:8px 0;color:#666;font-size:13px;width:110px">Tipo</td>
-                <td style="padding:8px 0;font-weight:600;font-size:13px">${tipoLabel}</td>
+                <td style="padding:8px 0;font-weight:600;font-size:13px">${tipoSafe}</td>
               </tr>
               <tr style="border-top:1px solid #eee">
                 <td style="padding:8px 0;color:#666;font-size:13px">Ciudad</td>
-                <td style="padding:8px 0;font-weight:600;font-size:13px">${ciudad || '—'}</td>
+                <td style="padding:8px 0;font-weight:600;font-size:13px">${ciudadSafe}</td>
               </tr>
               <tr style="border-top:1px solid #eee">
                 <td style="padding:8px 0;color:#666;font-size:13px">Estado</td>
@@ -264,6 +311,8 @@ app.post('/api/negocios', async (req, res) => {
 
     const err = validateBody(req.body);
     if (err) return res.status(400).json({ error: err });
+    const emailErr = validateEmail(email);
+    if (emailErr) return res.status(400).json({ error: emailErr });
 
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     const [estado, logo_url, edit_token] = await Promise.all([
@@ -316,15 +365,18 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
     const err = validateBody(req.body);
     if (err) return res.status(400).json({ error: err });
 
-    // Verificar que el token existe y traer el logo actual
+    // Verificar que el token existe y traer estado y logo actual
     const { data: existing } = await supabase
-      .from('negocios').select('id, logo_url')
+      .from('negocios').select('id, logo_url, estado')
       .eq('edit_token', req.params.token).single();
     if (!existing) return res.status(404).json({ error: 'Enlace de edición inválido.' });
 
     const latN = parseFloat(lat), lngN = parseFloat(lng);
+    // No re-moderar si ya estaba activo — evita desapublicar por una corrección menor
     const [estado, newLogo] = await Promise.all([
-      moderate(nombre, tipo, ciudad, descripcion),
+      existing.estado === 'activo'
+        ? Promise.resolve('activo')
+        : moderate(nombre, tipo, ciudad, descripcion),
       uploadLogo(logo_base64),
     ]);
 
@@ -452,7 +504,8 @@ app.patch('/api/negocios/:id', requireAdmin, async (req, res) => {
     .from('negocios').update(updates)
     .eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
-  if (updates.estado === 'activo') await postTweet(data);
+  if (updates.estado === 'activo')    await postTweet(data);
+  if (updates.estado === 'rechazado') await sendRejectionEmail(data);
   res.json({ ok: true, data });
 });
 
@@ -516,11 +569,13 @@ app.get('/api/cron/ping', async (req, res) => {
   let sent = 0;
   for (const neg of (stale || [])) {
     if (!neg.email) continue;
-    await sendPingEmail(neg);
-    await supabase.from('negocios')
-      .update({ ping_sent_at: now.toISOString() })
-      .eq('id', neg.id);
-    sent++;
+    const ok = await sendPingEmail(neg);
+    if (ok) {
+      await supabase.from('negocios')
+        .update({ ping_sent_at: now.toISOString() })
+        .eq('id', neg.id);
+      sent++;
+    }
   }
 
   console.log(`Cron ping: ${sent} emails sent, ${(expired || []).length} marked inactivo`);
