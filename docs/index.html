@@ -151,26 +151,45 @@
     }
     .btn-registro:hover { background: #e8840f; }
     .header-btns { display: flex; gap: 8px; align-items: center; }
-    .btn-profesional {
-      height: 36px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;
-      background: transparent; border: 1.5px solid var(--accent); color: var(--accent);
-      transition: background .15s;
-    }
-    .btn-profesional:hover { background: rgba(247,147,26,.12); }
     .btn-mobile { display: none; }
-    .reg-dropdown { position: relative; }
-    .reg-menu {
-      display: none; position: absolute; top: calc(100% + 8px); right: 0;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-      overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.5); min-width: 190px; z-index: 999;
+
+    /* ── Modal type picker ───────────────────────────────────── */
+    .type-picker { padding: 8px 24px 24px; }
+    .type-picker-title {
+      font-size: 14px; color: var(--muted);
+      margin-bottom: 16px; line-height: 1.5;
     }
-    .reg-menu.open { display: block; }
-    .reg-menu button {
-      display: block; width: 100%; padding: 13px 16px; background: none; border: none;
-      color: var(--text); font-size: 14px; font-weight: 500; text-align: left; cursor: pointer;
+    .type-picker-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
-    .reg-menu button:hover { background: var(--surface2); }
+    .type-card {
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: 8px; padding: 18px 16px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-md); cursor: pointer;
+      transition: border-color .18s, background .18s;
+      text-align: left;
+    }
+    .type-card:hover {
+      border-color: var(--accent-ring);
+      background: var(--accent-dim);
+    }
+    .type-card-icon { font-size: 28px; line-height: 1; }
+    .type-card-name {
+      font-size: 15px; font-weight: 700; color: var(--text);
+    }
+    .type-card-desc {
+      font-size: 12px; color: var(--muted); line-height: 1.5;
+    }
+
+    /* Back link in form step */
+    .picker-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--muted); background: none; border: none;
+      cursor: pointer; font-family: inherit; padding: 0; margin-bottom: 16px;
+      transition: color .15s;
+    }
+    .picker-back:hover { color: var(--text); }
 
     /* ── Filter bar ───────────────────────────────────────── */
     .filter-bar {
@@ -991,46 +1010,6 @@
         letter-spacing: .2px;
       }
 
-      /* Reg dropdown above FAB */
-      .mobile-reg-menu {
-        display: none;
-        position: absolute;
-        bottom: calc(100% + 10px);
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 -4px 24px rgba(0,0,0,.55);
-        min-width: 210px;
-        z-index: 600;
-        animation: slideUpMenu .18s ease;
-      }
-      @keyframes slideUpMenu {
-        from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-      }
-      .mobile-reg-menu.open { display: block; }
-      .mobile-reg-menu button {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 15px 18px;
-        background: none;
-        border: none;
-        border-bottom: 1px solid var(--border);
-        color: var(--text);
-        font-size: 15px;
-        font-weight: 500;
-        text-align: left;
-        cursor: pointer;
-        font-family: inherit;
-        transition: background .12s;
-      }
-      .mobile-reg-menu button:last-child { border-bottom: none; }
-      .mobile-reg-menu button:active { background: var(--surface2); }
 
       /* Filter button active state */
       .mbn-item.filter-active { color: var(--accent); }
@@ -1165,23 +1144,9 @@
   <span class="header-count" id="header-count">cargando…</span>
   <div class="spacer"></div>
   <div class="header-btns">
-    <!-- Desktop: dos botones -->
-    <button class="btn-profesional btn-desktop" onclick="openModal('registro', 'profesional')">
-      Perfil profesional
-    </button>
-    <button class="btn-registro btn-desktop" onclick="openModal('registro', 'negocio')">
+    <button class="btn-registro" onclick="openModal('registro')">
       Registrar gratis
     </button>
-    <!-- Mobile: dropdown -->
-    <div class="reg-dropdown btn-mobile">
-      <button class="btn-registro" onclick="toggleRegMenu(event)">
-        + Registrar <span style="font-size:10px;opacity:.8">▾</span>
-      </button>
-      <div class="reg-menu" id="reg-menu">
-        <button onclick="openModal('registro','negocio');closeRegMenu()">Registrar negocio gratis</button>
-        <button onclick="openModal('registro','profesional');closeRegMenu()">Crear perfil profesional</button>
-      </div>
-    </div>
   </div>
   <!-- Mobile: hamburger -->
   <button class="btn-hamburger btn-mobile" onclick="openDrawer()" aria-label="Menú">
@@ -1279,10 +1244,34 @@
 <div class="modal-overlay" id="modal-registro">
   <div class="modal-box">
     <div class="modal-header">
-      <h2>Registrar negocio</h2>
+      <h2 id="modal-registro-title">¿Qué tipo de perfil?</h2>
       <button class="btn-close" onclick="closeModal('registro')">×</button>
     </div>
+
+    <!-- Paso 1: selector de tipo -->
+    <div id="type-picker-step" class="type-picker">
+      <p class="type-picker-title">Elige cómo quieres aparecer en el mapa.</p>
+      <div class="type-picker-grid">
+        <button class="type-card" onclick="selectRegistroType('negocio')">
+          <span class="type-card-icon">🏪</span>
+          <span class="type-card-name">Negocio</span>
+          <span class="type-card-desc">Tienda, restaurante, farmacia, hotel u otro comercio con local físico u online.</span>
+        </button>
+        <button class="type-card" onclick="selectRegistroType('profesional')">
+          <span class="type-card-icon">💼</span>
+          <span class="type-card-name">Profesional</span>
+          <span class="type-card-desc">Diseñador, mecánico, docente, programador u otro servicio independiente.</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Paso 2: formulario -->
+    <div id="registro-form-step" style="display:none">
     <div class="modal-body">
+      <button class="picker-back" id="picker-back-btn" onclick="backToPicker()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+        Cambiar tipo de perfil
+      </button>
 
       <!-- Stats card — only visible in edit mode -->
       <div id="stats-card" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:20px">
@@ -1423,9 +1412,10 @@
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /.modal-body -->
+    </div><!-- /#registro-form-step -->
+  </div><!-- /.modal-box -->
+</div><!-- /#modal-registro -->
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- Modal: Panel de administración                             -->
@@ -1507,11 +1497,7 @@
 
   <!-- FAB Registrar -->
   <div class="mbn-fab-wrap">
-    <div class="mobile-reg-menu" id="mobile-reg-menu">
-      <button onclick="openModal('registro','negocio');closeMobileRegMenu()">🏪 Registrar negocio</button>
-      <button onclick="openModal('registro','profesional');closeMobileRegMenu()">👤 Soy profesional</button>
-    </div>
-    <button class="mbn-fab" onclick="toggleMobileRegMenu(event)" aria-label="Registrar negocio">
+    <button class="mbn-fab" onclick="openModal('registro')" aria-label="Registrar negocio">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
     <span class="mbn-fab-label">Registrar</span>
@@ -1975,30 +1961,73 @@ const OPTS_PROFESIONAL = `
 
 let registroMode = 'negocio';
 
-function openModal(name, mode = 'negocio') {
+function openModal(name) {
   document.getElementById(`modal-${name}`).classList.add('open');
-  if (name === 'registro') {
-    registroMode = mode;
-    const isPro = mode === 'profesional';
-    document.querySelector('#modal-registro .modal-header h2').textContent =
-      isPro ? 'Registrar profesional' : 'Registrar negocio';
-    document.getElementById('r-nombre-label').innerHTML =
-      (isPro ? 'Tu nombre / nombre comercial' : 'Nombre del negocio') + ' <span class="req">*</span>';
-    document.getElementById('r-nombre').placeholder =
-      isPro ? 'Ej. Juan Pérez — Técnico A/C' : 'Ej. Arepera La Criolla';
-    document.getElementById('r-tipo-label').innerHTML =
-      (isPro ? 'Especialidad / Profesión' : 'Tipo de negocio') + ' <span class="req">*</span>';
-    document.getElementById('r-tipo').innerHTML = isPro ? OPTS_PROFESIONAL : OPTS_NEGOCIO;
-    const onlineBox = document.getElementById('r-online');
-    onlineBox.checked = isPro;
-    toggleOnlineMode(isPro);
-    initMiniMap();
+  if (name === 'registro' && !currentEditToken) {
+    // Always start at the type picker unless in edit mode
+    showPickerStep();
   }
+}
+
+function showPickerStep() {
+  document.getElementById('type-picker-step').style.display = '';
+  document.getElementById('registro-form-step').style.display = 'none';
+  document.getElementById('modal-registro-title').textContent = '¿Qué tipo de perfil?';
+}
+
+function selectRegistroType(mode) {
+  registroMode = mode;
+  const isPro = mode === 'profesional';
+
+  document.getElementById('modal-registro-title').textContent =
+    isPro ? 'Crear perfil profesional' : 'Registrar negocio';
+  document.getElementById('r-nombre-label').innerHTML =
+    (isPro ? 'Tu nombre / nombre comercial' : 'Nombre del negocio') + ' <span class="req">*</span>';
+  document.getElementById('r-nombre').placeholder =
+    isPro ? 'Ej. Juan Pérez — Técnico A/C' : 'Ej. Arepera La Criolla';
+  document.getElementById('r-tipo-label').innerHTML =
+    (isPro ? 'Especialidad / Profesión' : 'Tipo de negocio') + ' <span class="req">*</span>';
+  document.getElementById('r-tipo').innerHTML = isPro ? OPTS_PROFESIONAL : OPTS_NEGOCIO;
+
+  const onlineBox = document.getElementById('r-online');
+  onlineBox.checked = isPro;
+  toggleOnlineMode(isPro);
+
+  document.getElementById('type-picker-step').style.display = 'none';
+  document.getElementById('registro-form-step').style.display = '';
+  initMiniMap();
+}
+
+function backToPicker() {
+  showPickerStep();
+  resetRegistroFormFields();
+}
+
+function openEditModal(mode) {
+  // Used when loading edit mode — skips picker, shows form directly
+  const isPro = mode === 'profesional';
+  registroMode = mode;
+  document.getElementById('modal-registro-title').textContent =
+    isPro ? 'Editar perfil profesional' : 'Editar negocio';
+  document.getElementById('r-nombre-label').innerHTML =
+    (isPro ? 'Tu nombre / nombre comercial' : 'Nombre del negocio') + ' <span class="req">*</span>';
+  document.getElementById('r-nombre').placeholder =
+    isPro ? 'Ej. Juan Pérez — Técnico A/C' : 'Ej. Arepera La Criolla';
+  document.getElementById('r-tipo-label').innerHTML =
+    (isPro ? 'Especialidad / Profesión' : 'Tipo de negocio') + ' <span class="req">*</span>';
+  document.getElementById('r-tipo').innerHTML = isPro ? OPTS_PROFESIONAL : OPTS_NEGOCIO;
+
+  document.getElementById('type-picker-step').style.display = 'none';
+  document.getElementById('registro-form-step').style.display = '';
+  document.getElementById('picker-back-btn').style.display = 'none';
+  document.getElementById('btn-submit').textContent = 'Guardar cambios';
+  document.getElementById('modal-registro').classList.add('open');
+  initMiniMap();
 }
 
 function closeModal(name) {
   document.getElementById(`modal-${name}`).classList.remove('open');
-  if (name === 'registro' && currentEditToken) resetRegistroForm();
+  if (name === 'registro') resetRegistroForm();
 }
 
 // Cerrar al clic fuera del box
@@ -2246,13 +2275,7 @@ async function submitRegistro() {
   }
 }
 
-function toggleRegMenu(e) {
-  e.stopPropagation();
-  document.getElementById('reg-menu').classList.toggle('open');
-}
-function closeRegMenu() {
-  document.getElementById('reg-menu').classList.remove('open');
-}
+// (reg menu removed — single button opens modal with type picker)
 
 // ── Side drawer ───────────────────────────────────────────────
 function openDrawer() {
@@ -2266,15 +2289,6 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 
-// ── Mobile bottom nav ─────────────────────────────────────────
-function toggleMobileRegMenu(e) {
-  e.stopPropagation();
-  document.getElementById('mobile-reg-menu').classList.toggle('open');
-}
-function closeMobileRegMenu() {
-  document.getElementById('mobile-reg-menu').classList.remove('open');
-}
-
 let mobileFilterVisible = true;
 function toggleMobileFilter() {
   const fb = document.querySelector('.filter-bar');
@@ -2284,10 +2298,7 @@ function toggleMobileFilter() {
   btn.classList.toggle('filter-active', mobileFilterVisible);
 }
 
-document.addEventListener('click', () => {
-  closeRegMenu();
-  closeMobileRegMenu();
-});
+// (dropdown close listeners removed)
 
 function toggleOnlineMode(isOnline) {
   const label = document.getElementById('location-label');
@@ -2309,7 +2320,7 @@ function showFormMsg(text, type) {
   msg.className = `form-msg ${type}`;
 }
 
-function resetRegistroForm() {
+function resetRegistroFormFields() {
   document.getElementById('r-nombre').value   = '';
   document.getElementById('r-tipo').value     = '';
   document.getElementById('r-ciudad').value   = '';
@@ -2334,17 +2345,18 @@ function resetRegistroForm() {
   document.getElementById('stats-card').style.display = 'none';
   document.getElementById('edit-link-qr').src = '';
   document.getElementById('r-online').checked = false;
-  // Restore negocio mode defaults
-  currentEditToken = null;
-  registroMode = 'negocio';
-  document.querySelector('#modal-registro .modal-header h2').textContent = 'Registrar negocio';
-  document.getElementById('r-nombre-label').innerHTML = 'Nombre del negocio <span class="req">*</span>';
-  document.getElementById('r-nombre').placeholder = 'Ej. Arepera La Criolla';
-  document.getElementById('r-tipo-label').innerHTML = 'Tipo de negocio <span class="req">*</span>';
   document.getElementById('r-tipo').innerHTML = OPTS_NEGOCIO;
   document.getElementById('btn-submit').textContent = 'Enviar negocio';
+  document.getElementById('picker-back-btn').style.display = '';
   toggleOnlineMode(false);
   resetLocation();
+}
+
+function resetRegistroForm() {
+  currentEditToken = null;
+  registroMode = 'negocio';
+  resetRegistroFormFields();
+  showPickerStep();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2501,7 +2513,7 @@ async function loadEditMode(token) {
     // Limpiar token de la URL para que no se comparta accidentalmente
     history.replaceState({}, '', '/');
     const mode = PRO_TIPOS.has(n.tipo) ? 'profesional' : 'negocio';
-    openModal('registro', mode);
+    openEditModal(mode);
     // Esperar a que el mini-mapa se inicialice (initMiniMap usa 120 ms)
     setTimeout(() => prefillEditForm(n), 300);
     // Load stats async (fire and show when ready)
