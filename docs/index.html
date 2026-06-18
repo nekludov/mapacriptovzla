@@ -47,20 +47,28 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary:   #CF142B;
-      --primary-h: #a50e22;
-      --accent:    #F7931A;
-      --blue:      #003893;
-      --bg:        #0F1117;
-      --surface:   #1C1F26;
-      --surface2:  #252930;
-      --border:    #2E3340;
-      --text:      #E8EAED;
-      --muted:     #9AA0AC;
-      --success:   #22C55E;
-      --error:     #EF4444;
-      --header-h:  56px;
-      --filter-h:  52px;
+      --primary:      #CF142B;
+      --primary-h:    #a50e22;
+      --accent:       #F7931A;
+      --accent-dim:   rgba(247,147,26,.12);
+      --accent-ring:  rgba(247,147,26,.25);
+      --blue:         #003893;
+      --bg:           #0A0C10;
+      --surface:      #111318;
+      --surface2:     #1A1D24;
+      --surface3:     #21252E;
+      --border:       #252830;
+      --border-hi:    #343842;
+      --text:         #E8EAED;
+      --text-2:       #C4C7CE;
+      --muted:        #7D8390;
+      --success:      #22C55E;
+      --error:        #EF4444;
+      --header-h:     56px;
+      --filter-h:     52px;
+      --radius-sm:    8px;
+      --radius-md:    12px;
+      --radius-lg:    16px;
     }
 
     body {
@@ -77,10 +85,11 @@
     header {
       height: var(--header-h);
       background: var(--surface);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 0 16px;
+      padding: 0 20px;
       flex-shrink: 0;
       z-index: 1000;
       position: relative;
@@ -88,9 +97,9 @@
     header::after {
       content: '';
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(to right, #CF9B00 33%, #003893 33% 66%, #CF142B 66%);
+      bottom: -1px; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, #CF9B00 33.33%, #003893 33.33% 66.66%, #CF142B 66.66%);
     }
 
     .logo {
@@ -170,8 +179,8 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 0 12px;
+      gap: 6px;
+      padding: 0 16px;
       flex-shrink: 0;
       overflow-x: auto;
       scrollbar-width: none;
@@ -183,32 +192,33 @@
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       padding: 0 12px;
-      height: 34px;
+      height: 32px;
       font-size: 13px;
       font-family: inherit;
       outline: none;
       cursor: pointer;
+      transition: border-color .15s;
     }
     .filter-bar input[type=text] { min-width: 130px; cursor: text; }
     .filter-bar select:focus,
-    .filter-bar input:focus { border-color: var(--primary); }
+    .filter-bar input:focus { border-color: var(--border-hi); }
 
     .btn-filter {
-      background: var(--surface2);
+      background: var(--surface);
       border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 8px;
+      color: var(--text-2);
+      border-radius: var(--radius-sm);
       padding: 0 14px;
-      height: 34px;
+      height: 32px;
       font-size: 13px;
       font-family: inherit;
       cursor: pointer;
       white-space: nowrap;
-      transition: background .15s;
+      transition: background .15s, border-color .15s;
     }
-    .btn-filter:hover { background: var(--border); }
+    .btn-filter:hover { background: var(--surface2); border-color: var(--border-hi); }
     .btn-clear {
       color: var(--muted);
       background: none;
@@ -216,8 +226,9 @@
       font-size: 13px;
       font-family: inherit;
       cursor: pointer;
-      padding: 0 4px;
+      padding: 0 6px;
       white-space: nowrap;
+      transition: color .15s;
     }
     .btn-clear:hover { color: var(--text); }
 
@@ -299,17 +310,17 @@
       align-items: center;
       gap: 4px;
       font-size: 11px;
-      font-weight: 700;
-      padding: 2px 7px;
+      font-weight: 600;
+      padding: 3px 8px;
       border-radius: 6px;
-      letter-spacing: .2px;
+      letter-spacing: .01em;
+      border: 1px solid transparent;
     }
-    .cripto-tag img { width: 14px; height: 14px; border-radius: 50%; }
-    .cripto-tag.BTC        { background: #f7931a22; color: #F7931A; border: 1px solid #F7931A55; }
-    .cripto-tag.USDT       { background: #26a17b22; color: #26A17B; border: 1px solid #26A17B55; }
-    .cripto-tag.USDC       { background: #2775ca22; color: #2775CA; border: 1px solid #2775CA55; }
-    .cripto-tag.BinancePay { background: #f3ba2f22; color: #F3BA2F; border: 1px solid #F3BA2F55; }
-    .cripto-tag.Otros      { background: #9aa0ac22; color: #9AA0AC; border: 1px solid #9AA0AC55; }
+    .cripto-tag.BTC        { background: #f7931a14; color: #F7931A; border-color: #F7931A30; }
+    .cripto-tag.USDT       { background: #26a17b14; color: #26A17B; border-color: #26A17B30; }
+    .cripto-tag.USDC       { background: #2775ca14; color: #2775CA; border-color: #2775CA30; }
+    .cripto-tag.BinancePay { background: #f3ba2f14; color: #F3BA2F; border-color: #F3BA2F30; }
+    .cripto-tag.Otros      { background: #ffffff0a; color: var(--muted); border-color: var(--border); }
 
     .contact-link { color: var(--accent); text-decoration: none; word-break: break-all; }
     .contact-link:hover { text-decoration: underline; }
@@ -389,7 +400,7 @@
       min-height: 0;
       overflow-y: auto;
       background: var(--bg);
-      padding: 16px 16px;
+      padding: 20px;
       scrollbar-width: thin;
       scrollbar-color: var(--border) transparent;
     }
@@ -398,99 +409,129 @@
     .negocio-cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 14px;
+      gap: 12px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    /* ── Card ── */
+    /* ── BusinessCard ── */
     .negocio-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
+      border-radius: var(--radius-md);
       display: flex;
       flex-direction: column;
-      transition: border-color .2s, transform .18s, box-shadow .2s;
+      transition: border-color .18s, box-shadow .18s;
+      overflow: hidden;
     }
     .negocio-card:hover {
-      border-color: rgba(247,147,26,.4);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(0,0,0,.35);
+      border-color: var(--border-hi);
+      box-shadow: 0 4px 20px rgba(0,0,0,.3);
     }
 
-    /* Color top strip */
-    .nc-strip { height: 4px; flex-shrink: 0; }
-
-    /* Header */
-    .nc-top {
+    /* Card body */
+    .nc-body {
       display: flex;
       gap: 14px;
-      padding: 16px 16px 12px;
-      align-items: flex-start;
+      padding: 16px;
+      align-items: center;
     }
+
+    /* Logo */
     .nc-logo {
-      width: 56px; height: 56px; border-radius: 12px;
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
       object-fit: cover; flex-shrink: 0;
+      border: 1px solid var(--border);
     }
     .nc-logo-placeholder {
-      width: 56px; height: 56px; border-radius: 12px;
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
       background: var(--surface2);
       border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px; flex-shrink: 0;
+      font-size: 22px; flex-shrink: 0;
     }
+
+    /* Info */
     .nc-info { flex: 1; min-width: 0; }
     .nc-name {
-      font-size: 15px; font-weight: 700; line-height: 1.25;
+      font-size: 14px; font-weight: 600;
+      line-height: 1.3; color: var(--text);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
-    .nc-badges { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-    .nc-tipo-badge {
+    .nc-meta {
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap; overflow: hidden;
+    }
+    .nc-meta-dot { opacity: .4; }
+
+    /* Status badge (Nuevo) */
+    .nc-status {
       display: inline-flex; align-items: center; gap: 4px;
-      font-size: 11px; font-weight: 600; color: var(--muted);
-      background: var(--surface2); border: 1px solid var(--border);
-      padding: 3px 9px; border-radius: 20px;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+      background: #22c55e15; color: var(--success);
+      border: 1px solid #22c55e35;
+      letter-spacing: .03em; text-transform: uppercase;
+      margin-left: 6px; vertical-align: middle;
+      flex-shrink: 0;
     }
-    .nc-city { font-size: 11px; color: var(--muted); }
+
+    /* Divider */
+    .nc-divider {
+      height: 1px; background: var(--border);
+      margin: 0 16px;
+    }
 
     /* Crypto row */
     .nc-criptos {
-      display: flex; flex-wrap: wrap; gap: 4px;
-      padding: 0 16px 12px;
+      display: flex; flex-wrap: wrap; gap: 5px;
+      padding: 12px 16px;
     }
 
-    /* Actions */
-    .nc-actions {
+    /* Footer / Actions */
+    .nc-footer {
       display: flex; gap: 8px;
-      padding: 10px 16px 16px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
       margin-top: auto;
     }
-    .nc-btn-wa-icon {
+    .nc-btn-wa {
       display: flex; align-items: center; justify-content: center;
-      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-      background: #25D36620; border: 1px solid #25D36650;
-      color: #25D366; font-size: 16px; text-decoration: none;
-      transition: background .15s;
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      background: var(--surface2); border: 1px solid var(--border);
+      color: #25D366; font-size: 15px;
+      text-decoration: none; transition: background .15s, border-color .15s;
     }
-    .nc-btn-wa-icon:hover { background: #25D36635; }
-    .nc-btn-perfil {
+    .nc-btn-wa:hover { background: #25D36618; border-color: #25D36640; }
+    .nc-cta {
       flex: 1; text-align: center; text-decoration: none;
       font-size: 13px; font-weight: 600;
-      padding: 8px 0; border-radius: 10px;
-      background: rgba(247,147,26,.12);
-      border: 1px solid rgba(247,147,26,.3);
-      color: var(--accent);
-      transition: background .15s, border-color .15s;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-2);
+      transition: background .15s, border-color .15s, color .15s;
     }
-    .nc-btn-perfil:hover { background: rgba(247,147,26,.2); border-color: var(--accent); }
+    .nc-cta:hover {
+      background: var(--accent-dim);
+      border-color: var(--accent-ring);
+      color: var(--accent);
+    }
 
     .list-empty {
       text-align: center; color: var(--muted);
-      padding: 60px 20px; font-size: 14px;
+      padding: 80px 20px; font-size: 14px; line-height: 1.7;
     }
+    .list-empty strong { display: block; font-size: 32px; margin-bottom: 8px; }
 
     @media (max-width: 600px) {
-      .negocio-cards-grid { grid-template-columns: 1fr; }
+      #list-view { padding: 12px; }
+      .negocio-cards-grid { grid-template-columns: 1fr; gap: 10px; }
     }
 
     /* ── Modals ───────────────────────────────────────────── */
@@ -1126,10 +1167,10 @@
   <div class="header-btns">
     <!-- Desktop: dos botones -->
     <button class="btn-profesional btn-desktop" onclick="openModal('registro', 'profesional')">
-      <span>+</span> Soy profesional
+      Perfil profesional
     </button>
     <button class="btn-registro btn-desktop" onclick="openModal('registro', 'negocio')">
-      <span>+</span> Registrar negocio
+      Registrar gratis
     </button>
     <!-- Mobile: dropdown -->
     <div class="reg-dropdown btn-mobile">
@@ -1137,8 +1178,8 @@
         + Registrar <span style="font-size:10px;opacity:.8">▾</span>
       </button>
       <div class="reg-menu" id="reg-menu">
-        <button onclick="openModal('registro','negocio');closeRegMenu()">🏪 Registrar negocio</button>
-        <button onclick="openModal('registro','profesional');closeRegMenu()">👤 Soy profesional</button>
+        <button onclick="openModal('registro','negocio');closeRegMenu()">Registrar negocio gratis</button>
+        <button onclick="openModal('registro','profesional');closeRegMenu()">Crear perfil profesional</button>
       </div>
     </div>
   </div>
@@ -1726,7 +1767,7 @@ function renderList(negocios) {
     return;
   }
 
-  const tipoLabel = {
+  const TIPO_LABEL = {
     restaurante:'Restaurante', farmacia:'Farmacia', ferreteria:'Ferretería',
     tecnologia:'Tecnología', servicio:'Servicio', tienda:'Tienda',
     hotel:'Hotel', transporte:'Transporte', emprendedor:'Emprendedor', otro:'Otro',
@@ -1734,43 +1775,48 @@ function renderList(negocios) {
     ac_tecnico:'Técnico A/C', mecanico:'Mecánico', programador:'Programador',
     disenador:'Diseñador', fotografo:'Fotógrafo', estetica:'Estética',
     entrenador:'Entrenador', medico:'Médico', abogado:'Abogado',
-    servicios_hogar:'Servicios hogar', marketing:'Marketing', otro_prof:'Profesional',
+    servicios_hogar:'Serv. hogar', marketing:'Marketing', otro_prof:'Profesional',
   };
 
   grid.innerHTML = negocios.map(n => {
-    const tipoData = n.online ? { emoji: '🌐', color: '#0891B2' } : (TIPOS[n.tipo] || TIPOS.otro);
+    const tipoData = n.online ? { emoji: '🌐' } : (TIPOS[n.tipo] || TIPOS.otro);
     const wa       = getWaContactLink(n.contacto);
     const isNew    = n.created_at &&
       (Date.now() - new Date(n.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000;
-    const label    = n.online ? 'Online' : (tipoLabel[n.tipo] || n.tipo);
+    const tipoLabel = n.online ? 'Online' : (TIPO_LABEL[n.tipo] || n.tipo);
 
     const criptos = (n.criptos || []).filter(c => VALID_IDS.has(c)).map(c => {
       const m = criptoMeta[c];
       return `<span class="cripto-tag ${escHtml(c)}">
-        ${m?.logo ? `<img src="${m.logo}" width="12" height="12" alt="${escHtml(c)}" style="border-radius:50%">` : ''}
+        ${m?.logo ? `<img src="${m.logo}" width="11" height="11" alt="" style="border-radius:50%;vertical-align:-1px">` : ''}
         ${escHtml(c)}
       </span>`;
     }).join('');
 
+    const metaParts = [tipoLabel, n.ciudad || null].filter(Boolean);
+    const metaHtml = metaParts.map((p, i) =>
+      i === 0 ? escHtml(p) : `<span class="nc-meta-dot">·</span>${escHtml(p)}`
+    ).join(' ');
+
     return `
       <div class="negocio-card">
-        <div class="nc-strip" style="background:${tipoData.color}"></div>
-        <div class="nc-top">
+        <div class="nc-body">
           ${n.logo_url
-            ? `<img class="nc-logo" src="${escHtml(n.logo_url)}" alt="${escHtml(n.nombre)}">`
-            : `<div class="nc-logo-placeholder" style="background:${tipoData.color}18;border-color:${tipoData.color}30">${tipoData.emoji}</div>`}
+            ? `<img class="nc-logo" src="${escHtml(n.logo_url)}" alt="${escHtml(n.nombre)}" loading="lazy">`
+            : `<div class="nc-logo-placeholder">${tipoData.emoji}</div>`}
           <div class="nc-info">
-            <div class="nc-name">${escHtml(n.nombre)}${isNew ? ' <span class="badge-nuevo">✨ Nuevo</span>' : ''}</div>
-            <div class="nc-badges">
-              <span class="nc-tipo-badge" style="color:${tipoData.color};border-color:${tipoData.color}40;background:${tipoData.color}10">${tipoData.emoji} ${escHtml(label)}</span>
-              ${n.ciudad ? `<span class="nc-city">📍 ${escHtml(n.ciudad)}</span>` : ''}
+            <div class="nc-name">
+              ${escHtml(n.nombre)}${isNew ? '<span class="nc-status">Nuevo</span>' : ''}
             </div>
+            <div class="nc-meta">${metaHtml}</div>
           </div>
         </div>
         ${criptos ? `<div class="nc-criptos">${criptos}</div>` : ''}
-        <div class="nc-actions">
-          ${wa ? `<a class="nc-btn-wa-icon" href="${escHtml(wa)}" target="_blank" rel="noopener" title="WhatsApp">💬</a>` : ''}
-          <a class="nc-btn-perfil" href="/negocio.html?id=${escHtml(n.id)}" target="_blank">Ver perfil →</a>
+        <div class="nc-footer">
+          ${wa ? `<a class="nc-btn-wa" href="${escHtml(wa)}" target="_blank" rel="noopener" title="Contactar por WhatsApp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.652A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.376l-.36-.213-3.728.972.994-3.641-.234-.374A9.769 9.769 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182c5.421 0 9.818 4.397 9.818 9.818 0 5.42-4.397 9.818-9.818 9.818z"/></svg>
+          </a>` : ''}
+          <a class="nc-cta" href="/negocio.html?id=${escHtml(n.id)}" target="_blank">Ver perfil</a>
         </div>
       </div>`;
   }).join('');
