@@ -1284,6 +1284,14 @@
         </div>
       </div>
 
+      <div class="form-row" id="email-row">
+        <label>Tu correo electrónico <span class="req">*</span></label>
+        <input id="r-email" class="form-control" type="email" placeholder="tu@correo.com">
+        <div style="font-size:11px;color:var(--muted);margin-top:5px">
+          Solo para enviarte el enlace de edición y recordatorios. No se muestra públicamente.
+        </div>
+      </div>
+
       <div class="form-row">
         <label>Logo o foto del local</label>
         <div class="logo-upload-area" id="logo-area" onclick="document.getElementById('logo-input').click()">
@@ -1545,6 +1553,16 @@ document.addEventListener('DOMContentLoaded', () => {
   tryAutoLocate();
   const et = new URLSearchParams(location.search).get('edit');
   if (et) loadEditMode(et);
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('confirm') === 'ok') {
+    const nombre = params.get('nombre') || 'tu negocio';
+    showToast(`✅ ¡Gracias! ${nombre} sigue activo en el mapa.`);
+    history.replaceState({}, '', '/');
+  } else if (params.get('confirm') === 'error') {
+    showToast('No pudimos confirmar el negocio. Verifica tu enlace.');
+    history.replaceState({}, '', '/');
+  }
   // Init mobile filter button state (visible by default)
   const mbnFilterBtn = document.getElementById('mbn-filter-btn');
   if (mbnFilterBtn) mbnFilterBtn.classList.add('filter-active');
@@ -2046,6 +2064,7 @@ async function submitRegistro() {
   const ciudad  = document.getElementById('r-ciudad').value.trim();
   const desc    = document.getElementById('r-desc').value.trim();
   const contacto= document.getElementById('r-contacto').value.trim();
+  const email   = document.getElementById('r-email').value.trim();
   const criptos = getSelectedCriptos();
 
   const msg = document.getElementById('form-msg');
@@ -2056,6 +2075,7 @@ async function submitRegistro() {
   if (!nombre) return showFormMsg('El nombre del negocio es requerido.', 'error');
   if (!tipo)   return showFormMsg('Selecciona el tipo de negocio.', 'error');
   if (!criptos.length) return showFormMsg('Selecciona al menos una criptomoneda.', 'error');
+  if (!currentEditToken && !email) return showFormMsg('El correo electrónico es requerido.', 'error');
   const isOnline = document.getElementById('r-online').checked;
   if (!pickedLat || !pickedLng) return showFormMsg(isOnline ? 'Marca tu ciudad o zona en el mapa.' : 'Selecciona la ubicación en el mapa.', 'error');
 
@@ -2068,6 +2088,7 @@ async function submitRegistro() {
       nombre, tipo, ciudad, descripcion: desc,
       contacto, criptos, lat: pickedLat, lng: pickedLng,
       online: isOnline, logo_base64: logoBase64,
+      ...(email && !currentEditToken ? { email } : {}),
     };
 
     if (currentEditToken) {
@@ -2203,6 +2224,8 @@ function resetRegistroForm() {
   document.getElementById('r-ciudad').value   = '';
   document.getElementById('r-desc').value     = '';
   document.getElementById('r-contacto').value = '';
+  document.getElementById('r-email').value    = '';
+  document.getElementById('email-row').style.display = '';
   document.querySelectorAll('.cripto-check.selected').forEach(el => {
     el.classList.remove('selected');
     el.querySelector('input').checked = false;
@@ -2418,6 +2441,8 @@ function prefillEditForm(n) {
   document.getElementById('r-desc').value     = n.descripcion || '';
   document.getElementById('r-contacto').value = n.contacto    || '';
   document.getElementById('r-tipo').value     = n.tipo        || '';
+  // Email is not editable after registration
+  document.getElementById('email-row').style.display = 'none';
 
   // Criptos
   document.querySelectorAll('.cripto-check').forEach(el => {
