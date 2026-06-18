@@ -604,6 +604,32 @@ app.get('/api/cron/ping', async (req, res) => {
   res.json({ ok: true, sent, expired: (expired || []).length });
 });
 
+// ── GET /api/stats/ciudades — ranking de ciudades ─────────────────────────────
+app.get('/api/stats/ciudades', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('negocios')
+      .select('ciudad')
+      .eq('estado', 'activo')
+      .not('ciudad', 'is', null)
+      .neq('ciudad', '');
+    if (error) throw error;
+    const counts = {};
+    for (const { ciudad } of data) {
+      const c = ciudad.trim();
+      if (c) counts[c] = (counts[c] || 0) + 1;
+    }
+    const ranking = Object.entries(counts)
+      .map(([ciudad, count]) => ({ ciudad, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15);
+    res.json(ranking);
+  } catch (err) {
+    console.error('GET /api/stats/ciudades:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOString() }));
 
