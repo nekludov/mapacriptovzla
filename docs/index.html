@@ -349,6 +349,117 @@
     .btn-x      { background: #000;    color: #fff !important; }
     .btn-perfil { background: var(--surface2); color: var(--text) !important; border: 1px solid var(--border); }
 
+    /* ── Badge nuevo ─────────────────────────────────────────── */
+    .badge-nuevo {
+      display: inline-block;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+      background: #22c55e18; color: var(--success);
+      border: 1px solid #22c55e44;
+      text-transform: uppercase; letter-spacing: .4px;
+      vertical-align: middle; margin-left: 6px;
+    }
+
+    /* ── Toggle view button ──────────────────────────────────── */
+    .btn-toggle-view {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0 10px;
+      height: 34px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background .15s;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+    .btn-toggle-view:hover { background: var(--border); }
+    .btn-toggle-view.list-active { border-color: var(--accent); color: var(--accent); }
+
+    /* ── List view ───────────────────────────────────────────── */
+    #list-view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      background: var(--bg);
+      padding: 12px 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    #list-view.active { display: block; }
+
+    .negocio-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+    }
+    .negocio-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .15s;
+    }
+    .negocio-card:hover { border-color: var(--muted); }
+    .nc-top {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      align-items: flex-start;
+    }
+    .nc-logo {
+      width: 52px; height: 52px; border-radius: 10px;
+      object-fit: cover; flex-shrink: 0; border: 1px solid var(--border);
+    }
+    .nc-logo-placeholder {
+      width: 52px; height: 52px; border-radius: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .nc-info { flex: 1; min-width: 0; }
+    .nc-name {
+      font-size: 15px; font-weight: 700; line-height: 1.3;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .nc-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .nc-criptos {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      padding: 0 14px 10px;
+    }
+    .nc-actions {
+      display: flex; gap: 8px;
+      padding: 10px 14px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .nc-btn {
+      flex: 1; text-align: center; text-decoration: none;
+      font-size: 12px; font-weight: 600;
+      padding: 7px 0; border-radius: 8px;
+      transition: opacity .15s; border: none; cursor: pointer;
+      font-family: inherit;
+    }
+    .nc-btn:hover { opacity: .8; }
+    .nc-btn-wa    { background: #25D366; color: #fff; }
+    .nc-btn-perfil { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+    .list-empty {
+      text-align: center; color: var(--muted);
+      padding: 60px 20px; font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .negocio-cards-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── Modals ───────────────────────────────────────────── */
     .modal-overlay {
       display: none;
@@ -1059,10 +1170,16 @@
   </select>
 
   <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
+  <button class="btn-toggle-view" id="btn-toggle-view" onclick="toggleView()" title="Cambiar vista">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Lista
+  </button>
 </div>
 
 <!-- ── Map ─────────────────────────────────────────────────── -->
 <div id="map"></div>
+<!-- ── List view ────────────────────────────────────────────── -->
+<div id="list-view"><div class="negocio-cards-grid" id="list-grid"></div></div>
 
 <!-- ── Footer ──────────────────────────────────────────────── -->
 <footer>
@@ -1183,6 +1300,21 @@
                   style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">
             Copiar
           </button>
+        </div>
+        <!-- QR del perfil público -->
+        <div id="edit-link-qr-wrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:none">
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">📱 Código QR de tu perfil</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Compártelo con tus clientes o imprímelo en tu local.</div>
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <img id="edit-link-qr" style="width:120px;height:120px;border-radius:8px;border:1px solid var(--border)" alt="QR">
+            <div style="flex:1;min-width:0">
+              <div id="edit-link-qr-url" style="font-size:10px;color:var(--muted);font-family:monospace;word-break:break-all;margin-bottom:8px"></div>
+              <a id="edit-link-qr-dl" href="#" download="qr-mapacripto.png"
+                 style="display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px">
+                ⬇ Descargar QR
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1477,9 +1609,21 @@ function hideLoading() {
 // ════════════════════════════════════════════════════════════
 // Markers & popup
 // ════════════════════════════════════════════════════════════
+let listViewActive = false;
+
+function toggleView() {
+  listViewActive = !listViewActive;
+  document.getElementById('map').style.display       = listViewActive ? 'none' : '';
+  document.getElementById('list-view').classList.toggle('active', listViewActive);
+  const btn = document.getElementById('btn-toggle-view');
+  btn.classList.toggle('list-active', listViewActive);
+  btn.innerHTML = listViewActive
+    ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Mapa`
+    : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Lista`;
+}
+
 function renderMarkers(negocios) {
   clusterGroup.clearLayers();
-
   negocios.forEach(n => {
     const tipo = n.online ? { emoji: '🌐', color: '#0891B2' } : (TIPOS[n.tipo] || TIPOS.otro);
     const icon = L.divIcon({
@@ -1489,11 +1633,61 @@ function renderMarkers(negocios) {
       iconAnchor: [19, 38],
       popupAnchor: [0, -40],
     });
-
     const marker = L.marker([n.lat, n.lng], { icon });
     marker.bindPopup(buildPopup(n), { maxWidth: 260, minWidth: 240 });
     clusterGroup.addLayer(marker);
   });
+  renderList(negocios);
+}
+
+function renderList(negocios) {
+  const grid = document.getElementById('list-grid');
+  if (!grid) return;
+
+  const criptoMeta = Object.fromEntries(CRIPTOS.map(c => [c.id, c]));
+  const VALID_IDS  = new Set(CRIPTOS.map(c => c.id));
+
+  if (!negocios.length) {
+    grid.innerHTML = '<p class="list-empty">Sin resultados para los filtros aplicados.</p>';
+    return;
+  }
+
+  grid.innerHTML = negocios.map(n => {
+    const tipo   = n.online ? { emoji: '🌐' } : (TIPOS[n.tipo] || TIPOS.otro);
+    const wa     = getWaContactLink(n.contacto);
+    const isNew  = n.created_at &&
+      (Date.now() - new Date(n.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000;
+
+    const criptos = (n.criptos || []).filter(c => VALID_IDS.has(c)).map(c => {
+      const m = criptoMeta[c];
+      return `<span class="cripto-tag ${escHtml(c)}">
+        ${m?.logo ? `<img src="${m.logo}" width="12" height="12" alt="${escHtml(c)}" style="border-radius:50%">` : ''}
+        ${escHtml(c)}
+      </span>`;
+    }).join('');
+
+    return `
+      <div class="negocio-card">
+        <div class="nc-top">
+          ${n.logo_url
+            ? `<img class="nc-logo" src="${escHtml(n.logo_url)}" alt="${escHtml(n.nombre)}">`
+            : `<div class="nc-logo-placeholder">${tipo.emoji}</div>`}
+          <div class="nc-info">
+            <div class="nc-name">${escHtml(n.nombre)}${isNew ? ' <span class="badge-nuevo">✨ Nuevo</span>' : ''}</div>
+            <div class="nc-meta">
+              ${escHtml(n.tipo)}${n.ciudad ? ` · 🏙 ${escHtml(n.ciudad)}` : ''}${n.online ? ' · 🌐 Online' : ''}
+            </div>
+          </div>
+        </div>
+        ${criptos ? `<div class="nc-criptos">${criptos}</div>` : ''}
+        <div class="nc-actions">
+          ${wa
+            ? `<a class="nc-btn nc-btn-wa" href="${escHtml(wa)}" target="_blank" rel="noopener">💬 WhatsApp</a>`
+            : ''}
+          <a class="nc-btn nc-btn-perfil" href="/negocio.html?id=${escHtml(n.id)}" target="_blank">Ver perfil</a>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function formatContacto(c) {
@@ -1547,11 +1741,14 @@ function buildPopup(n) {
     `\nEncuéntralos en criptomapavenezuela.com\n@criptomapavzla`
   );
 
+  const isNew = n.created_at &&
+    (Date.now() - new Date(n.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000;
+
   return `
     <div>
       ${n.logo_url ? `<img class="popup-logo" src="${n.logo_url}" alt="${escHtml(n.nombre)}">` : ''}
       <div class="popup-body">
-        <h3>${escHtml(n.nombre)}</h3>
+        <h3>${escHtml(n.nombre)}${isNew ? '<span class="badge-nuevo">✨ Nuevo</span>' : ''}</h3>
         <span class="badge-tipo">${tipo.emoji} ${escHtml(n.tipo)}</span>
         <div class="popup-criptos">${criptos}</div>
         ${n.descripcion ? `<p class="popup-desc">${escHtml(n.descripcion)}</p>` : ''}
@@ -1885,11 +2082,24 @@ async function submitRegistro() {
         showFormMsg('✅ ¡Registro enviado! Está en revisión y se publicará pronto.', 'success');
       }
 
-      // Mostrar enlace de edición — el usuario debe guardarlo antes de cerrar
+      // Mostrar enlace de edición + QR del perfil
       if (data.edit_token) {
-        const editLink = `${location.origin}/?edit=${data.edit_token}`;
+        const editLink   = `${location.origin}/?edit=${data.edit_token}`;
         document.getElementById('edit-link-input').value = editLink;
         document.getElementById('edit-link-box').style.display = '';
+
+        if (data.id) {
+          const profileUrl = `${location.origin}/negocio.html?id=${data.id}`;
+          const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(profileUrl)}&size=200x200&margin=8`;
+          const qrImg  = document.getElementById('edit-link-qr');
+          const qrWrap = document.getElementById('edit-link-qr-wrap');
+          const qrUrl  = document.getElementById('edit-link-qr-url');
+          const qrDl   = document.getElementById('edit-link-qr-dl');
+          qrImg.src  = qrSrc;
+          qrImg.onload = () => { qrDl.href = qrSrc; };
+          qrUrl.textContent = profileUrl;
+          qrWrap.style.display = 'block';
+        }
       }
     }
 
@@ -1983,6 +2193,8 @@ function resetRegistroForm() {
   document.getElementById('form-msg').className = 'form-msg';
   document.getElementById('edit-link-box').style.display = 'none';
   document.getElementById('edit-link-input').value = '';
+  document.getElementById('edit-link-qr-wrap').style.display = 'none';
+  document.getElementById('edit-link-qr').src = '';
   document.getElementById('r-online').checked = false;
   // Restore negocio mode defaults
   currentEditToken = null;
