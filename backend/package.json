@@ -11,6 +11,7 @@
     "@supabase/supabase-js": "^2.47.10",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "resend": "^6.14.0",
     "twitter-api-v2": "^1.29.0"
   }
 }

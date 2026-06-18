@@ -504,21 +504,76 @@
     }
     .rw-register:hover { opacity: .88; }
 
-    /* FAB ranking en vista mapa */
-    #ranking-fab {
-      position: fixed; bottom: 80px; right: 16px; z-index: 999;
-      display: flex; align-items: center; gap: 7px;
-      padding: 10px 16px; border-radius: 24px;
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text); font-size: 13px; font-weight: 700;
-      cursor: pointer; font-family: inherit;
-      box-shadow: 0 4px 16px rgba(0,0,0,.4);
-      transition: border-color .15s, transform .15s;
+    /* Botón trofeo en filter bar */
+    .btn-trophy {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: #F59E0B; border-radius: 8px; padding: 0 11px;
+      height: 34px; font-size: 15px; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      white-space: nowrap; transition: background .15s, border-color .15s;
+      font-family: inherit; font-size: 13px; font-weight: 700; flex-shrink: 0;
     }
-    #ranking-fab:hover { border-color: var(--accent-ring); transform: translateY(-1px); }
-    #ranking-fab i { color: #F59E0B; }
-    #ranking-fab.hidden { display: none; }
-    @media (min-width: 768px) { #ranking-fab { bottom: 24px; } }
+    .btn-trophy:hover, .btn-trophy.active { background: #F59E0B18; border-color: #F59E0B55; }
+
+    /* Panel ranking (slide-in) */
+    #ranking-panel {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 1100;
+      width: 340px; max-width: 100vw;
+      background: var(--surface); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform .25s cubic-bezier(.4,0,.2,1);
+      box-shadow: -8px 0 32px rgba(0,0,0,.4);
+    }
+    #ranking-panel.open { transform: translateX(0); }
+    .rp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .rp-title { display: flex; align-items: center; gap: 10px; }
+    .rp-title h2 { font-size: 14px; font-weight: 700; color: var(--text); margin: 0; }
+    .rp-title p  { font-size: 11px; color: var(--muted); margin: 2px 0 0; }
+    .rp-close {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-family: inherit; transition: color .15s;
+    }
+    .rp-close:hover { color: var(--text); }
+    .rp-body { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .rp-share {
+      margin: 0 16px 8px; display: flex; align-items: center; gap: 7px;
+      padding: 9px 16px; border-radius: 8px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-2); font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit; justify-content: center;
+      transition: border-color .15s, color .15s; width: calc(100% - 32px);
+    }
+    .rp-share:hover { border-color: var(--accent-ring); color: var(--accent); }
+    .rp-register {
+      margin: 0 16px 16px; display: flex; align-items: center; gap: 7px;
+      padding: 10px 16px; border-radius: 8px; justify-content: center;
+      background: var(--accent); color: #000; font-size: 13px; font-weight: 700;
+      border: none; cursor: pointer; font-family: inherit; width: calc(100% - 32px);
+      transition: opacity .15s;
+    }
+    .rp-register:hover { opacity: .88; }
+    #ranking-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1099;
+      background: rgba(0,0,0,.45);
+    }
+    #ranking-overlay.open { display: block; }
+
+    /* Mobile: panel desde abajo */
+    @media (max-width: 600px) {
+      #ranking-panel {
+        top: auto; left: 0; right: 0; bottom: 0; width: 100%;
+        border-left: none; border-top: 1px solid var(--border);
+        border-radius: 18px 18px 0 0; max-height: 75vh;
+        transform: translateY(100%);
+      }
+      #ranking-panel.open { transform: translateY(0); }
+    }
 
     .negocio-cards-grid {
       display: grid;
@@ -1311,19 +1366,32 @@
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     Lista
   </button>
+  <button class="btn-trophy" id="btn-trophy" onclick="toggleRankingPanel()" title="Ranking ciudades cripto">
+    <i class="fa-solid fa-trophy"></i> Ranking
+  </button>
 </div>
 
 <!-- ── Map ─────────────────────────────────────────────────── -->
 <div id="map"></div>
 
-<!-- ── FAB ranking (visible en mapa) ────────────────────────── -->
-<button id="ranking-fab" onclick="showRankingView()" title="Ver ranking de ciudades">
-  <i class="fa-solid fa-trophy"></i> Ranking
-</button>
+<!-- ── Ranking panel (slide-in) ─────────────────────────────── -->
+<div id="ranking-overlay" onclick="closeRankingPanel()"></div>
+<div id="ranking-panel">
+  <div class="rp-header">
+    <div class="rp-title">
+      <i class="fa-solid fa-trophy" style="color:#F59E0B;font-size:18px"></i>
+      <div>
+        <h2>Ranking Cripto</h2>
+        <p>Ciudades con más negocios activos</p>
+      </div>
+    </div>
+    <button class="rp-close" onclick="closeRankingPanel()">×</button>
+  </div>
+  <div class="rp-body" id="ranking-panel-body"></div>
+</div>
 
 <!-- ── List view ────────────────────────────────────────────── -->
 <div id="list-view">
-  <div id="ranking-widget" class="ranking-widget" style="display:none"></div>
   <div class="negocio-cards-grid" id="list-grid"></div>
 </div>
 
@@ -1835,7 +1903,7 @@ function toggleView() {
   listViewActive = !listViewActive;
   document.getElementById('map').style.display       = listViewActive ? 'none' : '';
   document.getElementById('list-view').classList.toggle('active', listViewActive);
-  document.getElementById('ranking-fab').classList.toggle('hidden', listViewActive);
+  // ranking panel stays available regardless of view
   const btn = document.getElementById('btn-toggle-view');
   btn.classList.toggle('list-active', listViewActive);
   btn.innerHTML = listViewActive
@@ -2730,23 +2798,18 @@ async function loadRanking() {
 }
 
 function renderRanking(data) {
-  const widget = document.getElementById('ranking-widget');
-  if (!widget) return;
-  if (!data.length) { widget.style.display = 'none'; return; }
+  const panel = document.getElementById('ranking-panel-body');
+  if (!panel || !data.length) return;
 
   const top    = data[0]?.count || 1;
   const medals = ['gold', 'silver', 'bronze'];
-  const labels = ['1°', '2°', '3°'];
 
   const rows = data.map((item, i) => {
     const pct      = Math.round((item.count / top) * 100);
-    const cls      = i < 3 ? medals[i] + '-row' : '';
     const medalCls = i < 3 ? medals[i] : 'num';
-    const badge    = i < 3
-      ? `<i class="fa-solid fa-medal"></i>`
-      : `${i + 1}`;
+    const badge    = i < 3 ? `<i class="fa-solid fa-medal"></i>` : `${i + 1}`;
     return `
-      <div class="rw-row ${cls}">
+      <div class="rw-row${i < 3 ? ' ' + medals[i] + '-row' : ''}">
         <div class="rw-medal ${medalCls}">${badge}</div>
         <div class="rw-city" title="${escHtml(item.ciudad)}">${escHtml(item.ciudad)}</div>
         <div class="rw-bar-wrap"><div class="rw-bar" data-pct="${pct}" style="width:0%"></div></div>
@@ -2755,34 +2818,19 @@ function renderRanking(data) {
       </div>`;
   }).join('');
 
-  widget.innerHTML = `
-    <div class="rw-header">
-      <div class="rw-title">
-        <div class="rw-trophy"><i class="fa-solid fa-trophy" style="color:#fff"></i></div>
-        <div>
-          <h2>Ciudad Más Cripto de Venezuela</h2>
-          <p>Ranking en tiempo real · ${data.length} ciudad${data.length !== 1 ? 'es' : ''} en el mapa</p>
-        </div>
-      </div>
-      <button class="rw-share" onclick="shareRanking()">
-        <i class="fa-brands fa-x-twitter"></i> Compartir
+  panel.innerHTML = `
+    <div class="rw-list" style="padding:8px 0">${rows}</div>
+    <div style="padding:8px 16px;display:flex;flex-direction:column;gap:8px">
+      <button class="rp-share" onclick="shareRanking()">
+        <i class="fa-brands fa-x-twitter"></i> Compartir ranking en X
       </button>
-    </div>
-    <div class="rw-list">${rows}</div>
-    <div class="rw-cta">
-      <p class="rw-cta-text">¿Tu ciudad no aparece o quieres subir en el ranking?<br>
-        <strong>Registra tu negocio gratis y ayuda a tu ciudad a ganar.</strong>
-      </p>
-      <button class="rw-register" onclick="openModal('registro')">
-        <i class="fa-solid fa-plus"></i> Registrar negocio
+      <button class="rp-register" onclick="closeRankingPanel();openModal('registro')">
+        <i class="fa-solid fa-plus"></i> Registrar mi negocio gratis
       </button>
     </div>`;
 
-  widget.style.display = '';
-
-  // Animar barras después de que el DOM pinte
   requestAnimationFrame(() => {
-    widget.querySelectorAll('.rw-bar').forEach(bar => {
+    panel.querySelectorAll('.rw-bar').forEach(bar => {
       bar.style.width = bar.dataset.pct + '%';
     });
   });
@@ -2790,21 +2838,37 @@ function renderRanking(data) {
 
 function shareRanking() {
   if (!rankingData.length) return;
-  const top3 = rankingData.slice(0, 3);
+  const top3  = rankingData.slice(0, 3);
   const nums  = ['1️⃣', '2️⃣', '3️⃣'];
   const lines = top3.map((c, i) => `${nums[i]} ${c.ciudad} — ${c.count} negocio${c.count !== 1 ? 's' : ''}`).join('\n');
-  const text = `🏆 Ranking de ciudades cripto en Venezuela:\n\n${lines}\n\n¿Tu ciudad está en el top? Registra tu negocio gratis en criptomapavenezuela.com\n\n#CriptoVenezuela #Bitcoin #USDT`;
+  const text  = `🏆 Ranking de ciudades cripto en Venezuela:\n\n${lines}\n\n¿Tu ciudad está en el top? Registra tu negocio gratis en criptomapavenezuela.com\n\n#CriptoVenezuela #Bitcoin #USDT`;
   window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
 }
 
-function showRankingView() {
-  // Cambia a list view y hace scroll al ranking
-  if (!document.getElementById('list-view').classList.contains('active')) {
-    toggleView();
+function toggleRankingPanel() {
+  const panel   = document.getElementById('ranking-panel');
+  const overlay = document.getElementById('ranking-overlay');
+  const btn     = document.getElementById('btn-trophy');
+  const isOpen  = panel.classList.contains('open');
+  if (isOpen) {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+    btn.classList.remove('active');
+  } else {
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    btn.classList.add('active');
+    // Reanimar barras al abrir
+    requestAnimationFrame(() => {
+      panel.querySelectorAll('.rw-bar').forEach(bar => { bar.style.width = bar.dataset.pct + '%'; });
+    });
   }
-  setTimeout(() => {
-    document.getElementById('ranking-widget')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 100);
+}
+
+function closeRankingPanel() {
+  document.getElementById('ranking-panel').classList.remove('open');
+  document.getElementById('ranking-overlay').classList.remove('open');
+  document.getElementById('btn-trophy').classList.remove('active');
 }
 
 function copyEditLink() {
