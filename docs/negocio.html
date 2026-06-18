@@ -183,6 +183,29 @@
       overflow: hidden; border: 1px solid var(--border);
     }
 
+    /* Rating */
+    .rating-display {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stars-display { font-size: 20px; letter-spacing: 2px; color: #F7931A; line-height: 1; }
+    .rating-meta { font-size: 13px; color: var(--muted); }
+    .rating-avg  { font-size: 18px; font-weight: 700; color: var(--text); margin-right: 4px; }
+
+    .stars-input { display: flex; gap: 6px; margin-top: 12px; }
+    .star-btn {
+      font-size: 28px; background: none; border: none; cursor: pointer;
+      color: var(--border); transition: color .1s, transform .1s;
+      line-height: 1; padding: 2px;
+    }
+    .star-btn:hover, .star-btn.hover { color: #F7931A; transform: scale(1.15); }
+    .star-btn.selected { color: #F7931A; }
+    .rating-hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    .rating-thanks {
+      font-size: 13px; color: var(--success); font-weight: 600;
+      margin-top: 10px; display: none;
+    }
+
     /* Share */
     .share-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-share {
@@ -323,18 +346,87 @@ function renderContact(c) {
   return `📞 ${e}`;
 }
 
+let currentNegocioId = null;
+
 async function loadProfile() {
   const id = new URLSearchParams(location.search).get('id');
   if (!id) return showError();
+  currentNegocioId = id;
 
   try {
     const res = await fetch(`${API_URL}/api/negocios/${encodeURIComponent(id)}`);
     if (!res.ok) return showError();
     const n = await res.json();
     render(n);
+    // fire-and-forget view tracking
+    fetch(`${API_URL}/api/negocios/${encodeURIComponent(id)}/view`, { method: 'POST' }).catch(() => {});
+    loadRating(id);
   } catch {
     showError();
   }
+}
+
+async function loadRating(id) {
+  try {
+    const res = await fetch(`${API_URL}/api/negocios/${encodeURIComponent(id)}/rating`);
+    const data = await res.json();
+    renderRating(data.avg, data.count);
+  } catch {}
+}
+
+function renderRating(avg, count) {
+  const display = document.getElementById('rating-display');
+  const input   = document.getElementById('rating-input');
+  if (!display) return;
+
+  if (avg !== null && count > 0) {
+    const full = Math.round(avg);
+    const stars = '★'.repeat(full) + '☆'.repeat(5 - full);
+    display.innerHTML = `
+      <span class="stars-display">${stars}</span>
+      <span class="rating-avg">${avg}</span>
+      <span class="rating-meta">(${count} ${count === 1 ? 'valoración' : 'valoraciones'})</span>
+    `;
+  } else {
+    display.innerHTML = `<span class="rating-meta">Sin valoraciones aún — sé el primero.</span>`;
+  }
+
+  if (input) input.style.display = 'flex';
+}
+
+function initStars() {
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    const val = i + 1;
+    btn.addEventListener('mouseenter', () => highlightStars(val));
+    btn.addEventListener('mouseleave', () => highlightStars(0));
+    btn.addEventListener('click', () => submitRating(val));
+  });
+}
+
+function highlightStars(val) {
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('hover', i < val);
+  });
+}
+
+async function submitRating(stars) {
+  if (!currentNegocioId) return;
+  const input   = document.getElementById('rating-input');
+  const thanks  = document.getElementById('rating-thanks');
+  const display = document.getElementById('rating-display');
+
+  if (input)  input.style.display = 'none';
+  if (thanks) thanks.style.display = 'block';
+
+  try {
+    const res = await fetch(`${API_URL}/api/negocios/${encodeURIComponent(currentNegocioId)}/rating`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stars }),
+    });
+    const data = await res.json();
+    if (data.ok) renderRating(data.avg, data.count);
+  } catch {}
 }
 
 function showError() {
@@ -408,6 +500,22 @@ function render(n) {
       <div id="profile-map"></div>
     </div>` : ''}
 
+    <div class="section">
+      <div class="section-title">Valoraciones</div>
+      <div id="rating-display" class="rating-display">
+        <span class="rating-meta" style="color:var(--muted);font-size:13px">Cargando…</span>
+      </div>
+      <div id="rating-input" class="stars-input" style="display:none">
+        <button class="star-btn" title="1 estrella">★</button>
+        <button class="star-btn" title="2 estrellas">★</button>
+        <button class="star-btn" title="3 estrellas">★</button>
+        <button class="star-btn" title="4 estrellas">★</button>
+        <button class="star-btn" title="5 estrellas">★</button>
+      </div>
+      <div class="rating-hint">Toca las estrellas para dejar tu valoración.</div>
+      <div id="rating-thanks" class="rating-thanks">¡Gracias por tu valoración! ⭐</div>
+    </div>
+
     <hr class="divider">
 
     <div class="section">
@@ -439,6 +547,7 @@ function render(n) {
 
   document.getElementById('state-loading').style.display = 'none';
   document.getElementById('profile').style.display = 'block';
+  initStars();
 
   // Render map if not online and has coordinates
   if (!n.online && n.lat && n.lng) {

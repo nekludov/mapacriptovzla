@@ -1210,6 +1210,25 @@
     </div>
     <div class="modal-body">
 
+      <!-- Stats card — only visible in edit mode -->
+      <div id="stats-card" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">📊 Estadísticas de tu perfil</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+          <div>
+            <div id="stats-v7" style="font-size:22px;font-weight:800;color:var(--text)">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Visitas 7 días</div>
+          </div>
+          <div>
+            <div id="stats-v30" style="font-size:22px;font-weight:800;color:var(--text)">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Visitas 30 días</div>
+          </div>
+          <div>
+            <div id="stats-rating" style="font-size:22px;font-weight:800;color:var(--accent)">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Valoración</div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-row">
         <label id="r-nombre-label">Nombre del negocio <span class="req">*</span></label>
         <input id="r-nombre" class="form-control" type="text" placeholder="Ej. Arepera La Criolla">
@@ -2194,6 +2213,7 @@ function resetRegistroForm() {
   document.getElementById('edit-link-box').style.display = 'none';
   document.getElementById('edit-link-input').value = '';
   document.getElementById('edit-link-qr-wrap').style.display = 'none';
+  document.getElementById('stats-card').style.display = 'none';
   document.getElementById('edit-link-qr').src = '';
   document.getElementById('r-online').checked = false;
   // Restore negocio mode defaults
@@ -2366,9 +2386,26 @@ async function loadEditMode(token) {
     openModal('registro', mode);
     // Esperar a que el mini-mapa se inicialice (initMiniMap usa 120 ms)
     setTimeout(() => prefillEditForm(n), 300);
+    // Load stats async (fire and show when ready)
+    loadEditStats(token);
   } catch (e) {
     showToast('Error al cargar los datos de edición.');
   }
+}
+
+async function loadEditStats(token) {
+  try {
+    const res = await fetch(`${API_URL}/api/negocios/edit/${encodeURIComponent(token)}/stats`);
+    if (!res.ok) return;
+    const s = await res.json();
+    document.getElementById('stats-v7').textContent    = s.views_7d  ?? '—';
+    document.getElementById('stats-v30').textContent   = s.views_30d ?? '—';
+    const ratingTxt = s.rating?.avg != null
+      ? `${s.rating.avg}★`
+      : 'Sin valoraciones';
+    document.getElementById('stats-rating').textContent = ratingTxt;
+    document.getElementById('stats-card').style.display = '';
+  } catch {}
 }
 
 function prefillEditForm(n) {
