@@ -174,7 +174,7 @@
       border-color: var(--accent-ring);
       background: var(--accent-dim);
     }
-    .type-card-icon { font-size: 28px; line-height: 1; }
+    .type-card-icon { font-size: 22px; line-height: 1; color: var(--accent); }
     .type-card-name {
       font-size: 15px; font-weight: 700; color: var(--text);
     }
@@ -1158,8 +1158,8 @@
 
 <!-- ── Filter bar ──────────────────────────────────────────── -->
 <div class="filter-bar">
-  <input type="text" id="f-nombre" placeholder="🔍 Buscar negocio…" oninput="applyFilters()" autocomplete="off">
-  <input type="text" id="f-ciudad" placeholder="🏙 Ciudad…" list="ciudades-list" oninput="applyFilters()">
+  <input type="text" id="f-nombre" placeholder="Buscar negocio…" oninput="applyFilters()" autocomplete="off">
+  <input type="text" id="f-ciudad" placeholder="Ciudad…" list="ciudades-list" oninput="applyFilters()">
   <datalist id="ciudades-list">
     <option>Caracas</option><option>Maracaibo</option><option>Valencia</option>
     <option>Barquisimeto</option><option>Maturín</option><option>Barcelona</option>
@@ -1170,32 +1170,32 @@
 
   <select id="f-tipo" onchange="applyFilters()">
     <option value="">Todos los tipos</option>
-    <option value="restaurante">🍽 Restaurante</option>
-    <option value="farmacia">💊 Farmacia</option>
-    <option value="ferreteria">🔧 Ferretería</option>
-    <option value="tecnologia">💻 Tecnología</option>
-    <option value="servicio">🛠 Servicio</option>
-    <option value="tienda">🏪 Tienda</option>
-    <option value="hotel">🏨 Hotel</option>
-    <option value="transporte">🚗 Transporte</option>
-    <option value="emprendedor">💡 Emprendedor</option>
-    <option value="otro">📍 Otro</option>
+    <option value="restaurante">Restaurante</option>
+    <option value="farmacia">Farmacia</option>
+    <option value="ferreteria">Ferretería</option>
+    <option value="tecnologia">Tecnología</option>
+    <option value="servicio">Servicio</option>
+    <option value="tienda">Tienda</option>
+    <option value="hotel">Hotel</option>
+    <option value="transporte">Transporte</option>
+    <option value="emprendedor">Emprendedor</option>
+    <option value="otro">Otro</option>
     <optgroup label="── Profesionales ──">
-    <option value="docente">👨‍🏫 Docente</option>
-    <option value="plomero">🪠 Plomero</option>
-    <option value="electricista">⚡ Electricista</option>
-    <option value="ac_tecnico">❄️ Técnico A/C</option>
-    <option value="mecanico">🔩 Mecánico</option>
-    <option value="programador">👨‍💻 Programador</option>
-    <option value="disenador">🎨 Diseñador</option>
-    <option value="fotografo">📸 Fotógrafo</option>
-    <option value="estetica">💇 Estética</option>
-    <option value="entrenador">🏋️ Entrenador</option>
-    <option value="medico">🩺 Médico</option>
-    <option value="abogado">⚖️ Abogado</option>
-    <option value="servicios_hogar">🧹 Servicios hogar</option>
-    <option value="marketing">📱 Marketing / Redes</option>
-    <option value="otro_prof">👤 Otro profesional</option>
+    <option value="docente">Docente</option>
+    <option value="plomero">Plomero</option>
+    <option value="electricista">Electricista</option>
+    <option value="ac_tecnico">Técnico A/C</option>
+    <option value="mecanico">Mecánico</option>
+    <option value="programador">Programador</option>
+    <option value="disenador">Diseñador</option>
+    <option value="fotografo">Fotógrafo</option>
+    <option value="estetica">Estética</option>
+    <option value="entrenador">Entrenador</option>
+    <option value="medico">Médico</option>
+    <option value="abogado">Abogado</option>
+    <option value="servicios_hogar">Servicios hogar</option>
+    <option value="marketing">Marketing / Redes</option>
+    <option value="otro_prof">Otro profesional</option>
     </optgroup>
   </select>
 
@@ -1253,12 +1253,12 @@
       <p class="type-picker-title">Elige cómo quieres aparecer en el mapa.</p>
       <div class="type-picker-grid">
         <button class="type-card" onclick="selectRegistroType('negocio')">
-          <span class="type-card-icon">🏪</span>
+          <span class="type-card-icon"><i class="fa-solid fa-store"></i></span>
           <span class="type-card-name">Negocio</span>
           <span class="type-card-desc">Tienda, restaurante, farmacia, hotel u otro comercio con local físico u online.</span>
         </button>
         <button class="type-card" onclick="selectRegistroType('profesional')">
-          <span class="type-card-icon">💼</span>
+          <span class="type-card-icon"><i class="fa-solid fa-briefcase"></i></span>
           <span class="type-card-name">Profesional</span>
           <span class="type-card-desc">Diseñador, mecánico, docente, programador u otro servicio independiente.</span>
         </button>
@@ -1275,7 +1275,7 @@
 
       <!-- Stats card — only visible in edit mode -->
       <div id="stats-card" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:20px">
-        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">📊 Estadísticas de tu perfil</div>
+        <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px"><i class="fa-solid fa-chart-bar"></i> Estadísticas de tu perfil</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
           <div>
             <div id="stats-v7" style="font-size:22px;font-weight:800;color:var(--text)">—</div>
@@ -1317,7 +1317,7 @@
       <div class="form-row">
         <label class="online-label">
           <input type="checkbox" id="r-online" onchange="toggleOnlineMode(this.checked)">
-          🌐 Solo online — sin local físico
+          <i class="fa-solid fa-globe"></i> Solo online — sin local físico
         </label>
       </div>
 
@@ -1359,7 +1359,7 @@
         <label>Logo o foto del local</label>
         <div class="logo-upload-area" id="logo-area" onclick="document.getElementById('logo-input').click()">
           <div id="logo-placeholder">
-            <div style="font-size:28px;margin-bottom:6px">📷</div>
+            <i class="fa-solid fa-camera" style="font-size:26px;color:var(--muted);margin-bottom:8px;display:block"></i>
             <div style="font-size:13px;color:var(--muted)">Clic para subir imagen</div>
             <div class="logo-upload-hint">JPG/PNG/WebP · se comprime automáticamente</div>
           </div>
@@ -1372,7 +1372,7 @@
         <label id="location-label">Ubicación en el mapa <span class="req">*</span> — clic en el mapa o GPS</label>
         <div id="mini-map"></div>
         <div class="map-actions">
-          <button class="btn-gps" onclick="useGPS()">📍 Usar mi ubicación</button>
+          <button class="btn-gps" onclick="useGPS()"><i class="fa-solid fa-location-dot"></i> Usar mi ubicación</button>
           <button class="btn-gps" onclick="resetLocation()" id="btn-reset-loc" style="display:none">✕ Quitar punto</button>
         </div>
         <div class="map-coords" id="map-coords">Sin ubicación seleccionada</div>
@@ -1385,7 +1385,7 @@
 
       <!-- Aparece tras registro exitoso con el link de edición -->
       <div id="edit-link-box" style="display:none;margin-top:12px;padding:14px;background:var(--surface2);border:1px solid var(--accent);border-radius:10px;">
-        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px">🔑 Guarda este enlace para editar tu negocio</div>
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px"><i class="fa-solid fa-key"></i> Guarda este enlace para editar tu negocio</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Con este link podrás actualizar tus datos en cualquier momento, sin contraseña. Guárdalo en un lugar seguro.</div>
         <div style="display:flex;gap:8px">
           <input id="edit-link-input" class="form-control" type="text" readonly
@@ -1397,7 +1397,7 @@
         </div>
         <!-- QR del perfil público -->
         <div id="edit-link-qr-wrap" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:none">
-          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">📱 Código QR de tu perfil</div>
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px"><i class="fa-solid fa-qrcode"></i> Código QR de tu perfil</div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Compártelo con tus clientes o imprímelo en tu local.</div>
           <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
             <img id="edit-link-qr" style="width:120px;height:120px;border-radius:8px;border:1px solid var(--border)" alt="QR">
@@ -1405,7 +1405,7 @@
               <div id="edit-link-qr-url" style="font-size:10px;color:var(--muted);font-family:monospace;word-break:break-all;margin-bottom:8px"></div>
               <a id="edit-link-qr-dl" href="#" download="qr-mapacripto.png"
                  style="display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px">
-                ⬇ Descargar QR
+                <i class="fa-solid fa-download"></i> Descargar QR
               </a>
             </div>
           </div>
@@ -1424,7 +1424,7 @@
 <div class="modal-overlay" id="modal-admin">
   <div class="modal-box">
     <div class="modal-header">
-      <h2>🔐 Admin</h2>
+      <h2><i class="fa-solid fa-lock"></i> Admin</h2>
       <button class="btn-close" onclick="closeModal('admin')">×</button>
     </div>
     <div class="modal-body">
@@ -1530,32 +1530,32 @@ const API_URL = 'https://api.criptomapavenezuela.com';
 // ════════════════════════════════════════════════════════════
 const TIPOS = {
   // Negocios
-  restaurante:      { emoji: '🍽', color: '#FF6B35' },
-  farmacia:         { emoji: '💊', color: '#4CAF50' },
-  ferreteria:       { emoji: '🔧', color: '#9C27B0' },
-  tecnologia:       { emoji: '💻', color: '#2196F3' },
-  servicio:         { emoji: '🛠', color: '#FF9800' },
-  tienda:           { emoji: '🏪', color: '#E91E63' },
-  hotel:            { emoji: '🏨', color: '#00BCD4' },
-  transporte:       { emoji: '🚗', color: '#795548' },
-  emprendedor:      { emoji: '💡', color: '#FFC107' },
-  otro:             { emoji: '📍', color: '#607D8B' },
+  restaurante:      { icon: 'fa-utensils',          color: '#FF6B35' },
+  farmacia:         { icon: 'fa-pills',              color: '#4CAF50' },
+  ferreteria:       { icon: 'fa-wrench',             color: '#9C27B0' },
+  tecnologia:       { icon: 'fa-laptop',             color: '#2196F3' },
+  servicio:         { icon: 'fa-screwdriver-wrench', color: '#FF9800' },
+  tienda:           { icon: 'fa-store',              color: '#E91E63' },
+  hotel:            { icon: 'fa-hotel',              color: '#00BCD4' },
+  transporte:       { icon: 'fa-car',                color: '#795548' },
+  emprendedor:      { icon: 'fa-lightbulb',          color: '#FFC107' },
+  otro:             { icon: 'fa-location-dot',       color: '#607D8B' },
   // Profesionales
-  docente:          { emoji: '👨‍🏫', color: '#8B5CF6' },
-  plomero:          { emoji: '🪠', color: '#6B7280' },
-  electricista:     { emoji: '⚡', color: '#EAB308' },
-  ac_tecnico:       { emoji: '❄️', color: '#06B6D4' },
-  mecanico:         { emoji: '🔩', color: '#78716C' },
-  programador:      { emoji: '👨‍💻', color: '#3B82F6' },
-  disenador:        { emoji: '🎨', color: '#EC4899' },
-  fotografo:        { emoji: '📸', color: '#F59E0B' },
-  estetica:         { emoji: '💇', color: '#F472B6' },
-  entrenador:       { emoji: '🏋️', color: '#10B981' },
-  medico:           { emoji: '🩺', color: '#06B6D4' },
-  abogado:          { emoji: '⚖️', color: '#8B5CF6' },
-  servicios_hogar:  { emoji: '🧹', color: '#9CA3AF' },
-  marketing:        { emoji: '📱', color: '#A855F7' },
-  otro_prof:        { emoji: '👤', color: '#607D8B' },
+  docente:          { icon: 'fa-graduation-cap',     color: '#8B5CF6' },
+  plomero:          { icon: 'fa-wrench',             color: '#6B7280' },
+  electricista:     { icon: 'fa-bolt',               color: '#EAB308' },
+  ac_tecnico:       { icon: 'fa-snowflake',          color: '#06B6D4' },
+  mecanico:         { icon: 'fa-gear',               color: '#78716C' },
+  programador:      { icon: 'fa-code',               color: '#3B82F6' },
+  disenador:        { icon: 'fa-pen-nib',            color: '#EC4899' },
+  fotografo:        { icon: 'fa-camera',             color: '#F59E0B' },
+  estetica:         { icon: 'fa-scissors',           color: '#F472B6' },
+  entrenador:       { icon: 'fa-dumbbell',           color: '#10B981' },
+  medico:           { icon: 'fa-stethoscope',        color: '#06B6D4' },
+  abogado:          { icon: 'fa-scale-balanced',     color: '#8B5CF6' },
+  servicios_hogar:  { icon: 'fa-broom',              color: '#9CA3AF' },
+  marketing:        { icon: 'fa-bullhorn',           color: '#A855F7' },
+  otro_prof:        { icon: 'fa-user',               color: '#607D8B' },
 };
 
 const CRIPTOS = [
@@ -1589,6 +1589,17 @@ const CRIPTOS = [
 // ════════════════════════════════════════════════════════════
 // Estado global
 // ════════════════════════════════════════════════════════════
+const TIPO_LABEL = {
+  restaurante:'Restaurante', farmacia:'Farmacia', ferreteria:'Ferretería',
+  tecnologia:'Tecnología', servicio:'Servicio', tienda:'Tienda',
+  hotel:'Hotel', transporte:'Transporte', emprendedor:'Emprendedor', otro:'Otro',
+  docente:'Docente', plomero:'Plomero', electricista:'Electricista',
+  ac_tecnico:'Técnico A/C', mecanico:'Mecánico', programador:'Programador',
+  disenador:'Diseñador', fotografo:'Fotógrafo', estetica:'Estética',
+  entrenador:'Entrenador', medico:'Médico', abogado:'Abogado',
+  servicios_hogar:'Serv. hogar', marketing:'Marketing', otro_prof:'Profesional',
+};
+
 let map, clusterGroup;
 let miniMap = null, miniMarker = null;
 let pickedLat = null, pickedLng = null;
@@ -1675,7 +1686,7 @@ function initMap() {
   locateBtn.onAdd = () => {
     const btn = L.DomUtil.create('button', 'map-locate-btn');
     btn.title = 'Mi ubicación';
-    btn.innerHTML = '📍';
+    btn.innerHTML = '<i class="fa-solid fa-location-dot" style="font-size:16px"></i>';
     L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation)
                .on(btn, 'click', locateUser);
     return btn;
@@ -1726,10 +1737,10 @@ function toggleView() {
 function renderMarkers(negocios) {
   clusterGroup.clearLayers();
   negocios.forEach(n => {
-    const tipo = n.online ? { emoji: '🌐', color: '#0891B2' } : (TIPOS[n.tipo] || TIPOS.otro);
+    const tipo = n.online ? { icon: 'fa-globe', color: '#0891B2' } : (TIPOS[n.tipo] || TIPOS.otro);
     const icon = L.divIcon({
       className: '',
-      html: `<div class="map-marker" style="background:${tipo.color}"><span>${tipo.emoji}</span></div>`,
+      html: `<div class="map-marker" style="background:${tipo.color}"><span><i class="fa-solid ${tipo.icon}" style="font-size:15px;color:#fff"></i></span></div>`,
       iconSize: [38, 38],
       iconAnchor: [19, 38],
       popupAnchor: [0, -40],
@@ -1753,19 +1764,8 @@ function renderList(negocios) {
     return;
   }
 
-  const TIPO_LABEL = {
-    restaurante:'Restaurante', farmacia:'Farmacia', ferreteria:'Ferretería',
-    tecnologia:'Tecnología', servicio:'Servicio', tienda:'Tienda',
-    hotel:'Hotel', transporte:'Transporte', emprendedor:'Emprendedor', otro:'Otro',
-    docente:'Docente', plomero:'Plomero', electricista:'Electricista',
-    ac_tecnico:'Técnico A/C', mecanico:'Mecánico', programador:'Programador',
-    disenador:'Diseñador', fotografo:'Fotógrafo', estetica:'Estética',
-    entrenador:'Entrenador', medico:'Médico', abogado:'Abogado',
-    servicios_hogar:'Serv. hogar', marketing:'Marketing', otro_prof:'Profesional',
-  };
-
   grid.innerHTML = negocios.map(n => {
-    const tipoData = n.online ? { emoji: '🌐' } : (TIPOS[n.tipo] || TIPOS.otro);
+    const tipoData = n.online ? { icon: 'fa-globe', color: '#0891B2' } : (TIPOS[n.tipo] || TIPOS.otro);
     const wa       = getWaContactLink(n.contacto);
     const isNew    = n.created_at &&
       (Date.now() - new Date(n.created_at).getTime()) < 7 * 24 * 60 * 60 * 1000;
@@ -1789,7 +1789,7 @@ function renderList(negocios) {
         <div class="nc-body">
           ${n.logo_url
             ? `<img class="nc-logo" src="${escHtml(n.logo_url)}" alt="${escHtml(n.nombre)}" loading="lazy">`
-            : `<div class="nc-logo-placeholder">${tipoData.emoji}</div>`}
+            : `<div class="nc-logo-placeholder"><i class="fa-solid ${tipoData.icon}" style="color:${tipoData.color};font-size:20px"></i></div>`}
           <div class="nc-info">
             <div class="nc-name">
               ${escHtml(n.nombre)}${isNew ? '<span class="nc-status">Nuevo</span>' : ''}
@@ -1812,20 +1812,28 @@ function formatContacto(c) {
   if (!c) return '';
   const esc = escHtml(c);
   if (/^https?:\/\//i.test(c)) {
-    const icon = /instagram/i.test(c) ? '📸' : /twitter\.com|x\.com/i.test(c) ? '𝕏' : /wa\.me|whatsapp/i.test(c) ? '💬' : /t\.me|telegram/i.test(c) ? '✈️' : '🔗';
+    const icon = /instagram/i.test(c)
+      ? '<i class="fa-brands fa-instagram"></i>'
+      : /twitter\.com|x\.com/i.test(c)
+        ? '<i class="fa-brands fa-x-twitter"></i>'
+        : /wa\.me|whatsapp/i.test(c)
+          ? '<i class="fa-brands fa-whatsapp"></i>'
+          : /t\.me|telegram/i.test(c)
+            ? '<i class="fa-brands fa-telegram"></i>'
+            : '<i class="fa-solid fa-link"></i>';
     const label = c.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
     const short = label.length > 32 ? label.slice(0, 32) + '…' : label;
     return `<p class="popup-meta"><a href="${esc}" target="_blank" rel="noopener" class="contact-link">${icon} ${short}</a></p>`;
   }
   if (/^@\w/.test(c)) {
     const handle = encodeURIComponent(c.slice(1));
-    return `<p class="popup-meta"><a href="https://instagram.com/${handle}" target="_blank" rel="noopener" class="contact-link">📸 ${esc}</a></p>`;
+    return `<p class="popup-meta"><a href="https://instagram.com/${handle}" target="_blank" rel="noopener" class="contact-link"><i class="fa-brands fa-instagram"></i> ${esc}</a></p>`;
   }
   if (/^\+?[\d\s\-()+]{6,}$/.test(c)) {
     const tel = c.replace(/[^\d+]/g, '');
-    return `<p class="popup-meta"><a href="tel:${tel}" class="contact-link">📞 ${esc}</a></p>`;
+    return `<p class="popup-meta"><a href="tel:${tel}" class="contact-link"><i class="fa-solid fa-phone"></i> ${esc}</a></p>`;
   }
-  return `<p class="popup-meta">📞 ${esc}</p>`;
+  return `<p class="popup-meta"><i class="fa-solid fa-phone"></i> ${esc}</p>`;
 }
 
 function getWaContactLink(c) {
@@ -1841,7 +1849,7 @@ function getWaContactLink(c) {
 }
 
 function buildPopup(n) {
-  const tipo = TIPOS[n.tipo] || TIPOS.otro;
+  const tipo = n.online ? { icon: 'fa-globe', color: '#0891B2' } : (TIPOS[n.tipo] || TIPOS.otro);
 
   const criptoMap = Object.fromEntries(CRIPTOS.map(c => [c.id, c]));
   const VALID_CRIPTO_IDS = new Set(CRIPTOS.map(c => c.id));
@@ -1867,10 +1875,10 @@ function buildPopup(n) {
       ${n.logo_url ? `<img class="popup-logo" src="${n.logo_url}" alt="${escHtml(n.nombre)}">` : ''}
       <div class="popup-body">
         <h3>${escHtml(n.nombre)}${isNew ? '<span class="badge-nuevo">✨ Nuevo</span>' : ''}</h3>
-        <span class="badge-tipo">${tipo.emoji} ${escHtml(n.tipo)}</span>
+        <span class="badge-tipo"><i class="fa-solid ${tipo.icon}"></i> ${escHtml(TIPO_LABEL[n.tipo] || n.tipo)}</span>
         <div class="popup-criptos">${criptos}</div>
         ${n.descripcion ? `<p class="popup-desc">${escHtml(n.descripcion)}</p>` : ''}
-        ${n.online ? `<p class="popup-meta">🌐 Tienda online</p>` : (n.ciudad ? `<p class="popup-meta">🏙 ${escHtml(n.ciudad)}</p>` : '')}
+        ${n.online ? `<p class="popup-meta"><i class="fa-solid fa-globe"></i> Tienda online</p>` : (n.ciudad ? `<p class="popup-meta"><i class="fa-solid fa-location-dot"></i> ${escHtml(n.ciudad)}</p>` : '')}
         ${formatContacto(n.contacto)}
         <div class="popup-share">
           ${waContact
@@ -1930,34 +1938,34 @@ function clearFilters() {
 // ════════════════════════════════════════════════════════════
 const OPTS_NEGOCIO = `
   <option value="">Seleccionar…</option>
-  <option value="restaurante">🍽 Restaurante / Comida</option>
-  <option value="farmacia">💊 Farmacia / Salud</option>
-  <option value="ferreteria">🔧 Ferretería / Construcción</option>
-  <option value="tecnologia">💻 Tecnología / Electrónica</option>
-  <option value="servicio">🛠 Servicio profesional</option>
-  <option value="tienda">🏪 Tienda / Comercio</option>
-  <option value="hotel">🏨 Hotel / Alojamiento</option>
-  <option value="transporte">🚗 Transporte</option>
-  <option value="emprendedor">💡 Emprendedor / Freelance</option>
-  <option value="otro">📍 Otro</option>`;
+  <option value="restaurante">Restaurante / Comida</option>
+  <option value="farmacia">Farmacia / Salud</option>
+  <option value="ferreteria">Ferretería / Construcción</option>
+  <option value="tecnologia">Tecnología / Electrónica</option>
+  <option value="servicio">Servicio profesional</option>
+  <option value="tienda">Tienda / Comercio</option>
+  <option value="hotel">Hotel / Alojamiento</option>
+  <option value="transporte">Transporte</option>
+  <option value="emprendedor">Emprendedor / Freelance</option>
+  <option value="otro">Otro</option>`;
 
 const OPTS_PROFESIONAL = `
   <option value="">Seleccionar especialidad…</option>
-  <option value="docente">👨‍🏫 Docente / Clases particulares</option>
-  <option value="plomero">🪠 Plomero / Gasfitero</option>
-  <option value="electricista">⚡ Electricista</option>
-  <option value="ac_tecnico">❄️ Técnico A/C / Refrigeración</option>
-  <option value="mecanico">🔩 Mecánico</option>
-  <option value="programador">👨‍💻 Programador / IT</option>
-  <option value="disenador">🎨 Diseñador / Ilustrador</option>
-  <option value="fotografo">📸 Fotógrafo / Videógrafo</option>
-  <option value="estetica">💇 Estética / Belleza</option>
-  <option value="entrenador">🏋️ Entrenador / Fitness</option>
-  <option value="medico">🩺 Médico / Salud</option>
-  <option value="abogado">⚖️ Abogado / Contador</option>
-  <option value="servicios_hogar">🧹 Servicios del hogar</option>
-  <option value="marketing">📱 Marketing / Redes Sociales</option>
-  <option value="otro_prof">👤 Otro profesional</option>`;
+  <option value="docente">Docente / Clases particulares</option>
+  <option value="plomero">Plomero / Gasfitero</option>
+  <option value="electricista">Electricista</option>
+  <option value="ac_tecnico">Técnico A/C / Refrigeración</option>
+  <option value="mecanico">Mecánico</option>
+  <option value="programador">Programador / IT</option>
+  <option value="disenador">Diseñador / Ilustrador</option>
+  <option value="fotografo">Fotógrafo / Videógrafo</option>
+  <option value="estetica">Estética / Belleza</option>
+  <option value="entrenador">Entrenador / Fitness</option>
+  <option value="medico">Médico / Salud</option>
+  <option value="abogado">Abogado / Contador</option>
+  <option value="servicios_hogar">Servicios del hogar</option>
+  <option value="marketing">Marketing / Redes Sociales</option>
+  <option value="otro_prof">Otro profesional</option>`;
 
 let registroMode = 'negocio';
 
@@ -2376,11 +2384,11 @@ function adminCardHtml(n, showModerar = true) {
       </div>
       <div class="admin-card-actions">
         ${showModerar ? `
-          <button class="btn-aprobar"  onclick="moderarNegocio('${n.id}','activo')">✅ Aprobar</button>
-          <button class="btn-rechazar" onclick="moderarNegocio('${n.id}','rechazado')">❌ Rechazar</button>
+          <button class="btn-aprobar"  onclick="moderarNegocio('${n.id}','activo')"><i class="fa-solid fa-check"></i> Aprobar</button>
+          <button class="btn-rechazar" onclick="moderarNegocio('${n.id}','rechazado')"><i class="fa-solid fa-xmark"></i> Rechazar</button>
         ` : ''}
         <button class="btn-rechazar" style="flex:0;padding:8px 12px"
-                onclick="eliminarNegocio('${n.id}')">🗑</button>
+                onclick="eliminarNegocio('${n.id}')"><i class="fa-solid fa-trash"></i></button>
       </div>
     </div>`;
 }
