@@ -230,6 +230,61 @@ app.get('/api/negocios/:id', async (req, res) => {
   res.json(data);
 });
 
+// ── GET /api/negocios/:id/rating — calificación promedio ─────
+app.get('/api/negocios/:id/rating', async (req, res) => {
+  const { data, error } = await supabase
+    .from('ratings').select('stars').eq('negocio_id', req.params.id);
+  if (error) return res.status(500).json({ error: 'Error interno.' });
+  if (!data.length) return res.json({ avg: null, count: 0 });
+  const avg = data.reduce((s, r) => s + r.stars, 0) / data.length;
+  res.json({ avg: Math.round(avg * 10) / 10, count: data.length });
+});
+
+// ── POST /api/negocios/:id/rating — enviar calificación ──────
+app.post('/api/negocios/:id/rating', async (req, res) => {
+  const stars = parseInt(req.body.stars, 10);
+  if (!stars || stars < 1 || stars > 5)
+    return res.status(400).json({ error: 'Calificación inválida (1-5).' });
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+    || req.socket.remoteAddress || 'unknown';
+  const ip_hash = crypto.createHash('sha256').update(ip).digest('hex');
+  const { error } = await supabase.from('ratings').upsert(
+    { negocio_id: req.params.id, stars, ip_hash },
+    { onConflict: 'negocio_id,ip_hash' }
+  );
+  if (error) return res.status(500).json({ error: 'Error al guardar.' });
+  const { data } = await supabase.from('ratings').select('stars').eq('negocio_id', req.params.id);
+  const avg = data.reduce((s, r) => s + r.stars, 0) / data.length;
+  res.json({ ok: true, avg: Math.round(avg * 10) / 10, count: data.length });
+});
+
+// ── POST /api/negocios/:id/view — registrar visita ───────────
+app.post('/api/negocios/:id/view', async (req, res) => {
+  await supabase.from('views').insert({ negocio_id: req.params.id });
+  res.json({ ok: true });
+});
+
+// ── GET /api/negocios/edit/:token/stats — estadísticas ───────
+app.get('/api/negocios/edit/:token/stats', async (req, res) => {
+  const { data: neg } = await supabase
+    .from('negocios').select('id').eq('edit_token', req.params.token).single();
+  if (!neg) return res.status(404).json({ error: 'Token inválido.' });
+  const since7  = new Date(Date.now() - 7  * 864e5).toISOString();
+  const since30 = new Date(Date.now() - 30 * 864e5).toISOString();
+  const [v7, v30, rat] = await Promise.all([
+    supabase.from('views').select('*', { count: 'exact', head: true })
+      .eq('negocio_id', neg.id).gte('viewed_at', since7),
+    supabase.from('views').select('*', { count: 'exact', head: true })
+      .eq('negocio_id', neg.id).gte('viewed_at', since30),
+    supabase.from('ratings').select('stars').eq('negocio_id', neg.id),
+  ]);
+  const rData = rat.data || [];
+  const rating = rData.length
+    ? { avg: Math.round(rData.reduce((s, r) => s + r.stars, 0) / rData.length * 10) / 10, count: rData.length }
+    : { avg: null, count: 0 };
+  res.json({ views_7d: v7.count || 0, views_30d: v30.count || 0, rating });
+});
+
 // ── GET /api/admin/pendientes ─────────────────────────────────────────────────
 app.get('/api/admin/pendientes', async (req, res) => {
   if (!ADMIN_PASSWORD || req.query.password !== ADMIN_PASSWORD) {
@@ -256,18 +311,27 @@ app.get('/api/admin/activos', async (req, res) => {
 
 // ── PATCH /api/negocios/:id — acción admin ────────────────────────────────────
 app.patch('/api/negocios/:id', async (req, res) => {
-  const { password, estado } = req.body;
+  const { password, estado, contacto, nombre, descripcion, ciudad } = req.body;
   if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'No autorizado.' });
   }
-  if (!['activo', 'rechazado'].includes(estado)) {
-    return res.status(400).json({ error: 'Estado inválido.' });
+  const updates = {};
+  if (estado !== undefined) {
+    if (!['activo', 'rechazado'].includes(estado))
+      return res.status(400).json({ error: 'Estado inválido.' });
+    updates.estado = estado;
   }
+  if (contacto  !== undefined) updates.contacto  = contacto  || null;
+  if (nombre    !== undefined) updates.nombre    = nombre    || null;
+  if (descripcion !== undefined) updates.descripcion = descripcion || null;
+  if (ciudad    !== undefined) updates.ciudad    = ciudad    || null;
+  if (!Object.keys(updates).length)
+    return res.status(400).json({ error: 'Nada que actualizar.' });
   const { data, error } = await supabase
-    .from('negocios').update({ estado })
+    .from('negocios').update(updates)
     .eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
-  if (estado === 'activo') await postTweet(data);
+  if (updates.estado === 'activo') await postTweet(data);
   res.json({ ok: true, data });
 });
 
