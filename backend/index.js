@@ -21,7 +21,13 @@ const resend    = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const CRON_SECRET    = process.env.CRON_SECRET;
-const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'seoyestrategia@gmail.com';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
+
+// Warn on startup if optional-but-important env vars are missing
+if (!ADMIN_PASSWORD)         console.warn('WARN: ADMIN_PASSWORD not set — admin routes will always return 401');
+if (!ADMIN_EMAIL)            console.warn('WARN: ADMIN_EMAIL not set — admin notifications disabled');
+if (!process.env.RESEND_API_KEY)     console.warn('WARN: RESEND_API_KEY not set — all emails disabled');
+if (!process.env.ANTHROPIC_API_KEY)  console.warn('WARN: ANTHROPIC_API_KEY not set — moderation will default to pendiente');
 const FRONTEND_URL   = 'https://criptomapavenezuela.com';
 const API_URL        = 'https://api.criptomapavenezuela.com';
 const BUCKET = 'logos';
@@ -347,13 +353,18 @@ app.post('/api/negocios', async (req, res) => {
 
 // ── GET /api/negocios/edit/:token — datos para pre-rellenar el formulario ─────
 app.get('/api/negocios/edit/:token', async (req, res) => {
-  const { data, error } = await supabase
-    .from('negocios')
-    .select(PUBLIC_COLS)
-    .eq('edit_token', req.params.token)
-    .single();
-  if (error || !data) return res.status(404).json({ error: 'Enlace de edición inválido.' });
-  res.json(data);
+  try {
+    const { data, error } = await supabase
+      .from('negocios')
+      .select(PUBLIC_COLS)
+      .eq('edit_token', req.params.token)
+      .single();
+    if (error || !data) return res.status(404).json({ error: 'Enlace de edición inválido.' });
+    res.json(data);
+  } catch (err) {
+    console.error('GET /edit/:token:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
 });
 
 // ── PATCH /api/negocios/edit/:token — guardar cambios ────────────────────────
@@ -402,24 +413,34 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
 
 // ── GET /api/negocios/:id — perfil público ────────────────────
 app.get('/api/negocios/:id', async (req, res) => {
-  const { data, error } = await supabase
-    .from('negocios')
-    .select(PUBLIC_COLS)
-    .eq('id', req.params.id)
-    .eq('estado', 'activo')
-    .single();
-  if (error || !data) return res.status(404).json({ error: 'Negocio no encontrado.' });
-  res.json(data);
+  try {
+    const { data, error } = await supabase
+      .from('negocios')
+      .select(PUBLIC_COLS)
+      .eq('id', req.params.id)
+      .eq('estado', 'activo')
+      .single();
+    if (error || !data) return res.status(404).json({ error: 'Negocio no encontrado.' });
+    res.json(data);
+  } catch (err) {
+    console.error('GET /negocios/:id:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
 });
 
 // ── GET /api/negocios/:id/rating — calificación promedio ─────
 app.get('/api/negocios/:id/rating', async (req, res) => {
-  const { data, error } = await supabase
-    .from('ratings').select('stars').eq('negocio_id', req.params.id);
-  if (error) return res.status(500).json({ error: 'Error interno.' });
-  if (!data.length) return res.json({ avg: null, count: 0 });
-  const avg = data.reduce((s, r) => s + r.stars, 0) / data.length;
-  res.json({ avg: Math.round(avg * 10) / 10, count: data.length });
+  try {
+    const { data, error } = await supabase
+      .from('ratings').select('stars').eq('negocio_id', req.params.id);
+    if (error) return res.status(500).json({ error: 'Error interno.' });
+    if (!data.length) return res.json({ avg: null, count: 0 });
+    const avg = data.reduce((s, r) => s + r.stars, 0) / data.length;
+    res.json({ avg: Math.round(avg * 10) / 10, count: data.length });
+  } catch (err) {
+    console.error('GET /negocios/:id/rating:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
 });
 
 // ── POST /api/negocios/:id/rating — enviar calificación ──────
@@ -435,7 +456,8 @@ app.post('/api/negocios/:id/rating', async (req, res) => {
     { onConflict: 'negocio_id,ip_hash' }
   );
   if (error) return res.status(500).json({ error: 'Error al guardar.' });
-  const { data } = await supabase.from('ratings').select('stars').eq('negocio_id', req.params.id);
+  const { data, error: fetchErr } = await supabase.from('ratings').select('stars').eq('negocio_id', req.params.id);
+  if (fetchErr || !data) return res.status(500).json({ error: 'Error al calcular calificación.' });
   const avg = data.reduce((s, r) => s + r.stars, 0) / data.length;
   res.json({ ok: true, avg: Math.round(avg * 10) / 10, count: data.length });
 });
