@@ -2254,6 +2254,9 @@ async function submitRegistro() {
         showFormMsg('✅ ¡Registro enviado! Está en revisión y se publicará pronto.', 'success');
       }
 
+      // Bloquear el botón permanentemente tras éxito para evitar duplicados
+      btn.textContent = 'Enviado ✓';
+
       // Mostrar enlace de edición + QR del perfil
       if (data.edit_token) {
         const editLink   = `${location.origin}/?edit=${data.edit_token}`;
@@ -2273,13 +2276,18 @@ async function submitRegistro() {
           qrWrap.style.display = 'block';
         }
       }
+      return; // no pasar por el finally de re-enable
     }
 
   } catch (e) {
     showFormMsg(e.message, 'error');
   } finally {
-    btn.disabled = false;
-    btn.textContent = currentEditToken ? 'Guardar cambios' : 'Enviar negocio';
+    // Solo re-habilitar en edición (el usuario puede seguir haciendo cambios)
+    // En registro nuevo el botón queda deshabilitado para evitar duplicados
+    if (currentEditToken) {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cambios';
+    }
   }
 }
 

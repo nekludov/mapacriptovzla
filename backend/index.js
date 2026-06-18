@@ -4,6 +4,7 @@ const crypto   = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
 const { TwitterApi } = require('twitter-api-v2');
+const { Resend } = require('resend');
 
 const app = express();
 
@@ -12,8 +13,13 @@ app.use(express.json({ limit: '5mb' }));
 
 const supabase  = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const resend    = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const CRON_SECRET    = process.env.CRON_SECRET;
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'seoyestrategia@gmail.com';
+const FRONTEND_URL   = 'https://criptomapavenezuela.com';
+const API_URL        = 'https://api.criptomapavenezuela.com';
 const BUCKET = 'logos';
 
 const ALLOWED_TIPOS = new Set([
@@ -91,6 +97,110 @@ async function uploadLogo(logo_base64) {
   }
 }
 
+async function sendPingEmail({ email, nombre, edit_token, id }) {
+  if (!resend) { console.warn('Resend not configured — skipping email'); return; }
+  const confirmUrl = `${API_URL}/api/confirm/${encodeURIComponent(edit_token)}`;
+  const editUrl    = `${FRONTEND_URL}/?edit=${encodeURIComponent(edit_token)}`;
+  const profileUrl = `${FRONTEND_URL}/negocio.html?id=${id}`;
+  try {
+    await resend.emails.send({
+      from: 'MapaCripto <noreply@criptomapavenezuela.com>',
+      to:   email,
+      subject: `¿${nombre} sigue activo en MapaCripto? ⚡`,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
+          <div style="background:#F7931A;padding:20px 24px;border-radius:10px 10px 0 0">
+            <span style="color:#fff;font-weight:700;font-size:18px">🗺️ MapaCripto Venezuela</span>
+          </div>
+          <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
+            <p style="margin:0 0 16px">Hola, hace 6 meses registraste <strong>${nombre}</strong> en el mapa de negocios cripto de Venezuela.</p>
+            <p style="margin:0 0 24px;color:#555">Para mantener el directorio actualizado necesitamos saber si el negocio sigue activo. Si no recibimos respuesta en <strong>30 días</strong>, lo marcaremos como inactivo y dejará de aparecer en el mapa.</p>
+            <a href="${confirmUrl}" style="display:inline-block;background:#F7931A;color:#fff;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:8px;font-size:15px">
+              ✅ Sí, seguimos activos
+            </a>
+            <p style="margin:28px 0 8px;font-size:13px;color:#777">¿Quieres actualizar la información del negocio?</p>
+            <a href="${editUrl}" style="font-size:13px;color:#F7931A">Editar mi perfil →</a>
+            <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0">
+            <p style="font-size:12px;color:#999;margin:0">
+              Ver perfil público: <a href="${profileUrl}" style="color:#999">${profileUrl}</a><br>
+              Si ya no operás, podés ignorar este correo.
+            </p>
+          </div>
+        </div>
+      `,
+    });
+  } catch (e) {
+    console.error('Ping email error:', e.message);
+  }
+}
+
+async function sendAdminNotification({ nombre, tipo, ciudad, estado, id }) {
+  if (!resend) return;
+  const TIPO_LABEL = {
+    restaurante:'Restaurante', farmacia:'Farmacia', ferreteria:'Ferretería',
+    tecnologia:'Tecnología', servicio:'Servicio', tienda:'Tienda',
+    hotel:'Hotel', transporte:'Transporte', emprendedor:'Emprendedor', otro:'Otro',
+    docente:'Docente', plomero:'Plomero', electricista:'Electricista',
+    ac_tecnico:'Técnico A/C', mecanico:'Mecánico', programador:'Programador',
+    disenador:'Diseñador', fotografo:'Fotógrafo', estetica:'Estética',
+    entrenador:'Entrenador', medico:'Médico', abogado:'Abogado',
+    servicios_hogar:'Serv. hogar', marketing:'Marketing', otro_prof:'Profesional',
+  };
+  const tipoLabel   = TIPO_LABEL[tipo] || tipo;
+  const estadoColor = estado === 'activo' ? '#22c55e' : '#F7931A';
+  const estadoLabel = estado === 'activo' ? 'Activo (aprobado por IA)' : 'Pendiente de revisión';
+  const profileUrl  = `${FRONTEND_URL}/negocio.html?id=${id}`;
+  const adminUrl    = `${FRONTEND_URL}/?admin=1`;
+  try {
+    await resend.emails.send({
+      from: 'MapaCripto <noreply@criptomapavenezuela.com>',
+      to:   ADMIN_EMAIL,
+      subject: `Nuevo registro: ${nombre}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
+          <div style="background:#0A0C10;padding:20px 24px;border-radius:10px 10px 0 0;display:flex;align-items:center;gap:12px">
+            <span style="color:#F7931A;font-weight:700;font-size:18px">MapaCripto Venezuela</span>
+          </div>
+          <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
+            <p style="margin:0 0 4px;font-size:13px;color:#888">Nuevo registro en el mapa</p>
+            <h2 style="margin:0 0 20px;font-size:22px;color:#111">${nombre}</h2>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+              <tr>
+                <td style="padding:8px 0;color:#666;font-size:13px;width:110px">Tipo</td>
+                <td style="padding:8px 0;font-weight:600;font-size:13px">${tipoLabel}</td>
+              </tr>
+              <tr style="border-top:1px solid #eee">
+                <td style="padding:8px 0;color:#666;font-size:13px">Ciudad</td>
+                <td style="padding:8px 0;font-weight:600;font-size:13px">${ciudad || '—'}</td>
+              </tr>
+              <tr style="border-top:1px solid #eee">
+                <td style="padding:8px 0;color:#666;font-size:13px">Estado</td>
+                <td style="padding:8px 0;font-size:13px">
+                  <span style="background:${estadoColor}20;color:${estadoColor};font-weight:700;padding:3px 10px;border-radius:20px;font-size:12px">${estadoLabel}</span>
+                </td>
+              </tr>
+            </table>
+            ${estado === 'pendiente' ? `
+            <a href="${adminUrl}" style="display:inline-block;background:#F7931A;color:#fff;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:8px;font-size:14px;margin-bottom:16px">
+              Revisar en el panel admin
+            </a>
+            ` : `
+            <a href="${profileUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:8px;font-size:14px;margin-bottom:16px">
+              Ver perfil publicado
+            </a>
+            `}
+            <p style="margin:16px 0 0;font-size:12px;color:#aaa">
+              ${estado === 'pendiente' ? 'La IA lo marcó como pendiente — requiere tu revisión manual.' : 'La IA lo aprobó automáticamente y ya es visible en el mapa.'}
+            </p>
+          </div>
+        </div>
+      `,
+    });
+  } catch (e) {
+    console.error('Admin notification error:', e.message);
+  }
+}
+
 async function postTweet(negocio) {
   if (!process.env.X_API_KEY) return;
   try {
@@ -134,7 +244,7 @@ app.get('/api/negocios', async (req, res) => {
 app.post('/api/negocios', async (req, res) => {
   try {
     const { nombre, tipo, criptos, descripcion, lat, lng,
-            contacto, ciudad, online, logo_base64 } = req.body;
+            contacto, ciudad, online, logo_base64, email } = req.body;
 
     const err = validateBody(req.body);
     if (err) return res.status(400).json({ error: err });
@@ -155,10 +265,14 @@ app.post('/api/negocios', async (req, res) => {
       ciudad:      ciudad?.trim() || null,
       online:      online === true || online === 'true',
       logo_url, estado, edit_token,
+      email:       email?.trim()  || null,
     }]).select().single();
 
     if (error) throw error;
-    if (data.estado === 'activo') await postTweet(data);
+    await Promise.all([
+      data.estado === 'activo' ? postTweet(data) : Promise.resolve(),
+      sendAdminNotification(data),
+    ]);
     res.json({ ok: true, estado: data.estado, id: data.id, edit_token: data.edit_token });
   } catch (err) {
     console.error('POST /api/negocios:', err.message);
@@ -344,6 +458,70 @@ app.delete('/api/negocios/:id', async (req, res) => {
   const { error } = await supabase.from('negocios').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: 'Error interno del servidor.' });
   res.json({ ok: true });
+});
+
+// ── GET /api/confirm/:token — confirmar que el negocio sigue activo ───────────
+app.get('/api/confirm/:token', async (req, res) => {
+  const { data, error } = await supabase
+    .from('negocios')
+    .update({ last_confirmed_at: new Date().toISOString(), ping_sent_at: null })
+    .eq('edit_token', req.params.token)
+    .eq('estado', 'activo')
+    .select('id,nombre')
+    .single();
+  if (error || !data) {
+    return res.redirect(`${FRONTEND_URL}/?confirm=error`);
+  }
+  res.redirect(`${FRONTEND_URL}/?confirm=ok&nombre=${encodeURIComponent(data.nombre)}`);
+});
+
+// ── GET /api/cron/ping — renovación semestral (ejecuta el cron de Vercel) ─────
+app.get('/api/cron/ping', async (req, res) => {
+  const auth = req.headers['authorization'] || '';
+  if (!CRON_SECRET || auth !== `Bearer ${CRON_SECRET}`) {
+    return res.status(401).json({ error: 'No autorizado.' });
+  }
+
+  const now     = new Date();
+  const sixMonthsAgo  = new Date(now); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const thirtyDaysAgo = new Date(now); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  // 1. Marcar como inactivos los que no respondieron al ping en 30 días
+  const { data: expired } = await supabase
+    .from('negocios')
+    .update({ estado: 'inactivo' })
+    .eq('estado', 'activo')
+    .lt('ping_sent_at', thirtyDaysAgo.toISOString())
+    .select('id,nombre');
+
+  // 2. Enviar ping a los que llevan 6 meses sin confirmar y aún no han recibido ping
+  // Dos queries para evitar OR anidado: nunca confirmados + confirmados hace >6 meses
+  const base = supabase.from('negocios').select('id,nombre,email,edit_token')
+    .eq('estado', 'activo').is('ping_sent_at', null);
+  const [{ data: neverConfirmed }, { data: oldConfirmed }] = await Promise.all([
+    base.is('last_confirmed_at', null).lt('created_at', sixMonthsAgo.toISOString()),
+    supabase.from('negocios').select('id,nombre,email,edit_token')
+      .eq('estado', 'activo').is('ping_sent_at', null)
+      .lt('last_confirmed_at', sixMonthsAgo.toISOString()),
+  ]);
+  const seen  = new Set();
+  const stale = [...(neverConfirmed || []), ...(oldConfirmed || [])].filter(n => {
+    if (seen.has(n.id)) return false;
+    seen.add(n.id); return true;
+  });
+
+  let sent = 0;
+  for (const neg of (stale || [])) {
+    if (!neg.email) continue;
+    await sendPingEmail(neg);
+    await supabase.from('negocios')
+      .update({ ping_sent_at: now.toISOString() })
+      .eq('id', neg.id);
+    sent++;
+  }
+
+  console.log(`Cron ping: ${sent} emails sent, ${(expired || []).length} marked inactivo`);
+  res.json({ ok: true, sent, expired: (expired || []).length });
 });
 
 // ── Health check ──────────────────────────────────────────────────────────────
