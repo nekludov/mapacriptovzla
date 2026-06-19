@@ -168,7 +168,7 @@ async function sendPingEmail({ email, nombre, edit_token, id, slug }) {
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
           <div style="background:#F7931A;padding:20px 24px;border-radius:10px 10px 0 0">
-            <span style="color:#fff;font-weight:700;font-size:18px">🗺️ MapaCripto Venezuela</span>
+            <span style="color:#fff;font-weight:700;font-size:18px">🗺️ CriptoMapa Venezuela</span>
           </div>
           <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
             <p style="margin:0 0 16px">Hola, hace 6 meses registraste <strong>${nombreSafe}</strong> en el mapa de negocios cripto de Venezuela.</p>
@@ -194,6 +194,56 @@ async function sendPingEmail({ email, nombre, edit_token, id, slug }) {
   }
 }
 
+async function sendStatsEmail({ email, nombre, edit_token, id, slug, views_7d, rating }) {
+  if (!resend) return false;
+  if (!EMAIL_RE.test(email)) return false;
+  const profileUrl = slug ? `${FRONTEND_URL}/negocio/${slug}/` : `${FRONTEND_URL}/negocio.html?id=${id}`;
+  const editUrl    = `${FRONTEND_URL}/?edit=${encodeURIComponent(edit_token)}`;
+  const nombreSafe = escEmail(nombre);
+  const visitasText = `${views_7d} visita${views_7d === 1 ? '' : 's'}`;
+  const ratingLine  = rating.count > 0
+    ? `⭐ <strong>${rating.avg}</strong> promedio · ${rating.count} ${rating.count === 1 ? 'valoración' : 'valoraciones'}`
+    : 'Aún sin calificaciones — comparte tu perfil para recibir la primera';
+  try {
+    await resend.emails.send({
+      from: 'CriptoMapa Venezuela <noreply@criptomapavenezuela.com>',
+      to:   email,
+      subject: `Tu perfil tuvo ${visitasText} esta semana 📊`,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
+          <div style="background:#F7931A;padding:20px 24px;border-radius:10px 10px 0 0">
+            <span style="color:#fff;font-weight:700;font-size:18px">🗺️ CriptoMapa Venezuela</span>
+          </div>
+          <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
+            <p style="margin:0 0 8px">Hola, aquí el resumen semanal de <strong>${nombreSafe}</strong>:</p>
+            <div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:20px 24px;margin:16px 0;display:flex;gap:24px">
+              <div style="text-align:center;flex:1">
+                <div style="font-size:36px;font-weight:800;color:#F7931A;line-height:1">${views_7d}</div>
+                <div style="font-size:12px;color:#777;margin-top:4px">visitas esta semana</div>
+              </div>
+              <div style="width:1px;background:#e5e5e5"></div>
+              <div style="text-align:center;flex:2;display:flex;align-items:center;justify-content:center">
+                <p style="margin:0;font-size:13px;color:#555">${ratingLine}</p>
+              </div>
+            </div>
+            <a href="${profileUrl}" style="display:inline-block;background:#F7931A;color:#fff;text-decoration:none;font-weight:700;padding:12px 24px;border-radius:8px;font-size:14px;margin-bottom:12px">
+              Ver mi perfil público →
+            </a>
+            <br>
+            <a href="${editUrl}" style="font-size:13px;color:#F7931A">Editar información →</a>
+            <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0">
+            <p style="font-size:11px;color:#bbb;margin:0">Recibes este resumen cada lunes. Si ya no operás, podés ignorarlo.</p>
+          </div>
+        </div>
+      `,
+    });
+    return true;
+  } catch (e) {
+    console.error('Stats email error:', e.message);
+    return false;
+  }
+}
+
 async function sendRejectionEmail({ email, nombre, id }) {
   if (!resend || !email || !EMAIL_RE.test(email)) return;
   const nombreSafe = escEmail(nombre);
@@ -206,7 +256,7 @@ async function sendRejectionEmail({ email, nombre, id }) {
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
           <div style="background:#0A0C10;padding:20px 24px;border-radius:10px 10px 0 0">
-            <span style="color:#F7931A;font-weight:700;font-size:18px">MapaCripto Venezuela</span>
+            <span style="color:#F7931A;font-weight:700;font-size:18px">CriptoMapa Venezuela</span>
           </div>
           <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
             <p style="margin:0 0 16px">Hola, tu registro <strong>${nombreSafe}</strong> fue revisado por nuestro equipo y no pudo ser aprobado en este momento.</p>
@@ -628,6 +678,54 @@ app.get('/api/cron/ping', async (req, res) => {
 
   console.log(`Cron ping: ${sent} emails sent, ${(expired || []).length} marked inactivo`);
   res.json({ ok: true, sent, expired: (expired || []).length });
+});
+
+// ── GET /api/cron/stats-digest — resumen semanal a dueños de negocios ────────
+app.get('/api/cron/stats-digest', async (req, res) => {
+  const auth = req.headers['authorization'] || '';
+  if (!CRON_SECRET || auth !== `Bearer ${CRON_SECRET}`) {
+    return res.status(401).json({ error: 'No autorizado.' });
+  }
+
+  // Traer todos los activos con email en una sola query
+  const { data: negocios, error: negErr } = await supabase
+    .from('negocios').select('id,nombre,email,edit_token,slug')
+    .eq('estado', 'activo').not('email', 'is', null).neq('email', '');
+  if (negErr) return res.status(500).json({ error: negErr.message });
+
+  // Agregar visitas de los últimos 7 días y ratings en 2 queries globales
+  const since7 = new Date(Date.now() - 7 * 864e5).toISOString();
+  const [{ data: recentViews }, { data: allRatings }] = await Promise.all([
+    supabase.from('views').select('negocio_id').gte('viewed_at', since7),
+    supabase.from('ratings').select('negocio_id,stars'),
+  ]);
+
+  const views7dMap = {};
+  for (const v of recentViews || []) {
+    views7dMap[v.negocio_id] = (views7dMap[v.negocio_id] || 0) + 1;
+  }
+  const ratingMap = {};
+  for (const r of allRatings || []) {
+    if (!ratingMap[r.negocio_id]) ratingMap[r.negocio_id] = [];
+    ratingMap[r.negocio_id].push(r.stars);
+  }
+
+  let sent = 0, skipped = 0;
+  for (const neg of negocios) {
+    const views_7d = views7dMap[neg.id] || 0;
+    if (views_7d < 1) { skipped++; continue; } // solo enviar si hubo actividad
+
+    const stars  = ratingMap[neg.id] || [];
+    const rating = stars.length
+      ? { avg: Math.round(stars.reduce((s, r) => s + r, 0) / stars.length * 10) / 10, count: stars.length }
+      : { avg: null, count: 0 };
+
+    const ok = await sendStatsEmail({ ...neg, views_7d, rating });
+    if (ok) sent++;
+  }
+
+  console.log(`Cron stats-digest: ${sent} sent, ${skipped} skipped (0 visitas)`);
+  res.json({ ok: true, sent, skipped });
 });
 
 // ── Shared helper: count active negocios by ciudad ───────────────────────────

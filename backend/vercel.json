@@ -7,6 +7,7 @@
     { "src": "/(.*)", "dest": "/index.js" }
   ],
   "crons": [
-    { "path": "/api/cron/ping", "schedule": "0 10 * * *" }
+    { "path": "/api/cron/ping",         "schedule": "0 10 * * *" },
+    { "path": "/api/cron/stats-digest", "schedule": "0 10 * * 1" }
   ]
 }
