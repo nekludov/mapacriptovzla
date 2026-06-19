@@ -162,9 +162,9 @@ async function sendPingEmail({ email, nombre, edit_token, id, slug }) {
   const nombreSafe = escEmail(nombre);
   try {
     await resend.emails.send({
-      from: 'MapaCripto <noreply@criptomapavenezuela.com>',
+      from: 'CriptoMapa Venezuela <noreply@criptomapavenezuela.com>',
       to:   email,
-      subject: `¿${nombre} sigue activo en MapaCripto? ⚡`,
+      subject: `¿${nombre} sigue activo en CriptoMapa Venezuela? ⚡`,
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
           <div style="background:#F7931A;padding:20px 24px;border-radius:10px 10px 0 0">
@@ -200,9 +200,9 @@ async function sendRejectionEmail({ email, nombre, id }) {
   const profileUrl = `${FRONTEND_URL}/negocio.html?id=${id}`;
   try {
     await resend.emails.send({
-      from: 'MapaCripto <noreply@criptomapavenezuela.com>',
+      from: 'CriptoMapa Venezuela <noreply@criptomapavenezuela.com>',
       to:   email,
-      subject: `Tu registro en MapaCripto no fue aprobado`,
+      subject: `Tu registro en CriptoMapa Venezuela no fue aprobado`,
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
           <div style="background:#0A0C10;padding:20px 24px;border-radius:10px 10px 0 0">
@@ -237,7 +237,7 @@ async function sendAdminNotification({ nombre, tipo, ciudad, estado, id }) {
   const tipoSafe    = escEmail(tipoLabel);
   try {
     await resend.emails.send({
-      from: 'MapaCripto <noreply@criptomapavenezuela.com>',
+      from: 'CriptoMapa Venezuela <noreply@criptomapavenezuela.com>',
       to:   ADMIN_EMAIL,
       subject: `Nuevo registro: ${nombre}`,
       html: `
@@ -704,7 +704,7 @@ app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOStri
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`MapaCripto API → http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`CriptoMapa Venezuela API → http://localhost:${PORT}`));
 }
 
 module.exports = app;

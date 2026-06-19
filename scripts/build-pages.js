@@ -103,7 +103,7 @@ const HEADER_SVG = `<svg width="26" height="17" viewBox="0 0 26 17" xmlns="http:
 function header(backHref, backLabel) {
   return `<header>
   <div class="header-inner">
-    <a class="logo" href="/">${HEADER_SVG} MapaCripto</a>
+    <a class="logo" href="/">${HEADER_SVG} CriptoMapa</a>
     <a class="back-btn" href="${esc(backHref)}">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15,18 9,12 15,6"/></svg>
       ${esc(backLabel)}
@@ -215,15 +215,15 @@ function negocioPage(n) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${esc(n.nombre)} – acepta cripto en Venezuela | MapaCripto</title>
+  <title>${esc(n.nombre)} – acepta cripto en Venezuela | CriptoMapa</title>
   <meta name="description" content="${esc(metaDesc)}">
   <meta property="og:type" content="business.business">
-  <meta property="og:title" content="${esc(n.nombre)} | MapaCripto Venezuela">
+  <meta property="og:title" content="${esc(n.nombre)} | CriptoMapa Venezuela">
   <meta property="og:description" content="${esc(metaDesc)}">
   <meta property="og:url" content="${esc(url)}">
   <meta property="og:image" content="${SITE_URL}/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${esc(n.nombre)} | MapaCripto Venezuela">
+  <meta name="twitter:title" content="${esc(n.nombre)} | CriptoMapa Venezuela">
   <meta name="twitter:description" content="${esc(metaDesc)}">
   <link rel="canonical" href="${esc(url)}">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -391,7 +391,7 @@ function rate(stars) {
 
 function ciudadPage(ciudad, negocios) {
   const url      = `${SITE_URL}/ciudad/${slugify(ciudad)}/`;
-  const title    = `Negocios que aceptan cripto en ${ciudad} | MapaCripto Venezuela`;
+  const title    = `Negocios que aceptan cripto en ${ciudad} | CriptoMapa Venezuela`;
   const metaDesc = `Directorio de negocios y profesionales que aceptan Bitcoin, USDT y otras criptomonedas en ${ciudad}, Venezuela. ${negocios.length} registrados.`;
 
   const cards = negocios.map(n => {
@@ -460,7 +460,7 @@ ${footer()}
 function categoriaPage(tipo, negocios) {
   const label    = TIPO_LABEL[tipo] || tipo;
   const url      = `${SITE_URL}/categoria/${tipo}/`;
-  const title    = `${label} que aceptan cripto en Venezuela | MapaCripto`;
+  const title    = `${label} que aceptan cripto en Venezuela | CriptoMapa`;
   const metaDesc = `Directorio de ${label.toLowerCase()} que aceptan Bitcoin, USDT y otras criptomonedas en Venezuela. ${negocios.length} registrados.`;
 
   const cards = negocios.map(n => {

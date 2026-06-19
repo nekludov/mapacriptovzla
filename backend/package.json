@@ -1,7 +1,7 @@
 {
   "name": "mapacripto-api",
   "version": "1.0.0",
-  "description": "API para MapaCripto Venezuela – negocios que aceptan cripto",
+  "description": "API para CriptoMapa Venezuela – negocios que aceptan cripto",
   "main": "index.js",
   "engines": {
     "node": ">=18"
