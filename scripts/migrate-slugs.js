@@ -10,24 +10,14 @@
  *   SUPABASE_URL=... SUPABASE_SERVICE_KEY=... node scripts/migrate-slugs.js
  */
 
-const { createClient } = require('@supabase/supabase-js');
+const { createClient } = require('../backend/node_modules/@supabase/supabase-js');
 const crypto = require('crypto');
+const { slugify } = require('./utils');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY,
 );
-
-function slugify(str) {
-  return (str || '')
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .slice(0, 60);
-}
 
 async function main() {
   const { data, error } = await supabase

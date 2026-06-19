@@ -151,12 +151,14 @@ async function uploadLogo(logo_base64) {
   }
 }
 
-async function sendPingEmail({ email, nombre, edit_token, id }) {
+async function sendPingEmail({ email, nombre, edit_token, id, slug }) {
   if (!resend) { console.warn('Resend not configured — skipping email'); return false; }
   if (!EMAIL_RE.test(email)) { console.warn('sendPingEmail: email inválido:', email); return false; }
   const confirmUrl = `${API_URL}/api/confirm/${encodeURIComponent(edit_token)}`;
   const editUrl    = `${FRONTEND_URL}/?edit=${encodeURIComponent(edit_token)}`;
-  const profileUrl = `${FRONTEND_URL}/negocio.html?id=${id}`;
+  const profileUrl = slug
+    ? `${FRONTEND_URL}/negocio/${slug}/`
+    : `${FRONTEND_URL}/negocio.html?id=${id}`;
   const nombreSafe = escEmail(nombre);
   try {
     await resend.emails.send({
@@ -395,11 +397,19 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
 
     // Verificar que el token existe y traer estado y logo actual
     const { data: existing } = await supabase
-      .from('negocios').select('id, logo_url, estado')
+      .from('negocios').select('id, logo_url, estado, nombre, slug')
       .eq('edit_token', req.params.token).single();
     if (!existing) return res.status(404).json({ error: 'Enlace de edición inválido.' });
 
     const latN = parseFloat(lat), lngN = parseFloat(lng);
+    const trimmedNombre = nombre.trim();
+
+    // Regenerar slug si cambió el nombre (reutiliza el mismo sufijo de 6 chars)
+    const slugSuffix = existing.slug ? existing.slug.slice(-6) : crypto.randomBytes(3).toString('hex');
+    const newSlug = trimmedNombre !== existing.nombre
+      ? (slugify(trimmedNombre) ? `${slugify(trimmedNombre)}-${slugSuffix}` : `negocio-${slugSuffix}`)
+      : null;
+
     // No re-moderar si ya estaba activo — evita desapublicar por una corrección menor
     const [estado, newLogo] = await Promise.all([
       existing.estado === 'activo'
@@ -409,7 +419,7 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
     ]);
 
     const { data, error } = await supabase.from('negocios').update({
-      nombre:      nombre.trim(),
+      nombre:      trimmedNombre,
       tipo, criptos,
       descripcion: descripcion?.trim() || null,
       lat: latN, lng: lngN,
@@ -418,6 +428,7 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
       online:      online === true || online === 'true',
       logo_url:    newLogo ?? existing.logo_url,
       estado,
+      ...(newSlug ? { slug: newSlug } : {}),
     }).eq('edit_token', req.params.token).select().single();
 
     if (error) throw error;
@@ -589,11 +600,11 @@ app.get('/api/cron/ping', async (req, res) => {
 
   // 2. Enviar ping a los que llevan 6 meses sin confirmar y aún no han recibido ping
   // Dos queries para evitar OR anidado: nunca confirmados + confirmados hace >6 meses
-  const base = supabase.from('negocios').select('id,nombre,email,edit_token')
+  const base = supabase.from('negocios').select('id,nombre,email,edit_token,slug')
     .eq('estado', 'activo').is('ping_sent_at', null);
   const [{ data: neverConfirmed }, { data: oldConfirmed }] = await Promise.all([
     base.is('last_confirmed_at', null).lt('created_at', sixMonthsAgo.toISOString()),
-    supabase.from('negocios').select('id,nombre,email,edit_token')
+    supabase.from('negocios').select('id,nombre,email,edit_token,slug')
       .eq('estado', 'activo').is('ping_sent_at', null)
       .lt('last_confirmed_at', sixMonthsAgo.toISOString()),
   ]);
@@ -628,10 +639,12 @@ async function getCiudadCounts() {
   const counts = {};
   for (const { ciudad } of data) {
     const c = ciudad.trim();
-    if (c) counts[c] = (counts[c] || 0) + 1;
+    if (!c) continue;
+    const key = c.toLowerCase();
+    if (!counts[key]) counts[key] = { ciudad: c, count: 0 };
+    counts[key].count++;
   }
-  return Object.entries(counts)
-    .map(([ciudad, count]) => ({ ciudad, count }))
+  return Object.values(counts)
     .sort((a, b) => b.count - a.count);
 }
 
