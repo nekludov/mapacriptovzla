@@ -43,12 +43,35 @@ const ALLOWED_CRIPTOS = new Set(['BTC','USDT','USDC','BinancePay','Otros']);
 const ALLOWED_MIMES   = new Set(['image/jpeg','image/png','image/webp','image/gif']);
 
 // Columnas públicas — edit_token nunca se expone al cliente
-const PUBLIC_COLS = 'id,nombre,tipo,criptos,descripcion,lat,lng,contacto,ciudad,online,logo_url,estado,created_at';
+const PUBLIC_COLS = 'id,slug,nombre,tipo,criptos,descripcion,lat,lng,contacto,ciudad,online,logo_url,estado,created_at';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const inVenezuela = (lat, lng) =>
   lat >= 0.6 && lat <= 12.2 && lng >= -73.4 && lng <= -59.8;
+
+function slugify(str) {
+  return (str || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 60);
+}
+
+const TIPO_LABEL = {
+  restaurante:'Restaurante', farmacia:'Farmacia', ferreteria:'Ferretería',
+  tecnologia:'Tecnología', servicio:'Servicio', tienda:'Tienda',
+  hotel:'Hotel', transporte:'Transporte', emprendedor:'Emprendedor', otro:'Otro',
+  docente:'Docente', plomero:'Plomero', electricista:'Electricista',
+  ac_tecnico:'Técnico A/C', mecanico:'Mecánico', programador:'Programador',
+  disenador:'Diseñador', fotografo:'Fotógrafo', estetica:'Estética',
+  entrenador:'Entrenador', medico:'Médico', abogado:'Abogado',
+  servicios_hogar:'Servicios del hogar', marketing:'Marketing', otro_prof:'Profesional',
+};
 
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 const escEmail = s => s?.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ?? '';
@@ -202,16 +225,6 @@ async function sendRejectionEmail({ email, nombre, id }) {
 
 async function sendAdminNotification({ nombre, tipo, ciudad, estado, id }) {
   if (!resend) return;
-  const TIPO_LABEL = {
-    restaurante:'Restaurante', farmacia:'Farmacia', ferreteria:'Ferretería',
-    tecnologia:'Tecnología', servicio:'Servicio', tienda:'Tienda',
-    hotel:'Hotel', transporte:'Transporte', emprendedor:'Emprendedor', otro:'Otro',
-    docente:'Docente', plomero:'Plomero', electricista:'Electricista',
-    ac_tecnico:'Técnico A/C', mecanico:'Mecánico', programador:'Programador',
-    disenador:'Diseñador', fotografo:'Fotógrafo', estetica:'Estética',
-    entrenador:'Entrenador', medico:'Médico', abogado:'Abogado',
-    servicios_hogar:'Serv. hogar', marketing:'Marketing', otro_prof:'Profesional',
-  };
   const tipoLabel   = TIPO_LABEL[tipo] || tipo;
   const estadoColor = estado === 'activo' ? '#22c55e' : '#F7931A';
   const estadoLabel = estado === 'activo' ? 'Activo (aprobado por IA)' : 'Pendiente de revisión';
@@ -321,6 +334,10 @@ app.post('/api/negocios', async (req, res) => {
     if (emailErr) return res.status(400).json({ error: emailErr });
 
     const latN = parseFloat(lat), lngN = parseFloat(lng);
+    const slugSuffix = crypto.randomBytes(3).toString('hex');
+    const slugBase   = slugify(nombre.trim());
+    const slug       = slugBase ? `${slugBase}-${slugSuffix}` : `negocio-${slugSuffix}`;
+
     const [estado, logo_url, edit_token] = await Promise.all([
       moderate(nombre, tipo, ciudad, descripcion),
       uploadLogo(logo_base64),
@@ -329,7 +346,7 @@ app.post('/api/negocios', async (req, res) => {
 
     const { data, error } = await supabase.from('negocios').insert([{
       nombre:      nombre.trim(),
-      tipo, criptos,
+      tipo, criptos, slug,
       descripcion: descripcion?.trim() || null,
       lat: latN, lng: lngN,
       contacto:    contacto?.trim() || null,
@@ -344,7 +361,7 @@ app.post('/api/negocios', async (req, res) => {
       data.estado === 'activo' ? postTweet(data) : Promise.resolve(),
       sendAdminNotification(data),
     ]);
-    res.json({ ok: true, estado: data.estado, id: data.id, edit_token: data.edit_token });
+    res.json({ ok: true, estado: data.estado, id: data.id, edit_token: data.edit_token, slug: data.slug });
   } catch (err) {
     console.error('POST /api/negocios:', err.message);
     res.status(500).json({ error: 'Error interno del servidor.' });
@@ -411,15 +428,13 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
   }
 });
 
-// ── GET /api/negocios/:id — perfil público ────────────────────
+// ── GET /api/negocios/:id — perfil público (acepta UUID o slug) ──
 app.get('/api/negocios/:id', async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('negocios')
-      .select(PUBLIC_COLS)
-      .eq('id', req.params.id)
-      .eq('estado', 'activo')
-      .single();
+    const param = req.params.id;
+    let q = supabase.from('negocios').select(PUBLIC_COLS).eq('estado', 'activo');
+    q = UUID_RE.test(param) ? q.eq('id', param) : q.eq('slug', param);
+    const { data, error } = await q.single();
     if (error || !data) return res.status(404).json({ error: 'Negocio no encontrado.' });
     res.json(data);
   } catch (err) {
@@ -604,28 +619,69 @@ app.get('/api/cron/ping', async (req, res) => {
   res.json({ ok: true, sent, expired: (expired || []).length });
 });
 
-// ── GET /api/stats/ciudades — ranking de ciudades ─────────────────────────────
+// ── Shared helper: count active negocios by ciudad ───────────────────────────
+async function getCiudadCounts() {
+  const { data, error } = await supabase
+    .from('negocios').select('ciudad')
+    .eq('estado', 'activo').not('ciudad', 'is', null).neq('ciudad', '');
+  if (error) throw error;
+  const counts = {};
+  for (const { ciudad } of data) {
+    const c = ciudad.trim();
+    if (c) counts[c] = (counts[c] || 0) + 1;
+  }
+  return Object.entries(counts)
+    .map(([ciudad, count]) => ({ ciudad, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+// ── GET /api/stats/ciudades — ranking de ciudades (widget panel) ──────────────
 app.get('/api/stats/ciudades', async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('negocios')
-      .select('ciudad')
-      .eq('estado', 'activo')
-      .not('ciudad', 'is', null)
-      .neq('ciudad', '');
-    if (error) throw error;
-    const counts = {};
-    for (const { ciudad } of data) {
-      const c = ciudad.trim();
-      if (c) counts[c] = (counts[c] || 0) + 1;
-    }
-    const ranking = Object.entries(counts)
-      .map(([ciudad, count]) => ({ ciudad, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 15);
-    res.json(ranking);
+    res.json((await getCiudadCounts()).slice(0, 15));
   } catch (err) {
     console.error('GET /api/stats/ciudades:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// ── GET /api/ranking — alias limpio para app / consumidores externos ──────────
+app.get('/api/ranking', async (req, res) => {
+  try {
+    res.json((await getCiudadCounts()).slice(0, 15));
+  } catch (err) {
+    console.error('GET /api/ranking:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// ── GET /api/ciudades — todas las ciudades con conteo y slug ──────────────────
+app.get('/api/ciudades', async (req, res) => {
+  try {
+    const all = await getCiudadCounts();
+    res.json(all.map(c => ({ ciudad: c.ciudad, slug: slugify(c.ciudad), count: c.count })));
+  } catch (err) {
+    console.error('GET /api/ciudades:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// ── GET /api/categorias — tipos de negocio con conteo ────────────────────────
+app.get('/api/categorias', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('negocios').select('tipo').eq('estado', 'activo');
+    if (error) throw error;
+    const counts = {};
+    for (const { tipo } of data) {
+      if (tipo) counts[tipo] = (counts[tipo] || 0) + 1;
+    }
+    const result = Object.entries(counts)
+      .map(([tipo, count]) => ({ tipo, label: TIPO_LABEL[tipo] || tipo, count }))
+      .sort((a, b) => b.count - a.count);
+    res.json(result);
+  } catch (err) {
+    console.error('GET /api/categorias:', err.message);
     res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });
