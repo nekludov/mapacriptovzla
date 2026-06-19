@@ -537,6 +537,14 @@ function render(n) {
       </div>
     </div>
 
+    ${n.slug ? `
+    <a href="/negocio/${esc(n.slug)}/"
+       style="display:block;text-align:center;margin-top:24px;padding:12px;border-radius:12px;
+              background:var(--surface);border:1px solid var(--accent);color:var(--accent);
+              text-decoration:none;font-weight:700;font-size:14px">
+      Ver página completa →
+    </a>` : ''}
+
     <div class="owner-box">
       <p>¿Eres el dueño de este negocio?<br>
         Usa el <a href="#">enlace de edición</a> que recibiste al registrarte para actualizar tus datos.
