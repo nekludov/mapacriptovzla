@@ -116,6 +116,7 @@ function footer() {
   return `<footer>
   <p>© 2025 CriptoMapa Venezuela ·
     <a href="/quienes-somos.html">Quiénes somos</a> ·
+    <a href="/faq.html">FAQ</a> ·
     <a href="/terms.html">Términos</a> ·
     <a href="/privacy.html">Privacidad</a>
   </p>
