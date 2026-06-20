@@ -295,7 +295,7 @@ async function sendAdminNotification({ nombre, tipo, ciudad, estado, id }) {
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a1a">
           <div style="background:#0A0C10;padding:20px 24px;border-radius:10px 10px 0 0;display:flex;align-items:center;gap:12px">
-            <span style="color:#F7931A;font-weight:700;font-size:18px">MapaCripto Venezuela</span>
+            <span style="color:#F7931A;font-weight:700;font-size:18px">CriptoMapa Venezuela</span>
           </div>
           <div style="background:#f9f9f9;padding:28px 24px;border-radius:0 0 10px 10px;border:1px solid #e5e5e5;border-top:none">
             <p style="margin:0 0 4px;font-size:13px;color:#888">Nuevo registro en el mapa</p>
