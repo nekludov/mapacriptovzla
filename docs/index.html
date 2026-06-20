@@ -1501,6 +1501,14 @@
         <input id="r-ciudad" class="form-control" type="text" list="ciudades-list" placeholder="Ej. Caracas">
       </div>
 
+      <div class="form-row" id="descuento-row">
+        <label>Descuento al pagar con cripto <span style="font-size:11px;color:var(--text-muted);font-weight:400">(opcional)</span></label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="r-descuento" class="form-control" type="number" min="0" max="99" step="1" placeholder="Ej. 15" style="max-width:100px">
+          <span style="font-size:14px;color:var(--text-muted)">% de descuento al pagar en cripto / dólares digitales</span>
+        </div>
+      </div>
+
       <div class="form-row">
         <label>Criptomonedas que acepta <span class="req">*</span></label>
         <div class="cripto-grid" id="cripto-grid">
@@ -1975,6 +1983,7 @@ function renderList(negocios) {
           </div>
         </div>
         ${criptos ? `<div class="nc-criptos">${criptos}</div>` : ''}
+        ${n.descuento ? `<div style="display:inline-flex;align-items:center;gap:5px;background:#16a34a;color:#fff;font-weight:700;font-size:12px;padding:4px 8px;border-radius:5px;margin:4px 0 2px">🏷️ ${escHtml(String(n.descuento))}% descuento en cripto</div>` : ''}
         <div class="nc-footer">
           ${wa ? `<a class="nc-btn-wa" href="${escHtml(wa)}" target="_blank" rel="noopener" title="Contactar por WhatsApp">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.849L0 24l6.335-1.652A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.376l-.36-.213-3.728.972.994-3.641-.234-.374A9.769 9.769 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182c5.421 0 9.818 4.397 9.818 9.818 0 5.42-4.397 9.818-9.818 9.818z"/></svg>
@@ -2054,6 +2063,7 @@ function buildPopup(n) {
         <h3>${escHtml(n.nombre)}${isNew ? '<span class="badge-nuevo">✨ Nuevo</span>' : ''}</h3>
         <span class="badge-tipo"><i class="fa-solid ${tipo.icon}"></i> ${escHtml(TIPO_LABEL[n.tipo] || n.tipo)}</span>
         <div class="popup-criptos">${criptos}</div>
+        ${n.descuento ? `<div style="display:inline-flex;align-items:center;gap:6px;background:#16a34a;color:#fff;font-weight:700;font-size:13px;padding:5px 10px;border-radius:6px;margin:6px 0 2px">🏷️ ${escHtml(String(n.descuento))}% de descuento pagando en cripto</div>` : ''}
         ${n.descripcion ? `<p class="popup-desc">${escHtml(n.descripcion)}</p>` : ''}
         ${n.online ? `<p class="popup-meta"><i class="fa-solid fa-globe"></i> Tienda online</p>` : (n.ciudad ? `<p class="popup-meta"><i class="fa-solid fa-location-dot"></i> ${escHtml(n.ciudad)}</p>` : '')}
         ${formatContacto(n.contacto)}
@@ -2394,10 +2404,12 @@ async function submitRegistro() {
   btn.textContent = currentEditToken ? 'Guardando…' : 'Enviando…';
 
   try {
+    const descuentoVal = document.getElementById('r-descuento').value.trim();
     const payload = {
       nombre, tipo, ciudad, descripcion: desc,
       contacto, criptos, lat: pickedLat, lng: pickedLng,
       online: isOnline, logo_base64: logoBase64,
+      descuento: (!isOnline && descuentoVal !== '') ? parseInt(descuentoVal, 10) : null,
       ...(email && !currentEditToken ? { email } : {}),
     };
 
@@ -2508,6 +2520,9 @@ function toggleOnlineMode(isOnline) {
   } else {
     label.innerHTML = 'Ubicación en el mapa <span class="req">*</span> — clic en el mapa o GPS';
   }
+  // Descuento solo aplica a locales físicos
+  document.getElementById('descuento-row').style.display = isOnline ? 'none' : '';
+  if (isOnline) document.getElementById('r-descuento').value = '';
   pickedLat = null;
   pickedLng = null;
   document.getElementById('map-coords').textContent = 'Sin ubicación seleccionada';
@@ -2546,6 +2561,7 @@ function resetRegistroFormFields() {
   document.getElementById('stats-card').style.display = 'none';
   document.getElementById('edit-link-qr').src = '';
   document.getElementById('r-online').checked = false;
+  document.getElementById('r-descuento').value = '';
   document.getElementById('r-tipo').innerHTML = OPTS_NEGOCIO;
   document.getElementById('btn-submit').textContent = 'Enviar negocio';
   document.getElementById('picker-back-btn').style.display = '';
@@ -2742,10 +2758,11 @@ async function loadEditStats(token) {
 }
 
 function prefillEditForm(n) {
-  document.getElementById('r-nombre').value   = n.nombre      || '';
-  document.getElementById('r-ciudad').value   = n.ciudad      || '';
-  document.getElementById('r-desc').value     = n.descripcion || '';
-  document.getElementById('r-contacto').value = n.contacto    || '';
+  document.getElementById('r-nombre').value    = n.nombre      || '';
+  document.getElementById('r-ciudad').value    = n.ciudad      || '';
+  document.getElementById('r-desc').value      = n.descripcion || '';
+  document.getElementById('r-contacto').value  = n.contacto    || '';
+  document.getElementById('r-descuento').value = n.descuento != null ? n.descuento : '';
   document.getElementById('r-tipo').value     = n.tipo        || '';
   // Email is not editable after registration
   document.getElementById('email-row').style.display = 'none';

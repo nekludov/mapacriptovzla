@@ -43,7 +43,7 @@ const ALLOWED_CRIPTOS = new Set(['BTC','USDT','USDC','BinancePay','Otros']);
 const ALLOWED_MIMES   = new Set(['image/jpeg','image/png','image/webp','image/gif']);
 
 // Columnas públicas — edit_token nunca se expone al cliente
-const PUBLIC_COLS = 'id,slug,nombre,tipo,criptos,descripcion,lat,lng,contacto,ciudad,online,logo_url,estado,created_at';
+const PUBLIC_COLS = 'id,slug,nombre,tipo,criptos,descripcion,lat,lng,contacto,ciudad,online,descuento,logo_url,estado,created_at';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ const TIPO_LABEL = {
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 const escEmail = s => s?.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ?? '';
 
-function validateBody({ nombre, tipo, criptos, descripcion, lat, lng, ciudad, contacto }) {
+function validateBody({ nombre, tipo, criptos, descripcion, lat, lng, ciudad, contacto, descuento }) {
   if (!nombre?.trim() || !tipo || !criptos?.length || lat == null || lng == null)
     return 'Faltan campos requeridos.';
   if (!ALLOWED_TIPOS.has(tipo))  return 'Tipo de negocio inválido.';
@@ -86,6 +86,8 @@ function validateBody({ nombre, tipo, criptos, descripcion, lat, lng, ciudad, co
   if (descripcion?.length > 500)     return 'Descripción demasiado larga.';
   if (ciudad?.length > 80)           return 'Ciudad demasiado larga.';
   if (contacto?.length > 200)        return 'Contacto demasiado largo.';
+  if (descuento != null && descuento !== '' && (isNaN(+descuento) || +descuento < 0 || +descuento > 99 || !Number.isInteger(+descuento)))
+    return 'Descuento inválido (0–99).';
   if (!inVenezuela(parseFloat(lat), parseFloat(lng)))
     return 'Las coordenadas deben estar dentro de Venezuela.';
   return null;
@@ -378,7 +380,7 @@ app.get('/api/negocios', async (req, res) => {
 app.post('/api/negocios', async (req, res) => {
   try {
     const { nombre, tipo, criptos, descripcion, lat, lng,
-            contacto, ciudad, online, logo_base64, email } = req.body;
+            contacto, ciudad, online, descuento, logo_base64, email } = req.body;
 
     const err = validateBody(req.body);
     if (err) return res.status(400).json({ error: err });
@@ -404,6 +406,7 @@ app.post('/api/negocios', async (req, res) => {
       contacto:    contacto?.trim() || null,
       ciudad:      ciudad?.trim() || null,
       online:      online === true || online === 'true',
+      descuento:   (descuento != null && descuento !== '') ? parseInt(descuento, 10) : null,
       logo_url, estado, edit_token,
       email:       email?.trim()  || null,
     }]).select().single();
@@ -440,7 +443,7 @@ app.get('/api/negocios/edit/:token', async (req, res) => {
 app.patch('/api/negocios/edit/:token', async (req, res) => {
   try {
     const { nombre, tipo, criptos, descripcion, lat, lng,
-            contacto, ciudad, online, logo_base64 } = req.body;
+            contacto, ciudad, online, descuento, logo_base64 } = req.body;
 
     const err = validateBody(req.body);
     if (err) return res.status(400).json({ error: err });
@@ -476,6 +479,7 @@ app.patch('/api/negocios/edit/:token', async (req, res) => {
       contacto:    contacto?.trim() || null,
       ciudad:      ciudad?.trim() || null,
       online:      online === true || online === 'true',
+      descuento:   (descuento != null && descuento !== '') ? parseInt(descuento, 10) : null,
       logo_url:    newLogo ?? existing.logo_url,
       estado,
       ...(newSlug ? { slug: newSlug } : {}),

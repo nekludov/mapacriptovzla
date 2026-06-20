@@ -477,6 +477,17 @@ function render(n) {
       <div class="cripto-grid">${criptosHtml}</div>
     </div>` : ''}
 
+    ${n.descuento ? `
+    <div class="section">
+      <div style="display:flex;align-items:center;gap:10px;background:#15803d;color:#fff;border-radius:10px;padding:14px 18px">
+        <span style="font-size:28px;line-height:1">🏷️</span>
+        <div>
+          <div style="font-size:22px;font-weight:800;line-height:1">${esc(String(n.descuento))}% de descuento</div>
+          <div style="font-size:13px;opacity:.9;margin-top:2px">al pagar con cripto / dólares digitales</div>
+        </div>
+      </div>
+    </div>` : ''}
+
     ${n.descripcion ? `
     <div class="section">
       <div class="section-title">Descripción</div>
