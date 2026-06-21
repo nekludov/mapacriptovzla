@@ -801,6 +801,144 @@ app.get('/api/categorias', async (req, res) => {
   }
 });
 
+// ── Telegram Bot ─────────────────────────────────────────────────────────────
+const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TG_API = `https://api.telegram.org/bot${TELEGRAM_TOKEN}`;
+
+const TIPO_EMOJI_TG = {
+  restaurante:'🍽️', farmacia:'💊', ferreteria:'🔧', tecnologia:'💻',
+  servicio:'🛠️', tienda:'🛍️', hotel:'🏨', transporte:'🚗',
+  emprendedor:'🚀', otro:'📦',
+  docente:'📚', plomero:'🔩', electricista:'⚡', ac_tecnico:'❄️',
+  mecanico:'🔨', programador:'👨‍💻', disenador:'🎨', fotografo:'📷',
+  estetica:'💅', entrenador:'🏋️', medico:'🩺', abogado:'⚖️',
+  servicios_hogar:'🏠', marketing:'📣', otro_prof:'👔',
+};
+
+function escTg(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatNegocio(n, i) {
+  const emoji    = TIPO_EMOJI_TG[n.tipo] || '📍';
+  const tipo     = escTg(TIPO_LABEL[n.tipo] || n.tipo);
+  const criptos  = escTg((n.criptos || []).join(' · '));
+  const ubicacion = n.online ? '🌐 Online' : (n.ciudad ? `📍 ${escTg(n.ciudad)}` : '');
+  const descuento = n.descuento ? `\n🏷️ <b>${n.descuento}% descuento</b> pagando en cripto` : '';
+  const url = n.slug
+    ? `${FRONTEND_URL}/negocio/${n.slug}/`
+    : `${FRONTEND_URL}/negocio.html?id=${n.id}`;
+  return `${i}. ${emoji} <b>${escTg(n.nombre)}</b>\n${ubicacion} · ${tipo}\n₿ ${criptos}${descuento}\n<a href="${url}">Ver perfil →</a>`;
+}
+
+async function tgSend(chatId, text) {
+  if (!TELEGRAM_TOKEN) return;
+  await fetch(`${TG_API}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+  }).catch(e => console.error('TG send error:', e.message));
+}
+
+async function handleTgUpdate(update) {
+  const msg = update.message || update.edited_message;
+  if (!msg?.text) return;
+  const chatId = msg.chat.id;
+  const text   = msg.text.trim();
+  const lower  = text.toLowerCase();
+
+  // /start
+  if (lower === '/start' || lower.startsWith('/start ')) {
+    return tgSend(chatId,
+      `🗺️ <b>CriptoMapa Venezuela</b>\n\n` +
+      `Encuentra negocios que aceptan cripto en todo el país.\n\n` +
+      `<b>Comandos:</b>\n` +
+      `/buscar <i>ciudad</i> — negocios en esa ciudad\n` +
+      `/descuentos — negocios con descuento en cripto\n` +
+      `/nuevos — últimos registrados\n\n` +
+      `O escribe directamente el nombre de una ciudad o negocio.`
+    );
+  }
+
+  // /descuentos
+  if (lower === '/descuentos') {
+    const { data } = await supabase.from('negocios').select(PUBLIC_COLS)
+      .eq('estado', 'activo').not('descuento', 'is', null)
+      .order('descuento', { ascending: false }).limit(8);
+    if (!data?.length) return tgSend(chatId, 'No hay negocios con descuento registrados aún.');
+    return tgSend(chatId,
+      `🏷️ <b>Negocios con descuento en cripto</b>\n\n` +
+      data.map((n, i) => formatNegocio(n, i + 1)).join('\n\n')
+    );
+  }
+
+  // /nuevos
+  if (lower === '/nuevos') {
+    const { data } = await supabase.from('negocios').select(PUBLIC_COLS)
+      .eq('estado', 'activo').order('created_at', { ascending: false }).limit(6);
+    if (!data?.length) return tgSend(chatId, 'No hay negocios registrados aún.');
+    return tgSend(chatId,
+      `✨ <b>Últimos negocios registrados</b>\n\n` +
+      data.map((n, i) => formatNegocio(n, i + 1)).join('\n\n')
+    );
+  }
+
+  // /buscar [ciudad]
+  if (lower.startsWith('/buscar')) {
+    const query = text.slice(7).trim();
+    if (!query) return tgSend(chatId, 'Uso: /buscar <i>ciudad</i>\nEjemplo: /buscar Caracas');
+    const { data } = await supabase.from('negocios').select(PUBLIC_COLS)
+      .eq('estado', 'activo').ilike('ciudad', `%${query}%`).limit(8);
+    if (!data?.length) return tgSend(chatId, `No encontré negocios en <b>${escTg(query)}</b>.`);
+    return tgSend(chatId,
+      `📍 <b>Negocios en ${escTg(query)}</b> (${data.length})\n\n` +
+      data.map((n, i) => formatNegocio(n, i + 1)).join('\n\n')
+    );
+  }
+
+  // Texto libre: busca por ciudad primero, luego por nombre
+  const { data: byCiudad } = await supabase.from('negocios').select(PUBLIC_COLS)
+    .eq('estado', 'activo').ilike('ciudad', `%${text}%`).limit(6);
+  if (byCiudad?.length) {
+    return tgSend(chatId,
+      `📍 <b>Negocios en ${escTg(text)}</b> (${byCiudad.length})\n\n` +
+      byCiudad.map((n, i) => formatNegocio(n, i + 1)).join('\n\n')
+    );
+  }
+
+  const { data: byNombre } = await supabase.from('negocios').select(PUBLIC_COLS)
+    .eq('estado', 'activo').ilike('nombre', `%${text}%`).limit(6);
+  if (byNombre?.length) {
+    return tgSend(chatId,
+      `🔍 <b>Resultados para "${escTg(text)}"</b>\n\n` +
+      byNombre.map((n, i) => formatNegocio(n, i + 1)).join('\n\n')
+    );
+  }
+
+  tgSend(chatId,
+    `No encontré resultados para "<b>${escTg(text)}</b>".\n\n` +
+    `Prueba: /buscar Caracas · /descuentos · /nuevos`
+  );
+}
+
+// Webhook — Telegram llama aquí en cada mensaje
+app.post('/api/telegram/webhook', (req, res) => {
+  res.sendStatus(200); // responder inmediatamente a Telegram
+  handleTgUpdate(req.body).catch(e => console.error('TG handler error:', e.message));
+});
+
+// Setup — registra el webhook (llamar una sola vez tras deploy)
+app.get('/api/telegram/setup', requireAdmin, async (req, res) => {
+  if (!TELEGRAM_TOKEN) return res.status(500).json({ error: 'TELEGRAM_BOT_TOKEN no configurado' });
+  const webhookUrl = `${API_URL}/api/telegram/webhook`;
+  const r = await fetch(`${TG_API}/setWebhook`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: webhookUrl }),
+  });
+  res.json({ ...(await r.json()), webhookUrl });
+});
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_, res) => res.json({ ok: true, ts: new Date().toISOString() }));
 
