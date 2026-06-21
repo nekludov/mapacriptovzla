@@ -1361,6 +1361,24 @@
     <option value="Otros">Otros</option>
   </select>
 
+  <select id="f-modalidad" onchange="applyFilters()">
+    <option value="">Todos los locales</option>
+    <option value="fisico">Solo locales físicos</option>
+    <option value="online">Solo online</option>
+  </select>
+
+  <select id="f-descuento" onchange="applyFilters()">
+    <option value="">Con o sin descuento</option>
+    <option value="si">🏷️ Con descuento en cripto</option>
+  </select>
+
+  <select id="f-orden" onchange="applyFilters()">
+    <option value="">Ordenar…</option>
+    <option value="recientes">Más recientes</option>
+    <option value="az">Nombre A–Z</option>
+    <option value="descuento">Mayor descuento</option>
+  </select>
+
   <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
   <button class="btn-toggle-view" id="btn-toggle-view" onclick="toggleView()" title="Cambiar vista">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -2097,28 +2115,45 @@ function updateCount(n) {
 // Filtros
 // ════════════════════════════════════════════════════════════
 function applyFilters() {
-  const nombre = document.getElementById('f-nombre').value.trim().toLowerCase();
-  const ciudad = document.getElementById('f-ciudad').value.trim().toLowerCase();
-  const tipo   = document.getElementById('f-tipo').value;
-  const cripto = document.getElementById('f-cripto').value;
+  const nombre    = document.getElementById('f-nombre').value.trim().toLowerCase();
+  const ciudad    = document.getElementById('f-ciudad').value.trim().toLowerCase();
+  const tipo      = document.getElementById('f-tipo').value;
+  const cripto    = document.getElementById('f-cripto').value;
+  const modalidad = document.getElementById('f-modalidad').value;
+  const descuento = document.getElementById('f-descuento').value;
+  const orden     = document.getElementById('f-orden').value;
 
-  const filtered = allNegocios.filter(n => {
-    if (nombre && !n.nombre?.toLowerCase().includes(nombre)) return false;
-    if (ciudad && !n.ciudad?.toLowerCase().includes(ciudad)) return false;
-    if (tipo   && n.tipo !== tipo) return false;
-    if (cripto && !n.criptos?.includes(cripto)) return false;
+  let filtered = allNegocios.filter(n => {
+    if (nombre    && !n.nombre?.toLowerCase().includes(nombre)) return false;
+    if (ciudad    && !n.ciudad?.toLowerCase().includes(ciudad)) return false;
+    if (tipo      && n.tipo !== tipo) return false;
+    if (cripto    && !n.criptos?.includes(cripto)) return false;
+    if (modalidad === 'fisico'  && n.online)  return false;
+    if (modalidad === 'online'  && !n.online) return false;
+    if (descuento === 'si'      && !n.descuento) return false;
     return true;
   });
+
+  if (orden === 'recientes') {
+    filtered = [...filtered].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  } else if (orden === 'az') {
+    filtered = [...filtered].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es'));
+  } else if (orden === 'descuento') {
+    filtered = [...filtered].sort((a, b) => (b.descuento || 0) - (a.descuento || 0));
+  }
 
   renderMarkers(filtered);
   updateCount(filtered.length);
 }
 
 function clearFilters() {
-  document.getElementById('f-nombre').value = '';
-  document.getElementById('f-ciudad').value = '';
-  document.getElementById('f-tipo').value   = '';
-  document.getElementById('f-cripto').value = '';
+  document.getElementById('f-nombre').value   = '';
+  document.getElementById('f-ciudad').value   = '';
+  document.getElementById('f-tipo').value     = '';
+  document.getElementById('f-cripto').value   = '';
+  document.getElementById('f-modalidad').value = '';
+  document.getElementById('f-descuento').value = '';
+  document.getElementById('f-orden').value    = '';
   renderMarkers(allNegocios);
   updateCount(allNegocios.length);
 }
