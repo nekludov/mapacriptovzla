@@ -3,94 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blog — CriptoMapa Venezuela</title>
-  <meta name="description" content="Guías y artículos sobre Bitcoin, criptomonedas, finanzas personales y pagos cripto en Venezuela.">
+  <title>Blog – CriptoMapa Venezuela</title>
+  <meta name="description" content="Guías y artículos sobre Bitcoin, criptomonedas, wallets, pagos cripto y finanzas personales en Venezuela.">
+  <meta name="theme-color" content="#0F1117">
   <link rel="canonical" href="https://criptomapavenezuela.com/blog/">
-  <meta property="og:title"       content="Blog — CriptoMapa Venezuela">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <meta property="og:title"       content="Blog – CriptoMapa Venezuela">
   <meta property="og:description" content="Guías y artículos sobre Bitcoin, criptomonedas y finanzas en Venezuela.">
   <meta property="og:url"         content="https://criptomapavenezuela.com/blog/">
   <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="CriptoMapa Venezuela">
+  <meta property="og:image"       content="https://criptomapavenezuela.com/og-image.png">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:site"       content="@criptomapavzla">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6}
-    a{color:#F7931A;text-decoration:none}
-    a:hover{text-decoration:underline}
 
-    header{background:#1e293b;border-bottom:1px solid #334155;padding:0 1rem}
-    .hdr{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:.75rem;height:56px}
-    .logo{display:flex;align-items:center;gap:.5rem;color:#f1f5f9;font-weight:700;font-size:1rem}
-    .logo:hover{text-decoration:none}
-    .badge{background:#F7931A;color:#000;font-size:.65rem;font-weight:800;padding:2px 6px;border-radius:4px}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    main{max-width:900px;margin:0 auto;padding:2.5rem 1rem 4rem}
-    .page-hdr{margin-bottom:2rem}
-    .page-hdr h1{font-size:1.75rem;color:#f1f5f9;margin-bottom:.35rem}
-    .page-hdr p{color:#94a3b8;font-size:.9rem}
+    :root {
+      --primary:  #CF142B;
+      --accent:   #F7931A;
+      --blue:     #003893;
+      --bg:       #0F1117;
+      --surface:  #1C1F26;
+      --surface2: #252930;
+      --border:   #2E3340;
+      --text:     #E8EAED;
+      --muted:    #9AA0AC;
+      --success:  #22C55E;
+    }
 
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:1.25rem}
-    .card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:1.4rem;display:flex;flex-direction:column;gap:.55rem}
-    .card-cat{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#F7931A}
-    .card h2{font-size:.95rem;line-height:1.4}
-    .card h2 a{color:#f1f5f9}
-    .card h2 a:hover{color:#F7931A;text-decoration:none}
-    .card p{color:#94a3b8;font-size:.845rem;flex:1}
-    .card-foot{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:#64748b;margin-top:.35rem}
-    .card-foot a{font-size:.8rem}
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
 
-    .empty{text-align:center;color:#64748b;padding:4rem 0;font-size:.9rem}
+    /* ── Header ── */
+    header {
+      background: rgba(15,17,23,.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 900px; margin: 0 auto; padding: 0 24px;
+      height: 60px; display: flex; align-items: center; gap: 12px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 9px;
+      font-weight: 800; font-size: 17px; text-decoration: none;
+      color: var(--text); letter-spacing: -.3px;
+    }
+    .back-btn {
+      margin-left: auto; display: flex; align-items: center; gap: 6px;
+      color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color .15s, border-color .15s;
+      border: 1px solid var(--border); padding: 6px 14px; border-radius: 8px;
+    }
+    .back-btn:hover { color: var(--text); border-color: var(--accent); }
 
-    footer{background:#1e293b;border-top:1px solid #334155;padding:1.5rem 1rem;text-align:center;color:#64748b;font-size:.78rem}
-    footer a{color:#64748b}
-    footer a:hover{color:#F7931A}
-    .flinks{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:.6rem}
+    main { flex: 1; }
+    a { color: var(--accent); }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 20px; text-align: center; font-size: 12px; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── CTA box ── */
+    .cta-box {
+      background: linear-gradient(135deg, rgba(247,147,26,.08) 0%, rgba(0,56,147,.06) 100%);
+      border: 1px solid rgba(247,147,26,.2); border-radius: 20px;
+      padding: 48px 40px; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-box::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(247,147,26,.07) 0%, transparent 60%);
+    }
+    .cta-box h2 {
+      font-size: clamp(22px, 4vw, 30px); font-weight: 800;
+      letter-spacing: -.02em; margin-bottom: 12px; position: relative;
+    }
+    .cta-box p { font-size: 16px; color: var(--muted); margin-bottom: 28px; position: relative; }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent); color: #fff; text-decoration: none;
+      font-weight: 700; font-size: 15px; padding: 14px 32px; border-radius: 12px;
+      transition: opacity .15s, transform .15s; position: relative;
+    }
+    .cta-btn:hover { opacity: .9; transform: translateY(-1px); }
+
+    /* ── Page hero ── */
+    .hero {
+      position: relative; text-align: center; overflow: hidden;
+      padding: 80px 24px 48px;
+    }
+    .hero-glow { position: absolute; inset: 0; pointer-events: none; }
+    .hero-glow::before {
+      content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 360px;
+      background: radial-gradient(ellipse, rgba(247,147,26,.12) 0%, transparent 70%);
+    }
+    .hero-glow::after {
+      content: ''; position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 200px;
+      background: radial-gradient(ellipse, rgba(0,56,147,.1) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px; position: relative;
+      border: 1px solid rgba(247,147,26,.35); background: rgba(247,147,26,.07);
+      color: var(--accent); font-size: 12px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 100px; margin-bottom: 24px;
+    }
+    .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .5; transform: scale(1.4); } }
+
+    .hero h1 {
+      position: relative; font-size: clamp(34px, 6vw, 56px); font-weight: 900;
+      line-height: 1.1; letter-spacing: -.03em; margin-bottom: 16px;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(135deg, #F7931A 0%, #FFD166 50%, #F7931A 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero p { position: relative; font-size: clamp(15px, 2.5vw, 18px); color: var(--muted); line-height: 1.7; max-width: 520px; margin: 0 auto; }
+
+    /* ── Grid ── */
+    .content { max-width: 900px; margin: 0 auto; padding: 24px 24px 80px; }
+    .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 18px; }
+
+    .post-card {
+      display: flex; flex-direction: column; gap: 10px; text-decoration: none;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 24px 22px; transition: border-color .2s, transform .2s;
+    }
+    .post-card:hover { border-color: rgba(247,147,26,.4); transform: translateY(-2px); }
+    .post-cat {
+      display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--accent);
+    }
+    .post-card h2 { font-size: 17px; font-weight: 800; line-height: 1.35; color: var(--text); letter-spacing: -.01em; }
+    .post-card p { font-size: 14px; color: var(--muted); line-height: 1.6; flex: 1; }
+    .post-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--muted); margin-top: 6px;
+    }
+    .read-more { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 600; }
+
+    .empty { text-align: center; color: var(--muted); padding: 60px 0; }
+
+    @media (max-width: 600px) {
+      .hero { padding: 56px 20px 36px; }
+      .content { padding: 20px 20px 64px; }
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="hdr">
-    <a href="https://criptomapavenezuela.com" class="logo">🗺️ <span>CriptoMapa</span><span class="badge">VE</span></a>
-    <span style="margin-left:auto">
-      <a href="https://criptomapavenezuela.com" style="font-size:.8rem;color:#94a3b8">← Volver al mapa</a>
-    </span>
+  <div class="header-inner">
+    <a class="logo" href="https://criptomapavenezuela.com/">
+      <svg width="26" height="17" viewBox="0 0 26 17" xmlns="http://www.w3.org/2000/svg" style="border-radius:2px;flex-shrink:0">
+        <rect width="26" height="5.67" fill="#CF9B00"/>
+        <rect y="5.67" width="26" height="5.67" fill="#003893"/>
+        <rect y="11.33" width="26" height="5.67" fill="#CF142B"/>
+        <circle cx="2.8"  cy="8.8"  r="0.72" fill="white"/>
+        <circle cx="5.7"  cy="7.9"  r="0.72" fill="white"/>
+        <circle cx="8.6"  cy="7.3"  r="0.72" fill="white"/>
+        <circle cx="11.5" cy="7.0"  r="0.72" fill="white"/>
+        <circle cx="14.5" cy="7.0"  r="0.72" fill="white"/>
+        <circle cx="17.4" cy="7.3"  r="0.72" fill="white"/>
+        <circle cx="20.3" cy="7.9"  r="0.72" fill="white"/>
+        <circle cx="23.2" cy="8.8"  r="0.72" fill="white"/>
+      </svg>
+      CriptoMapa
+    </a>
+    <a class="back-btn" href="https://criptomapavenezuela.com/">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15,18 9,12 15,6"/></svg>
+      Volver al mapa
+    </a>
   </div>
 </header>
 
 <main>
-  <div class="page-hdr">
-    <h1>Blog</h1>
-    <p>Guías y artículos sobre Bitcoin, criptomonedas y finanzas en Venezuela.</p>
-  </div>
-  <div class="grid">
-    <article class="card">
-      <div class="card-cat">Wallets</div>
-      <h2><a href="https://criptomapavenezuela.com/blog/muun-wallet-venezuela-guia-bitcoin-lightning.html">Muun Wallet en Venezuela: Guía Bitcoin y Lightning</a></h2>
-      <p>Aprende a usar Muun Wallet en Venezuela paso a paso. Descubre por qué es la mejor opción para Bitcoin y Lightning con bajas comisiones y máxima facilidad.</p>
-      <div class="card-foot">
-        <time datetime="2026-06-22">22 de junio de 2026</time>
-        <a href="https://criptomapavenezuela.com/blog/muun-wallet-venezuela-guia-bitcoin-lightning.html">Leer →</a>
-      </div>
-    </article>
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-badge"><span class="hero-badge-dot"></span> Aprende cripto</div>
+    <h1>Blog de <span class="grad">CriptoMapa</span></h1>
+    <p>Guías prácticas sobre Bitcoin, wallets, pagos cripto y finanzas personales, pensadas para venezolanos.</p>
+  </section>
 
-    <article class="card">
-      <div class="card-cat">Wallets</div>
-      <h2><a href="https://criptomapavenezuela.com/blog/mejores-wallets-multi-cripto-bitcoin-usdt-venezuela.html">Mejores Wallets Multi-Cripto para Bitcoin, USDT y Más</a></h2>
-      <p>Descubre las mejores wallets multimoneda para manejar Bitcoin, USDT y otras criptos desde Venezuela. Guía práctica para simplificar tus finanzas cripto.</p>
-      <div class="card-foot">
-        <time datetime="2026-06-22">22 de junio de 2026</time>
-        <a href="https://criptomapavenezuela.com/blog/mejores-wallets-multi-cripto-bitcoin-usdt-venezuela.html">Leer →</a>
-      </div>
-    </article></div>
+  <div class="content">
+    <div class="post-grid">
+      <a class="post-card" href="https://criptomapavenezuela.com/blog/muun-wallet-venezuela-guia-bitcoin-lightning.html">
+        <div class="post-cat"><i class="fa-solid fa-shield-halved"></i> Wallets</div>
+        <h2>Muun Wallet en Venezuela: Guía Bitcoin y Lightning</h2>
+        <p>Aprende a usar Muun Wallet en Venezuela paso a paso. Descubre por qué es la mejor opción para Bitcoin y Lightning con bajas comisiones y máxima facilidad.</p>
+        <div class="post-foot">
+          <time datetime="2026-06-22">22 de junio de 2026</time>
+          <span class="read-more">Leer <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9,18 15,12 9,6"/></svg></span>
+        </div>
+      </a>
+      <a class="post-card" href="https://criptomapavenezuela.com/blog/mejores-wallets-multi-cripto-bitcoin-usdt-venezuela.html">
+        <div class="post-cat"><i class="fa-solid fa-shield-halved"></i> Wallets</div>
+        <h2>Mejores Wallets Multi-Cripto para Bitcoin, USDT y Más</h2>
+        <p>Descubre las mejores wallets multimoneda para manejar Bitcoin, USDT y otras criptos desde Venezuela. Guía práctica para simplificar tus finanzas cripto.</p>
+        <div class="post-foot">
+          <time datetime="2026-06-22">22 de junio de 2026</time>
+          <span class="read-more">Leer <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9,18 15,12 9,6"/></svg></span>
+        </div>
+      </a>
+    </div>
+  </div>
 </main>
 
 <footer>
-  <div class="flinks">
-    <a href="https://criptomapavenezuela.com">Mapa</a>
-    <a href="https://criptomapavenezuela.com/blog/">Blog</a>
-    <a href="https://criptomapavenezuela.com/faq.html">FAQ</a>
-    <a href="https://criptomapavenezuela.com/quienes-somos.html">Quiénes somos</a>
-  </div>
-  © 2026 CriptoMapa Venezuela
+  <p>© 2026 CriptoMapa Venezuela ·
+     <a href="https://criptomapavenezuela.com/blog/">Blog</a> ·
+     <a href="https://criptomapavenezuela.com/faq.html">FAQ</a> ·
+     <a href="https://criptomapavenezuela.com/quienes-somos.html">Quiénes somos</a> ·
+     <a href="https://criptomapavenezuela.com/terms.html">Términos</a> ·
+     <a href="https://criptomapavenezuela.com/privacy.html">Privacidad</a></p>
 </footer>
 
 </body>
