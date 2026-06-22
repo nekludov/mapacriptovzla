@@ -1,4 +1,24 @@
 {
-  "usedTopics": [],
-  "posts": []
+  "usedTopics": [
+    "wallet-multimoneda-38",
+    "wallet-muun-33"
+  ],
+  "posts": [
+    {
+      "slug": "mejores-wallets-multi-cripto-bitcoin-usdt-venezuela",
+      "title": "Mejores Wallets Multi-Cripto para Bitcoin, USDT y Más",
+      "metaDescription": "Descubre las mejores wallets multimoneda para manejar Bitcoin, USDT y otras criptos desde Venezuela. Guía práctica para simplificar tus finanzas cripto.",
+      "category": "Wallets",
+      "date": "2026-06-22",
+      "topicId": "wallet-multimoneda-38"
+    },
+    {
+      "slug": "muun-wallet-venezuela-guia-bitcoin-lightning",
+      "title": "Muun Wallet en Venezuela: Guía Bitcoin y Lightning",
+      "metaDescription": "Aprende a usar Muun Wallet en Venezuela paso a paso. Descubre por qué es la mejor opción para Bitcoin y Lightning con bajas comisiones y máxima facilidad.",
+      "category": "Wallets",
+      "date": "2026-06-22",
+      "topicId": "wallet-muun-33"
+    }
+  ]
 }
