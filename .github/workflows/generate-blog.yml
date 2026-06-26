@@ -2,14 +2,13 @@ name: Generate Blog Posts
 
 on:
   schedule:
-    # Diario a las 8am UTC — genera 2 artículos (fase inicial, primeros 2 meses)
-    # Cuando pases a fase regular: cambia a "0 8 * * 1,3,5" y COUNT a 1
-    - cron: '0 8 * * *'
+    # 1 artículo a las 8am UTC, de lunes a viernes (días 1-5).
+    - cron: '0 8 * * 1-5'
   workflow_dispatch:
     inputs:
       count:
         description: 'Número de artículos a generar'
-        default: '2'
+        default: '1'
         type: string
 
 permissions:
@@ -37,7 +36,7 @@ jobs:
       - name: Generate articles
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          COUNT: ${{ github.event.inputs.count || '2' }}
+          COUNT: ${{ github.event.inputs.count || '1' }}
         run: node scripts/generate-blog.js
 
       - name: Commit & push
