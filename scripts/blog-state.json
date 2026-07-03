@@ -14,7 +14,8 @@
     "ve-ciudad-valencia-66",
     "btc-ciclos-mercado-09",
     "btc-vs-dolar-03",
-    "fp-dca-13"
+    "fp-dca-13",
+    "edu-glosario-54"
   ],
   "posts": [
     {
@@ -680,6 +681,57 @@
         "comprar bitcoin poco a poco",
         "invertir en bitcoin venezuela",
         "estrategia cripto sin estres"
+      ]
+    },
+    {
+      "slug": "glosario-cripto-50-terminos-venezolano",
+      "title": "Glosario Cripto: 50 Términos que Todo Venezolano Debe Saber",
+      "metaDescription": "Aprende los 50 términos cripto más importantes explicados de forma simple para venezolanos. Tu guía de vocabulario bitcoin para entender el mundo cripto.",
+      "category": "Educación cripto",
+      "topicId": "edu-glosario-54",
+      "date": "2026-07-03",
+      "intro": "<p>Entrar al mundo de las criptomonedas puede sentirse como aprender un idioma nuevo. Palabras como blockchain, wallet, stablecoin o gas pueden confundir a cualquiera que apenas empieza. Por eso preparamos este glosario cripto completo con 50 términos explicados de forma sencilla y con ejemplos aplicables en Venezuela. Guárdalo como referencia y consúltalo cada vez que tengas una duda.</p>",
+      "sections": [
+        {
+          "heading": "¿Qué es una criptomoneda y por qué importa en Venezuela?",
+          "content": "<p>Una <strong>criptomoneda</strong> es dinero digital que existe en internet y no depende de ningún banco ni gobierno. En un país donde la inflación golpea el bolsillo, muchos venezolanos usan cripto como una forma de proteger sus ahorros y recibir pagos desde el exterior sin depender de intermediarios costosos.</p><p>A diferencia del bolívar o incluso el dólar en efectivo, las criptomonedas se pueden enviar y recibir en minutos desde un teléfono, a cualquier persona del mundo. Esto las convierte en una herramienta práctica para remesas, ahorro y comercio diario en Venezuela.</p>"
+        },
+        {
+          "heading": "Términos básicos que debes conocer primero",
+          "content": "<p>Antes de avanzar, domina estos conceptos fundamentales que aparecen en casi cualquier conversación cripto:</p><ul><li><strong>Bitcoin (BTC):</strong> la primera y más conocida criptomoneda, creada en 2009. Es como el 'oro digital' del mundo cripto.</li><li><strong>Blockchain:</strong> el 'libro de cuentas' público donde se registran todas las transacciones. Nadie puede borrarlo ni falsificarlo.</li><li><strong>Wallet (billetera):</strong> aplicación o dispositivo donde guardas tus criptomonedas, como Trust Wallet o MetaMask.</li><li><strong>Altcoin:</strong> cualquier criptomoneda que no sea Bitcoin, como Ethereum o Solana.</li><li><strong>Token:</strong> unidad digital que representa un valor o activo dentro de una blockchain.</li></ul><p>Estos cinco términos son la base. Una vez los entiendas, el resto del vocabulario cripto será mucho más fácil de asimilar.</p>"
+        },
+        {
+          "heading": "Términos sobre transacciones y pagos",
+          "content": "<p>Cuando empieces a mover cripto, verás estas palabras constantemente. Aquí las más importantes para operar con confianza:</p><ul><li><strong>Address (dirección):</strong> tu 'número de cuenta' cripto, una cadena de letras y números para recibir fondos.</li><li><strong>Transacción (TX):</strong> cada envío o recepción de criptomonedas queda registrado con un identificador único.</li><li><strong>Gas / Fee (comisión):</strong> lo que pagas por procesar una transacción en la red. Varía según la congestión.</li><li><strong>Confirmación:</strong> validación de tu transacción por la red. Más confirmaciones significan mayor seguridad.</li><li><strong>Red (network):</strong> la blockchain por la que viaja tu cripto, como Tron (TRC-20) o Ethereum (ERC-20).</li></ul><p>Un consejo práctico: en Venezuela muchos usuarios prefieren la red <strong>Tron (TRC-20)</strong> para enviar USDT porque las comisiones son muy bajas. Verifica siempre que quien te paga y tú usen la misma red, o el dinero podría perderse.</p>"
+        },
+        {
+          "heading": "Stablecoins: las cripto más usadas en Venezuela",
+          "content": "<p>Las <strong>stablecoins</strong> son criptomonedas cuyo valor está atado a una moneda estable como el dólar. Por eso son tan populares en Venezuela: te dan la estabilidad del dólar con la rapidez de las cripto.</p><ul><li><strong>USDT (Tether):</strong> la stablecoin más usada; 1 USDT equivale aproximadamente a 1 dólar.</li><li><strong>USDC:</strong> otra stablecoin respaldada por dólares, considerada muy transparente.</li><li><strong>DAI:</strong> stablecoin descentralizada que también busca mantener el valor de un dólar.</li><li><strong>Peg (paridad):</strong> el mecanismo que mantiene el valor de la stablecoin igual al dólar.</li></ul><p>En la práctica, un venezolano puede cobrar su trabajo freelance en USDT, guardarlo sin miedo a la inflación y luego cambiarlo a bolívares solo cuando lo necesite. Cada vez más comercios locales aceptan estos pagos directamente.</p>"
+        },
+        {
+          "heading": "Términos de compra, venta e intercambio",
+          "content": "<p>Para comprar y vender cripto necesitas entender dónde y cómo se hace. Estos términos te ayudarán:</p><ul><li><strong>Exchange:</strong> plataforma para comprar, vender e intercambiar cripto, como Binance.</li><li><strong>P2P (peer to peer):</strong> compra y venta directa entre personas, muy usada en Venezuela para cambiar cripto por bolívares.</li><li><strong>CEX:</strong> exchange centralizado, administrado por una empresa.</li><li><strong>DEX:</strong> exchange descentralizado, donde tú controlas tus fondos sin intermediarios.</li><li><strong>Spread:</strong> diferencia entre el precio de compra y el de venta.</li><li><strong>Liquidez:</strong> facilidad para convertir una cripto en efectivo rápidamente.</li></ul><p>El método <strong>P2P</strong> es el favorito de muchos venezolanos porque permite recibir bolívares por pago móvil o transferencia bancaria a cambio de USDT, con precios competitivos y sin depender de tasas oficiales.</p>"
+        },
+        {
+          "heading": "Términos de seguridad que protegen tu dinero",
+          "content": "<p>La seguridad es lo más importante en cripto, porque tú eres tu propio banco. Memoriza estos conceptos para evitar estafas y pérdidas:</p><ul><li><strong>Clave privada (private key):</strong> el código secreto que da acceso a tus fondos. Nunca la compartas.</li><li><strong>Frase semilla (seed phrase):</strong> lista de 12 o 24 palabras para recuperar tu wallet. Anótala en papel, jamás en el teléfono.</li><li><strong>Cold wallet:</strong> billetera sin conexión a internet, la más segura para guardar grandes cantidades.</li><li><strong>Hot wallet:</strong> billetera conectada a internet, práctica para el día a día.</li><li><strong>2FA:</strong> verificación en dos pasos que añade una capa extra de seguridad.</li><li><strong>Phishing:</strong> estafa que imita sitios reales para robar tus datos.</li></ul><p>Regla de oro para todo venezolano: nadie legítimo te pedirá jamás tu frase semilla ni tu clave privada. Si alguien lo hace, es una estafa. Guarda esas palabras como guardarías las llaves de tu casa.</p>"
+        },
+        {
+          "heading": "Términos avanzados y de inversión",
+          "content": "<p>A medida que avances, escucharás estas palabras en comunidades y noticias cripto. Conocerlas te dará más contexto:</p><ul><li><strong>HODL:</strong> mantener tus cripto a largo plazo sin venderlas ante las bajadas de precio.</li><li><strong>Bull market:</strong> mercado en tendencia alcista, cuando los precios suben.</li><li><strong>Bear market:</strong> mercado a la baja, cuando los precios caen.</li><li><strong>Volatilidad:</strong> qué tanto sube y baja el precio en poco tiempo.</li><li><strong>Staking:</strong> bloquear tus cripto para ganar recompensas, como un interés.</li><li><strong>DeFi:</strong> finanzas descentralizadas; servicios financieros sin bancos.</li><li><strong>NFT:</strong> token que representa algo único, como arte digital.</li><li><strong>Whale (ballena):</strong> persona o entidad con grandes cantidades de cripto.</li><li><strong>FOMO:</strong> miedo a quedarse fuera que lleva a comprar impulsivamente.</li><li><strong>Airdrop:</strong> distribución gratuita de tokens a los usuarios.</li></ul><p>Estos términos aparecen mucho en redes sociales. Entenderlos te ayudará a tomar mejores decisiones y a no dejarte llevar por emociones como el FOMO, que suele causar pérdidas a los principiantes.</p>"
+        },
+        {
+          "heading": "Términos útiles para usar cripto en el día a día",
+          "content": "<p>Para quienes ya usan cripto como medio de pago en Venezuela, estos conceptos completan el vocabulario esencial:</p><ul><li><strong>QR de pago:</strong> código que escaneas para pagar en un comercio de forma instantánea.</li><li><strong>On-ramp:</strong> convertir dinero tradicional (bolívares) en cripto.</li><li><strong>Off-ramp:</strong> convertir cripto de vuelta en dinero tradicional.</li><li><strong>Remesa cripto:</strong> envío de dinero desde el exterior usando criptomonedas.</li><li><strong>KYC:</strong> verificación de identidad que piden algunas plataformas.</li><li><strong>Comercio cripto:</strong> negocio que acepta pagos en criptomonedas.</li></ul><p>Cada vez más negocios en Venezuela aceptan pagos en cripto, desde restaurantes hasta tiendas y servicios. Si quieres saber dónde puedes pagar con USDT u otras criptomonedas cerca de ti, en <strong>CriptoMapa Venezuela</strong> encontrarás un directorio actualizado de comercios que las aceptan en todo el país.</p>"
+        }
+      ],
+      "conclusion": "<p>Dominar este vocabulario cripto te dará la confianza para ahorrar, cobrar y pagar con criptomonedas de forma segura, algo cada vez más útil en la realidad económica venezolana. No necesitas aprenderlos todos de golpe: guarda este glosario y regresa cada vez que tengas una duda. Cuando estés listo para dar el siguiente paso, explora CriptoMapa Venezuela y descubre los negocios cerca de ti donde ya puedes usar tus cripto en el mundo real. ¡El conocimiento es tu mejor inversión!</p>",
+      "keywords": [
+        "glosario cripto",
+        "términos cripto",
+        "vocabulario bitcoin venezuela",
+        "que es blockchain",
+        "criptomonedas para principiantes"
       ]
     }
   ]
